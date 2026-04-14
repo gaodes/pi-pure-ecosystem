@@ -1,0 +1,21 @@
+{
+  "$comment": "Project-level overrides for testing pure-* extensions. Merges with ~/.pi/agent/settings.json.",
+  "defaultProvider": "zai",
+  "defaultModel": "glm-4.7-flash",
+  "defaultThinkingLevel": "off",
+  "enabledModels": [
+    "zai/glm-4.7-flash",
+    "zai/glm-4.7-flashx",
+    "zai/glm-4.5-air",
+    "minimax-custom/MiniMax-M2.1",
+    "google-antigravity/gemini-3-flash"
+  ],
+  "pure": {
+    "cron": {
+      "widget_show_default": true
+    },
+    "theme": {
+      "sync_on_start": false
+    }
+  }
+}
