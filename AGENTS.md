@@ -2,7 +2,9 @@
 
 Personal Pi extensions, themes, and configuration. Named with the `pure-` prefix convention. Developed for local use — published only if broadly useful.
 
-This repo is the **version-control and documentation** layer. The live extensions run from `~/.pi/agent/extensions/` (Pi's extension directory), not from this repo. Sync changes between them as needed.
+This is the **development workspace**. Extensions are built and tested here, then promoted to `~/.pi/agent/extensions/` when stable.
+
+**Workflow**: develop in `extensions/` → test via `.pi/settings.json` (points to local extensions) → promote to `~/.pi/agent/extensions/` (global).
 
 ## Pi docs — always read first
 
@@ -15,18 +17,30 @@ When working on Pi internals, read the Pi docs before implementing:
 ## Project structure
 
 ```
+pi-pure-ecosystem/
+├── .pi/
+│   └── settings.json       # Project settings — loads local extensions for testing
+├── extensions/              # ← develop and test extensions here
+│   └── pure-<name>/
+│       ├── index.ts         # Extension entry point
+│       ├── package.json     # Dependencies (npm install if needed)
+│       └── ...
+├── AGENTS.md
+└── README.md (if published)
+```
+
+Global (stable extensions):
+```
 ~/.pi/agent/
-├── extensions/
-│   ├── pure-cron/        # Scheduled prompts (cron, intervals, one-shot)
-│   ├── pure-sessions/    # LLM-powered session naming + session browser
-│   ├── pure-theme/       # System dark/light theme sync + theme picker
-│   └── _disabled/        # Stashed extensions (not loaded by Pi)
+├── extensions/              # ← promoted extensions live here
+│   ├── pure-cron/
+│   ├── pure-sessions/
+│   └── pure-theme/
 ├── themes/
 │   ├── catppuccin-frappe.json
 │   └── catppuccin-latte.json
-├── settings.json         # Pi agent settings (theme, models, compaction, LCM)
-├── models.json           # Custom providers (minimax-custom)
-└── pure-cron.json        # pure-cron job storage (auto-generated)
+├── settings.json
+└── models.json
 ```
 
 ## Extensions
@@ -117,7 +131,7 @@ These differ from what the docs suggest:
 
 ## Development workflow
 
-1. **Edit** extension files directly in `~/.pi/agent/extensions/pure-<name>/`.
-2. **Test** by restarting Pi (or using the session if hot-reload applies).
-3. **Commit** to this repo when changes are stable — copy or sync from the extensions directory.
+1. **Develop** in `extensions/pure-<name>/` within this project.
+2. **Test** by running Pi from this directory — `.pi/settings.json` loads local extensions via `"extensions": ["../extensions/*"]`.
+3. **Promote** — once stable, copy to `~/.pi/agent/extensions/` (the global location).
 4. **No build step** — Pi loads `.ts` files via Jiti at runtime. `npm install` only needed for native dependencies (e.g. `croner`, `nanoid`).
