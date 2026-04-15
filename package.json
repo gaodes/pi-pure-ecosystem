@@ -1,0 +1,21 @@
+{
+  "name": "pi-pure-ecosystem",
+  "version": "0.1.0",
+  "description": "Personal extensions, themes, and configuration for the Pi coding agent",
+  "keywords": ["pi-package"],
+  "license": "MIT",
+  "dependencies": {
+    "croner": "^8.1.2",
+    "nanoid": "^5.1.7"
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-ai": "*",
+    "@mariozechner/pi-agent-core": "*",
+    "@mariozechner/pi-coding-agent": "*",
+    "@mariozechner/pi-tui": "*",
+    "@sinclair/typebox": "*"
+  },
+  "pi": {
+    "extensions": ["./extensions"]
+  }
+}
