@@ -2,9 +2,9 @@
 
 Personal Pi extensions, themes, and configuration. Named with the `pure-` prefix convention. Developed for local use — published only if broadly useful.
 
-This is the **development workspace**. Extensions are built and tested here, then synced to `~/.pi/agent/extensions/` for Pi to load via global auto-discovery.
+This is the **development workspace**. Extensions are sourced as a git package (`git:github.com/gaodes/pi-pure-ecosystem` in global settings). Pi clones the repo and loads extensions from there.
 
-**Workflow**: develop in `extensions/` → check/lint/format → test locally in `.pi/extensions/` → restore global → ask user approval → promote to global → `/reload` in Pi.
+**Workflow**: develop in `extensions/` → check/lint/format → auto-commit → **ask user before pushing** → push to GitHub → `pi update` or `/reload` in Pi.
 
 ## Pi docs — always read first
 
@@ -52,15 +52,13 @@ pi-pure-ecosystem/
 └── README.md
 ```
 
-Global (live extensions):
+Global (live git package):
 
 ```
 ~/.pi/agent/
-├── extensions/              # ← synced from project for Pi to load
-│   ├── pure-cron/
-│   ├── pure-sessions/
-│   ├── pure-theme/
-│   └── pure-updater/
+├── extensions/              # ← empty (extensions loaded from git package)
+├── git/
+│   └── github.com/gaodes/pi-pure-ecosystem/   # ← cloned by pi install
 ├── themes/
 │   ├── catppuccin-frappe.json
 │   └── catppuccin-latte.json
@@ -219,19 +217,19 @@ After developing an extension, before considering the task done:
 3. Update `README.md` if behavior changed
 4. Only include `package.json` if extension has npm dependencies
 5. Test locally (see development workflow below)
-6. Ask user for approval before promoting to global
-7. Promote: `cp -R extensions/pure-<name>/* ~/.pi/agent/extensions/pure-<name>/`
-8. `/reload` in Pi and verify the extension loads without errors
+6. Auto-commit after each major logical change
+7. **Ask user for approval before pushing to remote**
+8. Push → `pi update` or `/reload` in Pi to verify
 
 When implementing new extensions or major changes, use the `pi-extension` skill's reference files for best practices and patterns.
 
 ## Development workflow
 
-Extensions are developed in `extensions/pure-<name>/` at the project root. This is the **canonical source** — always sync from here to global, never the reverse.
+Extensions are developed in `extensions/pure-<name>/` at the project root. This is the **canonical source** — the repo is loaded as a git package in Pi's global settings.
 
 ### 1. Develop
 
-Edit files in `extensions/pure-<name>/`. No build step — Pi loads `.ts` via Jiti at runtime. `npm install` only needed for native dependencies (e.g. `croner`, `nanoid`).
+Edit files in `extensions/pure-<name>/`. No build step — Pi loads `.ts` via Jiti at runtime. `npm install` at the repo root only needed when changing dependencies (e.g. `croner`, `nanoid`).
 
 ### 2. Check & fix
 
@@ -243,36 +241,36 @@ Zero errors required. Project-wide disabled rules (`noExplicitAny`, `noNonNullAs
 
 ### 3. Test locally
 
-Copy the extension to `.pi/extensions/` for Pi to load it at project level. **Always disable the global copy first** to avoid conflicts:
+Copy the extension to `.pi/extensions/` for Pi to load it at project level. **Always disable the git package copy first** to avoid conflicts:
 
 ```bash
-# Disable global copy (move to _disabled)
-mv ~/.pi/agent/extensions/pure-<name> ~/.pi/agent/extensions/_disabled/pure-<name>
+# Disable git package loading for the extension being tested
+# (move the git package entry or use pi config)
 
 # Install local test copy
+mkdir -p .pi/extensions
 cp -R extensions/pure-<name> .pi/extensions/pure-<name>
 ```
 
-Then `/reload` in Pi and test. The extension loads from `.pi/extensions/` (project-level auto-discovery).
+Then `/reload` in Pi and test. The extension loads from `.pi/extensions/` (project-level auto-discovery, which overrides global).
 
-### 4. Restore global after testing
+### 4. Restore after testing
 
 ```bash
 # Remove test copy
 rm -rf .pi/extensions/pure-<name>
-
-# Re-enable global copy
-mv ~/.pi/agent/extensions/_disabled/pure-<name> ~/.pi/agent/extensions/pure-<name>
 ```
 
-Then `/reload` in Pi.
+Then `/reload` in Pi. The extension loads from the git package again.
 
-### 5. Promote to global (requires user approval)
+### 5. Publish (requires user approval)
 
-Only after the user explicitly approves:
+After each major logical change, auto-commit. **Ask the user before pushing to remote.**
 
 ```bash
-cp -R extensions/pure-<name>/* ~/.pi/agent/extensions/pure-<name>/
+git commit -m "description"
+# Ask user: "Ready to push?"
+git push
 ```
 
-Then `/reload` in Pi and verify the extension loads without errors.
+Then `pi update` or `/reload` in Pi to verify.
