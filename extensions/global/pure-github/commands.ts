@@ -7,7 +7,7 @@
 import { DynamicBorder, type ExtensionAPI, type ExtensionContext } from "@mariozechner/pi-coding-agent";
 import { Container, Key, matchesKey, Text } from "@mariozechner/pi-tui";
 import type { PiExecFn } from "./gh-client";
-import { ghJson } from "./gh-helpers";
+import { getCurrentBranch, ghJson } from "./gh-helpers";
 
 interface StatusInfo {
 	myPRs: number;
@@ -24,18 +24,18 @@ interface StatusInfo {
 	};
 }
 
-async function getCurrentRepo(exec: PiExecFn, binaryPath: string): Promise<string | null> {
+export async function getCurrentRepo(exec: PiExecFn, binaryPath: string, cwd?: string): Promise<string | null> {
 	const result = await ghJson<{ owner: { login: string }; name: string }>(
 		exec,
 		binaryPath,
 		["repo", "view", "--json", "owner,name"],
-		{ timeout: 10000 },
+		{ timeout: 10000, cwd },
 	);
 	if (result.code !== 0 || !result.data) return null;
 	return `${result.data.owner.login}/${result.data.name}`;
 }
 
-async function fetchRepoStatus(
+export async function fetchRepoStatus(
 	exec: PiExecFn,
 	binaryPath: string,
 	repo: string,
@@ -198,17 +198,13 @@ export function createGhStatusCommand(
 	return {
 		description: "Show repo dashboard: open PRs, issues, current branch PR, CI status",
 		handler: async (_args, ctx) => {
-			const repo = await getCurrentRepo(exec, binaryPath);
+			const repo = await getCurrentRepo(exec, binaryPath, getCwd());
 			if (!repo) {
 				ctx.ui.notify("Could not determine GitHub repo for current directory.", "warning");
 				return;
 			}
 
-			const branchResult = await exec("git", ["branch", "--show-current"], {
-				timeout: 5000,
-				cwd: getCwd(),
-			});
-			const branch = branchResult.code === 0 ? branchResult.stdout.trim() : null;
+			const branch = await getCurrentBranch(exec, "git", getCwd());
 
 			const status = await fetchRepoStatus(exec, binaryPath, repo, branch);
 			if (!ctx.hasUI) {

@@ -1,3 +1,17 @@
+## [0.3.0] - 2026-04-15
+
+### Added
+
+- Pure ecosystem config file support via `~/.pi/agent/pure/config/pure-github.json`
+- Project override support via `<project>/.pi/pure/config/pure-github.json`
+- Startup GitHub summary notifications showing review-requested count and current-branch CI status
+- Automatic scaffolding of the global `pure-github` config file on first load
+
+### Changed
+
+- `github_browse` default owner resolution now reads from `pure-github` config instead of Pi `settings.json`
+- `/gh-status` now resolves the current repo using the session cwd explicitly
+
 ## [0.2.1] - 2026-04-15
 
 ### Changed

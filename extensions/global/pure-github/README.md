@@ -63,9 +63,29 @@ Then `/reload` in Pi.
 
 ## Configuration
 
-No config file needed. Requires `gh` CLI installed and authenticated.
+Config file paths:
+- global: `~/.pi/agent/pure/config/pure-github.json`
+- project override: `<project>/.pi/pure/config/pure-github.json`
 
-Settings namespace: `pure.github.*` (reserved for future use)
+Project config overrides global config when present.
+
+Supported settings:
+
+```json
+{
+  "defaultOwner": "gaodes",
+  "mergeStrategy": "squash",
+  "notifications": {
+    "enabled": true
+  }
+}
+```
+
+- `defaultOwner` — default owner/org for shorthand repo references
+- `mergeStrategy` — default merge method for future PR merge workflows
+- `notifications.enabled` — show GitHub startup summary notifications (review-requested count + CI status)
+
+The global config is scaffolded automatically on first load.
 
 ## Sources / Inspiration
 

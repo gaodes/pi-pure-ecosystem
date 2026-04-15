@@ -5,14 +5,13 @@
  * Forked from @the-forge-flow/gh-pi (https://github.com/MonsieurBarti/GH-PI)
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { StringEnum } from "@mariozechner/pi-ai";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { defineTool, getAgentDir, truncateHead } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import { defineTool, truncateHead } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { createBrowseToolDefinition } from "./browse-tools";
-import { createGhStatusCommand } from "./commands";
+import { createGhStatusCommand, fetchRepoStatus, getCurrentRepo } from "./commands";
+import { initializeGithubConfig, loadGithubConfig } from "./config";
 import { GHNotFoundError, getInstallInstructions } from "./error-handler";
 import {
 	formatIssueList,
@@ -24,6 +23,7 @@ import {
 	formatWorkflowList,
 } from "./format";
 import { type ExecResult, GHClient } from "./gh-client";
+import { getCurrentBranch } from "./gh-helpers";
 import { createIssueTools } from "./issue-tools";
 import { createPRTools } from "./pr-tools";
 import { createRepoTools } from "./repo-tools";
@@ -32,6 +32,8 @@ import { createWorkflowTools } from "./workflow-tools";
 export type { BrowseAction, BrowseEntity, BrowseParams } from "./browse-tools";
 export { createBrowseToolDefinition } from "./browse-tools";
 export { createGhStatusCommand } from "./commands";
+export type { MergeStrategy, RawGithubConfig, ResolvedGithubConfig } from "./config";
+export { initializeGithubConfig, loadGithubConfig } from "./config";
 export {
 	GHAuthError,
 	GHError,
@@ -105,15 +107,14 @@ export default function pureGithub(pi: ExtensionAPI): void {
 		cwd: process.cwd(),
 	};
 
+	initializeGithubConfig();
+
+	function _getConfig() {
+		return loadGithubConfig(state.cwd);
+	}
+
 	function _getDefaultOwner(): string | undefined {
-		try {
-			const settingsPath = join(getAgentDir(), "settings.json");
-			if (!existsSync(settingsPath)) return undefined;
-			const raw = JSON.parse(readFileSync(settingsPath, "utf-8"));
-			return raw?.pure?.github?.defaultOwner;
-		} catch {
-			return undefined;
-		}
+		return _getConfig().defaultOwner;
 	}
 
 	function registerDualCommand(
@@ -175,6 +176,23 @@ export default function pureGithub(pi: ExtensionAPI): void {
 		}
 	}
 
+	async function maybeShowStartupGithubSummary(ctx: ExtensionContext): Promise<boolean> {
+		const config = _getConfig();
+		if (!config.notifications.enabled) return false;
+
+		const repo = await getCurrentRepo(pi.exec.bind(pi), binaryPath, state.cwd);
+		if (!repo) return false;
+
+		const branch = await getCurrentBranch(pi.exec.bind(pi), "git", state.cwd);
+		if (!branch) return false;
+
+		const status = await fetchRepoStatus(pi.exec.bind(pi), binaryPath, repo, branch);
+		const reviewText = `${status.reviewRequested} review requested`;
+		const ciText = status.checks?.conclusion || status.checks?.status || "no recent runs";
+		ctx.ui.notify(`GitHub ${repo} (${branch}): ${reviewText} • CI ${ciText}`, "info");
+		return true;
+	}
+
 	// Session lifecycle — probe on start so we can surface a nice notification,
 	// and reset detection on shutdown so a future reload re-probes.
 	pi.on("session_start", async (_event, ctx) => {
@@ -184,9 +202,13 @@ export default function pureGithub(pi: ExtensionAPI): void {
 		if (!ctx.hasUI) return;
 
 		switch (status) {
-			case "ready":
-				ctx.ui.notify("GitHub CLI ready (authenticated)", "info");
+			case "ready": {
+				const showedSummary = await maybeShowStartupGithubSummary(ctx);
+				if (!showedSummary) {
+					ctx.ui.notify("GitHub CLI ready (authenticated)", "info");
+				}
 				break;
+			}
 			case "missing":
 				ctx.ui.notify(getInstallInstructions(), "warning");
 				break;
