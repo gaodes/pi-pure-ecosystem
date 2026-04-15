@@ -40,9 +40,7 @@ Forked from [`@aliou/pi-dev-kit`](https://www.npmjs.com/package/@aliou/pi-dev-ki
 ```
 pi-pure-ecosystem/
 ├── .pi/
-│   ├── settings.json       # Project settings + local pkg refs for in-testing extensions
-│   ├── extensions/          # ← legacy (no longer used for testing)
-│   └── npm/                 # ← npm deps for project-scope packages
+│   └── settings.json       # Project settings + local pkg refs for in-testing extensions
 ├── extensions/              # ← develop extensions here (canonical source)
 │   ├── global/              # ← loaded globally only (package filter)
 │   │   └── pure-<name>/
@@ -294,12 +292,13 @@ Extensions are developed in `extensions/<scope>/pure-<name>/` at the project roo
 
 ### Extension lifecycle
 
-**New extension → testing → promoted → published.**
+Three phases with two additional transitions for already-published extensions:
 
 | Phase | `.gitignore` | `package.json` manifest | `.pi/settings.json` (local pkg) |
 |-------|-------------|------------------------|-------------------------------|
 | **New / In testing** | ✅ gitignored | ❌ not in manifest | ✅ loaded from local path |
 | **Promoted** | ❌ removed from gitignore | ✅ added to manifest | ❌ removed |
+| **Published + local dev** | ❌ tracked | ✅ in manifest | ✅ local override (takes precedence) |
 
 > **No copying needed.** Pi loads extensions directly from their source directory via local path references in `.pi/settings.json`. Edit → `/reload` → test. Instant iteration.
 
@@ -315,6 +314,8 @@ Before creating an extension, decide its scope. Scope determines where it lives 
 | `shared` | `extensions/shared/` | Always (loaded alongside global) | Utilities used by all scopes |
 
 Most extensions are `global`. Use `project` for tools that only make sense in a specific repo (like a dev-kit). Use `shared` for common utilities that other extensions might also need.
+
+> **Project-scoped extensions** (e.g. `pure-devkit`) are never published to the git package — they always load via `.pi/settings.json` local path. They stay gitignored and are never added to `package.json`.
 
 ### 1. Create (new extension)
 
@@ -350,7 +351,7 @@ Zero errors required. Warnings acceptable with inline suppressions.
 
 ### 4. Promote (user says "promote")
 
-When the user approves promotion:
+When the user approves promotion of a new extension:
 
 1. **Remove from `.gitignore`**: delete the `extensions/<scope>/pure-<name>/` line.
 2. **Add to `package.json` manifest**: append `"./extensions/<scope>/pure-<name>/index.ts"` to `pi.extensions`.
@@ -358,7 +359,20 @@ When the user approves promotion:
 4. Update `CHANGELOG.md` and `README.md`.
 5. `/reload` in Pi to verify it loads from the git package.
 
-### 5. Publish (requires user approval)
+> **Project-scoped extensions skip this step.** They remain in `.pi/settings.json` and gitignored — they're never added to `package.json`.
+
+### 5. Local dev on a published extension
+
+When resuming work on an extension already in `package.json` (already published to GitHub):
+
+1. **Add a local path reference** in `.pi/settings.json` `packages`.
+2. Do NOT change `.gitignore` — the extension is already tracked.
+3. Do NOT remove it from `package.json` — it stays in the manifest.
+4. Pi's scope deduplication gives precedence to the project-level entry, so the local source overrides the git package.
+5. Edit → `/reload` → test as usual.
+6. When done, **remove the local path reference** from `.pi/settings.json`. The git package resumes loading.
+
+### 6. Publish (requires user approval)
 
 After each major logical change, auto-commit. **Ask the user before pushing to remote.**
 

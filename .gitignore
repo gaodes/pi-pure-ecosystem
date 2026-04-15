@@ -6,7 +6,3 @@ node_modules/
 extensions/global/pure-statusline/
 extensions/global/pure-vibes/
 extensions/project/pure-devkit/
-
-# Legacy test copies (no longer used — extensions load via .pi/settings.json packages)
-.pi/extensions/
-.pi/npm/
