@@ -1,8 +1,11 @@
 {
-	"$comment": "Project-level settings for pi-pure-ecosystem development. Local test extensions in .pi/extensions/ are auto-discovered. Sync stable changes to global with: cp -R extensions/pure-* ~/.pi/agent/extensions/",
+	"$comment": "Project-level settings for pi-pure-ecosystem development.",
 	"pure": {
 		"persona": {
 			"id": "🛠️ Extension Dev"
 		}
-	}
+	},
+	"packages": [
+		"npm:@aliou/pi-dev-kit"
+	]
 }
