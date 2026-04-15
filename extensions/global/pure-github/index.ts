@@ -5,9 +5,11 @@
  * Forked from @the-forge-flow/gh-pi (https://github.com/MonsieurBarti/GH-PI)
  */
 
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { StringEnum } from "@mariozechner/pi-ai";
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { defineTool, truncateHead } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionCommandDefinition } from "@mariozechner/pi-coding-agent";
+import { defineTool, getAgentDir, truncateHead } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 import { GHNotFoundError, getInstallInstructions } from "./error-handler";
 import {
@@ -39,6 +41,7 @@ export type { ExecOptions, ExecResult, PiExecFn } from "./gh-client";
  * behavior unchanged.
  */
 export { createGHClient, GHClient } from "./gh-client";
+export * from "./gh-helpers";
 export type {
 	CloseIssueParams,
 	CommentOnIssueParams,
@@ -48,7 +51,6 @@ export type {
 	ReopenIssueParams,
 	ViewIssueParams,
 } from "./issue-tools";
-
 export { createIssueTools } from "./issue-tools";
 export type {
 	CheckoutPRParams,
@@ -62,6 +64,7 @@ export type {
 	ViewPRParams,
 } from "./pr-tools";
 export { createPRTools } from "./pr-tools";
+export * from "./repo-ref";
 export type {
 	CloneRepoParams,
 	CreateRepoParams,
@@ -94,7 +97,24 @@ export default function pureGithub(pi: ExtensionAPI): void {
 	const state = {
 		client: new GHClient({ exec: pi.exec.bind(pi), binaryPath }),
 		detectionStatus: "unchecked" as "unchecked" | "missing" | "unauthenticated" | "ready",
+		cwd: process.cwd(),
 	};
+
+	function _getDefaultOwner(): string | undefined {
+		try {
+			const settingsPath = join(getAgentDir(), "settings.json");
+			if (!existsSync(settingsPath)) return undefined;
+			const raw = JSON.parse(readFileSync(settingsPath, "utf-8"));
+			return raw?.pure?.github?.defaultOwner;
+		} catch {
+			return undefined;
+		}
+	}
+
+	function _registerDualCommand(shortName: string, longName: string, definition: ExtensionCommandDefinition): void {
+		pi.registerCommand(shortName, definition);
+		pi.registerCommand(longName, definition);
+	}
 
 	/**
 	 * Probe the gh binary (and optionally auth). Caches the result on state.
@@ -149,6 +169,7 @@ export default function pureGithub(pi: ExtensionAPI): void {
 	// Session lifecycle — probe on start so we can surface a nice notification,
 	// and reset detection on shutdown so a future reload re-probes.
 	pi.on("session_start", async (_event, ctx) => {
+		state.cwd = ctx.cwd;
 		const status = await probeBinary();
 
 		if (!ctx.hasUI) return;
