@@ -158,9 +158,9 @@ biome check --write --unsafe extensions/<scope>/pure-<name>/
 
 Fix all errors. Warnings acceptable if the rule is already disabled project-wide.
 
-### 8. Install for local testing
+### 8. Local testing (Stage B)
 
-**Stage B — test the adapted pure-* version.** After renaming, cleanup, path-helper work, and docs:
+After renaming, cleanup, path-helper work, and docs, run the extension through three gates before promotion.
 
 The extension should already be referenced in `.pi/settings.json` from step 2. If not, add it:
 ```json
@@ -169,21 +169,65 @@ The extension should already be referenced in `.pi/settings.json` from step 2. I
 }
 ```
 
-Ask the user to `/reload` and test the adapted extension. Do not proceed to promotion until the user explicitly approves.
+**Gate 1 — Smoke test (automated, mandatory)**
 
-> **Smoke-test after changes.** Run `pi -p "reply with just the word ok" 2>&1 | tail -20` from the project directory to verify the extension loads without crashing. Check for TypeError/SyntaxError in output and that the agent actually responded. Fix any errors before continuing.
+Run from the project directory:
+```bash
+pi -p "reply with just the word ok" 2>&1 | tail -20
+```
+
+Check for:
+- **Extension load errors** (TypeError, SyntaxError, missing imports) — these crash before the prompt runs
+- **Exit code** — non-zero means something broke
+- **The word `ok`** in output — confirms the agent actually started and responded
+
+Fix any errors before continuing. Do not rely on `/reload` alone — it may silently skip broken extensions.
+
+**Gate 2 — Functional test (user, mandatory)**
+
+Ask the user to `/reload` and test the adapted extension:
+- **Tool**: invoke it in a session
+- **Command**: run the slash command
+- **Widget / event**: verify it renders or triggers as expected
+
+Do not proceed to promotion until the user explicitly confirms it works.
+
+**Gate 3 — Commit checkpoint (mandatory)**
+
+Commit the changes before promotion so the working tree is clean:
+```bash
+git add .
+git status
+git commit -m "pure-<name>: <description of changes>"
+```
 
 ### 9. Promote (after user approval)
 
-Promotion now means moving an extension from **local-only** loading to **global** loading via the git package.
+Promotion means moving an extension from **local-only** loading to **global** loading via the git package.
 
-1. **Remove the local path reference** from `.pi/settings.json` `packages`.
-2. **Add it to `~/.pi/agent/settings.json`** inside the git package's `extensions` array.
-3. Update `CHANGELOG.md` and `README.md`.
-4. Commit and push.
-5. `/reload` in Pi to verify it loads from the git package.
+**Pre-promotion checklist**
+- [ ] Working tree is clean (everything committed)
+- [ ] Smoke test passed
+- [ ] Functional test passed
+- [ ] `package.json` already lists the extension
 
-> **Project-scoped extensions skip this step.** They remain in `.pi/settings.json` — they are not added to the global git package.
+**Migrate activation**
+1. **Remove** the local path reference from `.pi/settings.json`.
+2. **Add** the extension to `~/.pi/agent/settings.json` inside the git package's `extensions` array.
+
+**Verify global load**
+`/reload` in Pi and confirm the extension loads from the git package (e.g. the tool appears in `?` or the command is available).
+
+**Push**
+```bash
+git push
+```
+Then run `pi update` or `/reload` in a fresh session to confirm the remote package works.
+
+**Rollback plan**
+If global load fails, immediately move the extension back to `.pi/settings.json`, remove it from `~/.pi/agent/settings.json`, and investigate.
+
+> **Project-scoped extensions skip promotion.** They remain in `.pi/settings.json` — they are not added to the global git package.
 
 ---
 
@@ -217,7 +261,7 @@ Read the `pi-extension` skill reference files for the relevant areas (tools, com
 
 ### 3. Implement
 
-Create `extensions/pure-<name>/index.ts` with:
+Create `extensions/<scope>/pure-<name>/index.ts` with:
 
 - Inline path helpers (only what's needed)
 - Extension entry point (default export function)
@@ -229,13 +273,16 @@ Create `extensions/pure-<name>/index.ts` with:
 
 Same format as fork-based workflow, but Sources/Inspiration cites ideas/articles/APIs instead of repos.
 
-### 5. Check, format, lint, test, promote
+### 5. Check, format, lint, test, and promote
 
-Same steps 7–9 as fork-based workflow. Specifically:
+Same gates as fork-based workflow:
+
 1. `biome check --write --unsafe extensions/<scope>/pure-<name>/`
 2. Verify the extension is in `package.json` `pi.extensions` and `.pi/settings.json` has a local path reference
-3. Smoke-test: `pi -p "reply with just the word ok" 2>&1 | tail -20` from the project directory. Check for errors and that the agent responded.
-4. When approved, promote (remove from `.pi/settings.json`, add to `~/.pi/agent/settings.json`, commit and push)
+3. **Smoke-test**: `pi -p "reply with just the word ok" 2>&1 | tail -20` from the project directory. Check for errors and that the agent responded. Fix any errors before continuing.
+4. Ask the user to `/reload` and **functionally test** the extension. Do not proceed until confirmed working.
+5. **Commit checkpoint**: `git add . && git commit -m "pure-<name>: <description>"`
+6. When approved, promote (remove from `.pi/settings.json`, add to `~/.pi/agent/settings.json`, verify global load, push)
 
 ---
 
@@ -254,7 +301,7 @@ Read the extension's `README.md` → **Sources / Inspiration** section. The firs
 git clone --depth 1 <upstream-url> /tmp/<source-name>
 ```
 
-Compare the upstream source against our `extensions/pure-<name>/index.ts`:
+Compare the upstream source against our `extensions/<scope>/pure-<name>/index.ts`:
 
 - Read the upstream's main source file(s)
 - Check the upstream's CHANGELOG for releases since our fork
@@ -278,7 +325,7 @@ Apply updates to `extensions/<scope>/pure-<name>/` following the same convention
 - Maintain our README/CHANGELOG format
 - Update CHANGELOG.md with changes brought from upstream
 
-### 5. Check, test, promote
+### 5. Check, test, and restore activation
 
 **Before editing, determine the extension's activation tier:**
 
@@ -291,15 +338,16 @@ Apply updates to `extensions/<scope>/pure-<name>/` following the same convention
   1. Edit directly.
   2. `/reload` and develop.
 
-**When finished**:
-- If it was globally active, remove it from `.pi/settings.json` and add it back to `~/.pi/agent/settings.json`.
-- If it was locally active (baseline), keep it in `.pi/settings.json`.
+**When finished, run the three testing gates:**
 
 1. `biome check --write --unsafe extensions/<scope>/pure-<name>/`
-2. `/reload` and test
-3. Commit after significant changes; push when a feature is complete or at user request
+2. **Smoke-test**: `pi -p "reply with just the word ok" 2>&1 | tail -20`. Fix errors before continuing.
+3. Ask the user to `/reload` and **functionally test**. Do not proceed until confirmed working.
+4. **Commit checkpoint**: `git add . && git commit -m "pure-<name>: <description>"`
 
-> **Smoke-test after changes.** Run `pi -p "reply with just the word ok" 2>&1 | tail -20` from the project directory. Check for errors and that the agent responded.
+**Restore activation:**
+- If it was globally active, remove it from `.pi/settings.json` and add it back to `~/.pi/agent/settings.json`. Verify global load with `/reload`, then `git push`.
+- If it was locally active (baseline), keep it in `.pi/settings.json`.
 
 ---
 
@@ -316,12 +364,15 @@ Before considering the extension ready for user testing:
 - [ ] TypeBox schemas for tool parameters
 - [ ] `biome check` passes with zero errors
 - [ ] Smoke-tested: `pi -p "reply ok"` runs without extension load errors
+- [ ] User confirmed functional test
 - [ ] README.md with Sources / Inspiration section
 - [ ] CHANGELOG.md with initial release entry
 - [ ] Local path reference in `.pi/settings.json` for local loading
-- [ ] User has tested and approved
+- [ ] Commit checkpoint done before promotion
 
 **Promotion** (when user says "promote"):
+- [ ] Pre-promotion checklist complete
 - [ ] Added to `~/.pi/agent/settings.json` git package entry
 - [ ] Local path reference removed from `.pi/settings.json`
-- [ ] Committed and pushed
+- [ ] Global load verified with `/reload`
+- [ ] Pushed to remote

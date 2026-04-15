@@ -189,7 +189,7 @@ function hasNerdFonts(): boolean {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const DEFAULT_COLORS: Record<string, ColorRef> = {
-	model: "accent",
+	model: "text",
 	path: "text",
 	git_clean: "success",
 	git_dirty: "warning",
@@ -260,11 +260,11 @@ const DEFAULT_SEGMENTS: Record<string, SegCfg> = {
 	token_total: { style: "tokens" },
 	cost: { style: "cost" },
 	context_pct: {
-		style: "context",
-		warn_style: "context_warn",
-		error_style: "context_error",
-		warn_threshold: 70,
-		error_threshold: 90,
+		style: "success",
+		warn_style: "warning",
+		error_style: "text",
+		warn_threshold: 50,
+		error_threshold: 80,
 		show_auto_icon: false,
 		show_window: false,
 	},
@@ -896,6 +896,7 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			const prefix = ((seg as any).tilde as boolean) ? "~" : "";
 			const sep = (seg as any).sep ?? "/";
 			const style = (seg as any).style ?? "text";
+			const icon = ico(id, icons, segs) || "";
 			let pathStr = "";
 			if (mode === "basename") {
 				pathStr = parts[parts.length - 1] ?? "";
@@ -903,15 +904,13 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 					pathStr = `${pathStr.slice(0, Math.max(1, maxLength - 1))}…`;
 				}
 			} else if (mode === "parent") {
-				const parentParts = parts.slice(0, -1);
-				const displayed = parentParts.slice(-maxParts);
-				pathStr = prefix + displayed.join(sep);
+				pathStr = parts[parts.length - 2] ?? "";
 			} else {
 				const displayed = parts.slice(-maxParts);
 				pathStr = prefix + displayed.join(sep);
 			}
 			if (!pathStr) return { content: "", visible: false };
-			return { content: c(theme, ctx.palette, style, pathStr), visible: true };
+			return { content: c(theme, ctx.palette, style, `${icon} ${pathStr}`.trim()), visible: true };
 		}
 		case "git": {
 			const s = data.git;
