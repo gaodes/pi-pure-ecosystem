@@ -40,16 +40,57 @@ pi-pure-ecosystem/
 │   ├── settings.json       # Project settings (no extension loading — globals only)
 │   └── extensions/          # ← test location (temporary, cleaned up after testing)
 ├── extensions/              # ← develop extensions here (canonical source)
-│   └── pure-<name>/
-│       ├── index.ts         # Extension entry point
-│       ├── CHANGELOG.md     # GitHub-style changelog
-│       ├── README.md        # Docs + Sources/Inspiration section
-│       ├── package.json     # ONLY if npm dependencies needed
-│       └── ...
-├── biome.json               # Linter/formatter config
+│   ├── global/              # ← loaded globally only (package filter)
+│   │   └── pure-<name>/
+│   ├── project/             # ← loaded per-project (opt-in via project settings)
+│   │   └── pure-<name>/
+│   ├── workspace/            # ← loaded per-workspace (opt-in via project settings)
+│   │   └── pure-<name>/
+│   └── shared/               # ← loaded by all scopes
+│       └── pure-<name>/
+├── themes/                   # ← loaded globally via package filter
+├── biome.json                # Linter/formatter config
 ├── .gitignore
 ├── AGENTS.md
 └── README.md
+```
+
+### Extension scope layout
+
+Package filtering controls what loads where (in `settings.json`):
+
+```json
+// Global (~/.pi/agent/settings.json) — all extensions load globally
+{
+  "packages": [
+    {
+      "source": "git:github.com/gaodes/pi-pure-ecosystem",
+      "extensions": ["extensions/global/*", "extensions/shared/*"]
+    }
+  ]
+}
+```
+
+```json
+// Project (<project>/.pi/settings.json) — opt-in per-project or workspace scope
+{
+  "packages": [
+    {
+      "source": "git:github.com/gaodes/pi-pure-ecosystem",
+      "extensions": ["extensions/project/*", "extensions/shared/*"]
+    }
+  ]
+}
+```
+
+Each `pure-<name>/` directory contains:
+
+```
+├── index.ts         # Extension entry point
+├── CHANGELOG.md     # GitHub-style changelog
+├── README.md        # Docs + Sources/Inspiration section
+├── package.json     # ONLY if npm dependencies needed
+└── ...
 ```
 
 Global (live git package):
@@ -83,14 +124,16 @@ Global (live git package):
 
 ## Extensions
 
-| Extension         | Tool        | Command       | Purpose                                                           |
-| ----------------- | ----------- | ------------- | ----------------------------------------------------------------- |
-| `pure-cron`       | `pure_cron` | `/pure-cron`  | Schedule recurring/one-shot agent prompts                         |
-| `pure-sessions`   | —           | `/sesh`       | Auto-name sessions, browse/resume/rename                          |
-| `pure-statusline` | —           | `/statusline` | Configurable multi-line footer with segments, tool counters       |
-| `pure-theme`      | —           | `/theme`      | Sync theme with system dark/light mode                            |
-| `pure-updater`    | —           | `/update`     | Check for pi updates, prompt on new versions, install and restart |
-| `pure-vibes`      | —           | `/vibe`       | AI-generated themed working messages                              |
+| Extension              | Tool            | Command       | Purpose                                                           |
+| --------------------- | --------------- | ------------- | ----------------------------------------------------------------- |
+| `pure-cron`           | `pure_cron`     | `/pure-cron`  | Schedule recurring/one-shot agent prompts                         |
+| `pure-github`         | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* `/gh-status`, `/gh-pr-create`, `/gh-pr-fix`, `/gh-pr-merge` | GitHub PR/repo/workflow tools *(in local testing)*                |
+| `pure-model-switch`   | `switch_model`  | —             | List, search, and switch models with aliases                      |
+| `pure-sessions`       | —               | `/sesh`       | Auto-name sessions, browse/resume/rename                          |
+| `pure-statusline`     | —               | `/statusline` | Configurable multi-line footer with segments, tool counters       |
+| `pure-theme`          | —               | `/theme`      | Sync theme with system dark/light mode                            |
+| `pure-updater`        | —               | `/update`     | Check for pi updates, prompt on new versions, install and restart |
+| `pure-vibes`          | —               | `/vibe`       | AI-generated themed working messages                              |
 
 ### Extension conventions
 
@@ -202,6 +245,8 @@ biome format --write extensions/
 biome lint extensions/
 ```
 
+> Note: biome is configured to only lint extension entry points and source files under `extensions/{global,project,workspace,shared}/*/`.
+
 ### What to fix vs suppress
 
 - **Fix**: all errors and warnings that point to real issues (unused vars, parse errors, wrong radix, etc.)
@@ -225,11 +270,11 @@ When implementing new extensions or major changes, use the `pi-extension` skill'
 
 ## Development workflow
 
-Extensions are developed in `extensions/pure-<name>/` at the project root. This is the **canonical source** — the repo is loaded as a git package in Pi's global settings.
+Extensions are developed in `extensions/<scope>/pure-<name>/` at the project root. This is the **canonical source** — the repo is loaded as a git package in Pi's global settings via package filtering.
 
 ### 1. Develop
 
-Edit files in `extensions/pure-<name>/`. No build step — Pi loads `.ts` via Jiti at runtime. `npm install` at the repo root only needed when changing dependencies (e.g. `croner`, `nanoid`).
+Edit files in `extensions/global/pure-<name>/` (or `project/` / `workspace/` / `shared/`). No build step — Pi loads `.ts` via Jiti at runtime. `npm install` in the extension directory only needed when adding dependencies (e.g. `croner`, `nanoid`).
 
 ### 2. Check & fix
 
@@ -249,8 +294,10 @@ Copy the extension to `.pi/extensions/` for Pi to load it at project level. **Al
 
 # Install local test copy
 mkdir -p .pi/extensions
-cp -R extensions/pure-<name> .pi/extensions/pure-<name>
+cp -R extensions/global/pure-<name> .pi/extensions/pure-<name>
 ```
+
+For extensions that are not yet ready for publishing, you can also gitignore `extensions/global/pure-<name>/` and keep the test copy in `.pi/extensions/` indefinitely.
 
 Then `/reload` in Pi and test. The extension loads from `.pi/extensions/` (project-level auto-discovery, which overrides global).
 
