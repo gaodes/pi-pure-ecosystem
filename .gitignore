@@ -2,7 +2,4 @@ node_modules/
  Disabled/
 *.tmp
 
-# In-testing extensions (not in package.json manifest)
-extensions/global/pure-statusline/
-extensions/global/pure-vibes/
-extensions/project/pure-devkit/
+# All extensions are tracked in this repo.

@@ -6,25 +6,20 @@ This file tracks planned features sourced from other Pi GitHub extensions. Each 
 
 ---
 
-## Phase 1 — Commands from espennilsen/pi-github
+## Completed
 
-Port the command-based workflows from [@e9n/pi-github](https://github.com/espennilsen/pi/tree/main/extensions/pi-github). These add user-triggered TUI commands that complement the existing LLM tools.
+- **Phase 1.1** `/gh-status` repo dashboard
+- **Phase 1.9** Command infrastructure (`registerDualCommand`, `repo-ref.ts`, `ghJson`, `ghGraphql`, `getCurrentBranch`, `cwd` tracking, config-based `defaultOwner`)
+- **Phase 2** Remote repo browsing (`github_browse` with 18 actions including thread formatting and image extraction)
+- **Phase 4** Pure ecosystem integration (config file support + startup status notifications)
 
-### 1.1 `/gh-status` — Repo dashboard command
+---
 
-**Source**: espennilsen `commands.ts` → `gh-status`
+## Backlog — Phase 1 Commands from espennilsen/pi-github
 
-Shows a compact repo overview: open PR count (mine + review-requested), open issues, current branch PR, CI status. Replaces multiple individual tool calls with one user command.
+Port the command-based workflows from [@e9n/pi-github](https://github.com/espennilsen/pi/tree/main/extensions/pi-github).
 
-**Scope**: New file `commands.ts`, `repo-ref.ts` helper. Medium.
-
-**Implementation notes**:
-- Port `registerDualCommand` helper (registers `/gh-*` + `/github-*` from one definition)
-- Port `extractRepoRef` / `resolveRepo` / `repoFlag` from espennilsen's `repo-ref.ts`
-- Use `pi.exec()` instead of `execFile`
-- Track `cwd` from `session_start` context
-
-### 1.2 `/gh-pr-create` — LLM-assisted PR creation
+### `/gh-pr-create` — LLM-assisted PR creation
 
 **Source**: espennilsen `commands.ts` → `gh-pr-create`
 
@@ -37,7 +32,7 @@ Workflow: push branch → gather diff → LLM generates title/body → confirm w
 - Truncate large diffs (>50KB) before sending to LLM
 - Ask user for confirmation before creating
 
-### 1.3 `/gh-pr-fix` — PR review thread resolution
+### `/gh-pr-fix` — PR review thread resolution
 
 **Source**: espennilsen `pr-fix.ts`
 
@@ -47,12 +42,12 @@ Workflow: fetch unresolved review threads via GraphQL → present to agent → a
 
 **Implementation notes**:
 - Port GraphQL queries for review threads
-- Port `ghGraphql()` helper using `pi.exec("gh", ["api", "graphql", ...])`
+- `ghGraphql()` helper already exists in `gh-helpers.ts`
 - Support thread ID resolution
 - Register prompt template for the fix flow
-- Reset state on `session_shutdown` (not `session_switch`/`session_fork` — those events don't exist in current Pi)
+- Reset state on `session_shutdown`
 
-### 1.4 `/gh-pr-merge` — Merge with branch cleanup
+### `/gh-pr-merge` — Merge with branch cleanup
 
 **Source**: espennilsen `pr-merge.ts`
 
@@ -61,12 +56,12 @@ Workflow: find PR → fetch details → merge (squash/merge/rebase) → post sum
 **Scope**: New file `pr-merge.ts`. Medium.
 
 **Implementation notes**:
-- Support `--squash` (default), `--merge`, `--rebase` flags
+- Support `--squash` (default from config), `--merge`, `--rebase` flags
 - Post summary comment with file list and stats
 - Handle worktree branches (skip deletion if checked out in worktree)
 - Use `pi.exec()` for all git/gh calls
 
-### 1.5 `/gh-pr-review` — Show review feedback
+### `/gh-pr-review` — Show review feedback
 
 **Source**: espennilsen `commands.ts` → `gh-pr-review`
 
@@ -74,7 +69,7 @@ Shows PR review decision and individual review comments. Auto-detects PR from cu
 
 **Scope**: Add to `commands.ts`. Small.
 
-### 1.6 `/gh-prs` and `/gh-issues` — List commands
+### `/gh-prs` and `/gh-issues` — List commands
 
 **Source**: espennilsen `commands.ts` → `gh-prs`, `gh-issues`
 
@@ -82,7 +77,7 @@ Quick TUI commands to list open PRs/issues with filters. Uses `ctx.ui.notify()` 
 
 **Scope**: Add to `commands.ts`. Small each.
 
-### 1.7 `/gh-notifications` — Unread notifications
+### `/gh-notifications` — Unread notifications
 
 **Source**: espennilsen `commands.ts` → `gh-notifications`
 
@@ -90,103 +85,13 @@ Fetches unread GitHub notifications via `gh api /notifications`. Shows type icon
 
 **Scope**: Add to `commands.ts`. Small.
 
-### 1.8 `/gh-actions` — Workflow runs command
+### `/gh-actions` — Workflow runs command
 
 **Source**: espennilsen `commands.ts` → `gh-actions`
 
 Lists recent workflow runs with status icons. Lower priority since we already have the `github_workflow` tool.
 
 **Scope**: Add to `commands.ts`. Small.
-
-### 1.9 Infrastructure for commands
-
-**Scope**: Shared across all commands.
-
-- [ ] Port `registerDualCommand` pattern from espennilsen
-- [ ] Create `repo-ref.ts` (repo reference parsing: owner/repo, URL, #number)
-- [ ] Port `gh.ts` helpers: `ghJson()`, `ghGraphql()`, `getCurrentBranch()` — all using `pi.exec()`
-- [ ] Track `cwd` from `session_start` context (for git commands)
-- [ ] `defaultOwner` setting support from `pure.github.defaultOwner`
-
----
-
-## Phase 2 — Remote repo browsing from maria-rcks/pi-github
-
-Port remote repo inspection tools from [pi-github](https://github.com/maria-rcks/pi-github). These add the ability to read, search, and browse any GitHub repo without cloning.
-
-### 2.1 `github_browse` tool — Remote file reading
-
-**Source**: maria-rcks `src/github/fetchers.ts` → `fetchRepoFile`
-
-Read a file from any public GitHub repo (or authenticated private repo) using the `gh api` endpoint for repo contents. Base64 decode, line range support.
-
-**Scope**: New file `browse-tools.ts`. Medium.
-
-**Implementation notes**:
-- Use `pi.exec("gh", ["api", ...])` instead of direct `fetch()` calls
-- Support `startLine`/`endLine` for partial reads
-- Support `ref` parameter for branch/tag/commit
-
-### 2.2 `github_browse` tool — Directory listing
-
-**Source**: maria-rcks → `fetchRepoDirectory`
-
-List directory contents of any GitHub repo path.
-
-**Scope**: Add to `browse-tools.ts`. Small.
-
-### 2.3 `github_browse` tool — Code search
-
-**Source**: maria-rcks → `searchRepoCode`
-
-Search code within a repo using GitHub's code search API. Supports path filtering.
-
-**Scope**: Add to `browse-tools.ts`. Small.
-
-### 2.4 `github_browse` tool — File glob
-
-**Source**: maria-rcks → `fetchRepoTreeFiles` + `globMatch`
-
-Fetch the full repo tree and filter by glob pattern. Useful for finding all `*.test.ts` files, etc.
-
-**Scope**: Add to `browse-tools.ts`. Small.
-
-### 2.5 `github_browse` tool — Commit search
-
-**Source**: maria-rcks → `searchRepoCommits`
-
-Search commits by query, author, date range.
-
-**Scope**: Add to `browse-tools.ts`. Small.
-
-### 2.6 `github_browse` tool — PR overview & checks
-
-**Source**: maria-rcks → `fetchPrOverview`, `fetchPrChecks`, `fetchPrCommits`
-
-Dedicated actions for PR overview (metadata + files + reviews + checks in one call), per-file diff, and commit listing.
-
-**Scope**: Add to `browse-tools.ts`. Medium.
-
-### 2.7 Thread formatting
-
-**Source**: maria-rcks → `renderThreadMarkdown`
-
-Format GitHub issue/PR/discussion threads as chronological markdown with filters (author, kind, since, until, contains).
-
-**Scope**: New file `thread-format.ts`. Medium.
-
-**Implementation notes**:
-- Auto-detect entity type (issue/PR/discussion)
-- Support pagination
-- Thread caching for repeated access
-
-### 2.8 Image extraction
-
-**Source**: maria-rcks → `collectImages`, `downloadImage`
-
-Extract image references from threads and download by ID. Lower priority.
-
-**Scope**: Add to `thread-format.ts` or separate `image-tools.ts`. Low priority.
 
 ---
 
@@ -210,63 +115,35 @@ Support `GITHUB_PAT_FILE` for reading token from a file (NixOS, Docker secrets).
 
 ---
 
-## Phase 4 — Pure ecosystem integration
-
-### 4.1 Config file support
-
-Add `~/.pi/agent/pure/config/pure-github.json` for persistent settings.
-
-Settings to support:
-- `defaultOwner` — default GitHub owner/org for commands
-- `mergeStrategy` — default merge strategy for `/gh-pr-merge`
-- `notifications.enabled` — whether to check notifications on session start
-
-**Scope**: Inline path helpers + config resolution. Small.
-
-### 4.2 Session start enhancements
-
-- Show CI status for current branch on session start (if in a git repo)
-- Show review-requested count
-
-**Scope**: Small additions to `session_start` handler.
-
----
-
-## File structure (target)
+## Current file structure
 
 ```
 extensions/global/pure-github/
 ├── index.ts           # Entry — registers tools + commands, lifecycle
-├── gh-client.ts       # GHClient class wrapping pi.exec() (from GH-PI)
-├── repo-tools.ts      # github_repo tool (from GH-PI)
-├── issue-tools.ts     # github_issue tool (from GH-PI)
-├── pr-tools.ts        # github_pr tool (from GH-PI)
-├── workflow-tools.ts  # github_workflow tool (from GH-PI)
-├── browse-tools.ts    # github_browse tool (Phase 2, from maria-rcks)
-├── commands.ts        # All /gh-* commands (Phase 1, from espennilsen)
-├── pr-create.ts       # /gh-pr-create (Phase 1.2)
-├── pr-fix.ts          # /gh-pr-fix (Phase 1.3)
-├── pr-merge.ts        # /gh-pr-merge (Phase 1.4)
-├── repo-ref.ts        # Repo ref parsing (Phase 1.9)
-├── format.ts          # Summary formatters (from GH-PI, extend as needed)
-├── error-handler.ts   # GHError types (from GH-PI)
-├── thread-format.ts   # Thread formatting (Phase 2.7, from maria-rcks)
+├── gh-client.ts       # GHClient class wrapping pi.exec()
+├── repo-tools.ts      # github_repo tool
+├── issue-tools.ts     # github_issue tool
+├── pr-tools.ts        # github_pr tool
+├── workflow-tools.ts  # github_workflow tool
+├── browse-tools.ts    # github_browse tool (remote repo inspection)
+├── commands.ts        # /gh-status + future commands
+├── repo-ref.ts        # Repo ref parsing
+├── format.ts          # Summary formatters
+├── error-handler.ts   # GHError types
+├── gh-helpers.ts      # ghJson / ghGraphql / getCurrentBranch
+├── config.ts          # Config loader (pure ecosystem style)
 ├── CHANGELOG.md
 ├── README.md
 └── PLAN.md            # This file
 ```
 
----
-
 ## Priority order
 
-1. **Phase 1.9** — Command infrastructure (`registerDualCommand`, `repo-ref.ts`, `ghJson`, `cwd` tracking)
-2. **Phase 1.1** — `/gh-status` (high impact, low effort)
-3. **Phase 1.2** — `/gh-pr-create` (high impact)
-4. **Phase 1.4** — `/gh-pr-merge` (high impact)
-5. **Phase 1.3** — `/gh-pr-fix` (complex but very valuable)
-6. **Phase 1.5–1.8** — Remaining commands (low effort each)
-7. **Phase 2.1–2.5** — Remote repo browsing (high value for agent autonomy)
-8. **Phase 4.1** — Config file support
-9. **Phase 2.6–2.8** — PR overview, thread formatting, images
-10. **Phase 3** — Nice-to-haves (low priority)
+1. `/gh-pr-create` — high impact, medium effort
+2. `/gh-pr-merge` — high impact, medium effort
+3. `/gh-pr-fix` — very valuable, large effort
+4. `/gh-pr-review` — small effort
+5. `/gh-prs` and `/gh-issues` — small effort each
+6. `/gh-notifications` — small effort
+7. `/gh-actions` — small effort, lowest priority command
+8. Phase 3 — nice-to-haves (low priority)

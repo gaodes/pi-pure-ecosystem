@@ -341,6 +341,21 @@ Most extensions are `global`. Use `project` for tools that only make sense in a 
 
 Edit files in `extensions/<scope>/pure-<name>/`, then `/reload` in Pi. The extension loads directly from source — no copy step needed. Repeat until stable.
 
+### 2b. Smoke test
+
+After making changes, **always smoke-test in a separate Pi process** to catch crashes without risking your working session:
+
+```bash
+pi -p "reply with just the word ok" 2>&1 | tail -20
+```
+
+Run this from the project directory so `.pi/settings.json` loads local extensions. Check the output for:
+- **Extension load errors** (TypeError, SyntaxError, missing imports) — these crash before the prompt runs
+- **Exit code** — non-zero means something broke
+- **The word `ok`** in output — confirms the agent actually started and responded
+
+If there are errors, fix them before continuing. Do not rely on `/reload` alone — it may silently skip broken extensions.
+
 ### 3. Check & fix
 
 ```bash

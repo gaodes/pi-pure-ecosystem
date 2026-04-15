@@ -1,0 +1,18 @@
+{
+	"name": "pure-devkit",
+	"version": "1.0.0",
+	"description": "Tools, commands, and skills for developing Pi extensions in the pure-ecosystem",
+	"private": true,
+	"dependencies": {
+		"@aliou/pi-utils-ui": "^0.1.0",
+		"@sinclair/typebox": "^0.34.41"
+	},
+	"peerDependencies": {
+		"@mariozechner/pi-coding-agent": "*",
+		"@mariozechner/pi-tui": "*"
+	},
+	"peerDependenciesMeta": {
+		"@mariozechner/pi-coding-agent": { "optional": true },
+		"@mariozechner/pi-tui": { "optional": true }
+	}
+}
