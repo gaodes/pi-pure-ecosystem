@@ -485,8 +485,8 @@ function _extractFirstUserQuery(ctx: ExtensionContext): string | null {
 }
 
 function getSessionId(ctx: ExtensionContext): string | null {
-	const manager = ctx.sessionManager as { getSessionId?: () => string };
-	const id = manager.getSessionId?.();
+	const manager = ctx.sessionManager as { getSessionId?: () => string } | undefined;
+	const id = manager?.getSessionId?.();
 	return id || null;
 }
 
