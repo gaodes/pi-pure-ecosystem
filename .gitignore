@@ -3,8 +3,8 @@ node_modules/
 *.tmp
 
 # Not ready for publishing
-extensions/pure-statusline/
-extensions/pure-vibes/
+extensions/global/pure-statusline/
+extensions/global/pure-vibes/
 
 # Local test extensions
 .pi/extensions/
