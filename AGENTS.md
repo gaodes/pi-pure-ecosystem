@@ -83,7 +83,19 @@ Package filtering controls what loads where (in `settings.json`):
 }
 ```
 
-> **Package filters must match files, not directories.** Use `extensions/<scope>/*/index.ts` in `settings.json` package filters so Pi finds the extension entry points. The repo's root `package.json` uses `"./extensions"` as a conventional directory so auto-discovery works; the package filter in `settings.json` then narrows down which scopes are actually loaded.
+> **Package filters must match files, not directories.** Use `extensions/<scope>/*/index.ts` in `settings.json` package filters so Pi finds the extension entry points.
+>
+> **The `package.json` `pi.extensions` manifest requires explicit file paths.** Directory paths and globs are not reliably resolved in the manifest (per upstream convention). List every `index.ts` explicitly, just like `tmustier/pi-extensions` and other published packages:
+> ```json
+> "pi": {
+>   "extensions": [
+>     "./extensions/global/pure-cron/index.ts",
+>     "./extensions/global/pure-theme/index.ts"
+>   ]
+> }
+> ```
+>
+> The package filter in `settings.json` then narrows down which scopes are actually loaded.
 
 Each `pure-<name>/` directory contains:
 
