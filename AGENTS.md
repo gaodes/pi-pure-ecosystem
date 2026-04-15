@@ -4,7 +4,7 @@ Personal Pi extensions, themes, and configuration. Named with the `pure-` prefix
 
 This is the **development workspace**. Extensions are sourced as a git package (`git:github.com/gaodes/pi-pure-ecosystem` in global settings). Pi clones the repo and loads extensions from there.
 
-**Workflow**: develop in `extensions/` → check/lint/format → auto-commit → **ask user before pushing** → push to GitHub → `pi update` or `/reload` in Pi.
+**Workflow**: determine activation tier → move globally-active extensions to local settings if needed → develop in `extensions/` → check/lint/format → auto-commit → push to GitHub when a feature is complete or at user request → restore globally-active extensions to global settings → `pi update` or `/reload` in Pi.
 
 ## Pi docs — always read first
 
@@ -62,25 +62,31 @@ pi-pure-ecosystem/
 Package filtering controls what loads where (in `settings.json`):
 
 ```json
-// Global (~/.pi/agent/settings.json) — all extensions load globally
+// Global (~/.pi/agent/settings.json) — baseline globally-active extensions
 {
   "packages": [
     {
       "source": "git:github.com/gaodes/pi-pure-ecosystem",
-      "extensions": ["extensions/global/*/index.ts", "extensions/shared/*/index.ts"]
+      "extensions": [
+        "extensions/global/pure-cron/index.ts",
+        "extensions/global/pure-github/index.ts",
+        "extensions/global/pure-model-switch/index.ts",
+        "extensions/global/pure-sessions/index.ts",
+        "extensions/global/pure-theme/index.ts",
+        "extensions/global/pure-updater/index.ts"
+      ]
     }
   ]
 }
 ```
 
 ```json
-// Project (<project>/.pi/settings.json) — opt-in per-project or workspace scope
+// Project (<project>/.pi/settings.json) — locally-active extensions
 {
   "packages": [
-    {
-      "source": "git:github.com/gaodes/pi-pure-ecosystem",
-      "extensions": ["extensions/project/*/index.ts", "extensions/shared/*/index.ts"]
-    }
+    "../extensions/global/pure-statusline",
+    "../extensions/global/pure-vibes",
+    "../extensions/project/pure-devkit"
   ]
 }
 ```
@@ -277,30 +283,38 @@ After developing an extension, before considering the task done:
 1. `biome check extensions/` — zero errors
 2. Update `CHANGELOG.md` with changes
 3. Update `README.md` if behavior changed
-4. **Register the extension in the root `package.json` `pi.extensions` manifest** (explicit file path required)
+4. **Ensure the extension is listed in the root `package.json` `pi.extensions` manifest** (all extensions must be explicit)
 5. Only include a per-extension `package.json` if it has npm dependencies
 6. Test locally (see development workflow below)
-7. Auto-commit after each major logical change
-8. **Ask user for approval before pushing to remote**
-9. Push → `pi update` or `/reload` in Pi to verify
+7. Commit after each significant logical change
+8. **Push when a feature is complete or at user request**
+9. Keep `~/.pi/agent/settings.json` and `.pi/settings.json` in sync with the base state
+10. Push → `pi update` or `/reload` in Pi to verify
 
 When implementing new extensions or major changes, use the `pi-extension` skill's reference files for best practices and patterns.
 
 ## Development workflow
 
-Extensions are developed in `extensions/<scope>/pure-<name>/` at the project root. This is the **canonical source** — the repo is loaded as a git package in Pi's global settings via package filtering.
-
-### Extension lifecycle
-
-Three phases with two additional transitions for already-published extensions:
-
-| Phase | `.gitignore` | `package.json` manifest | `.pi/settings.json` (local pkg) |
-|-------|-------------|------------------------|-------------------------------|
-| **New / In testing** | ✅ gitignored | ❌ not in manifest | ✅ loaded from local path |
-| **Promoted** | ❌ removed from gitignore | ✅ added to manifest | ❌ removed |
-| **Published + local dev** | ❌ tracked | ✅ in manifest | ✅ local override (takes precedence) |
+Extensions are developed in `extensions/<scope>/pure-<name>/` at the project root. Every extension is tracked in Git and listed in the root `package.json` manifest. Activation is controlled by whether an extension is referenced in the **global** `~/.pi/agent/settings.json` (git package) or the **local** `.pi/settings.json` (source path).
 
 > **No copying needed.** Pi loads extensions directly from their source directory via local path references in `.pi/settings.json`. Edit → `/reload` → test. Instant iteration.
+
+### Base state
+
+The current setup has two activation tiers. The agent must know which tier an extension belongs to before making changes.
+
+**Globally active** — loaded from the git package in `~/.pi/agent/settings.json`:
+- `pure-cron`
+- `pure-github`
+- `pure-model-switch`
+- `pure-sessions`
+- `pure-theme`
+- `pure-updater`
+
+**Locally active** — loaded from source paths in `.pi/settings.json`:
+- `pure-statusline`
+- `pure-vibes`
+- `pure-devkit`
 
 ### Extension scopes
 
@@ -315,15 +329,12 @@ Before creating an extension, decide its scope. Scope determines where it lives 
 
 Most extensions are `global`. Use `project` for tools that only make sense in a specific repo (like a dev-kit). Use `shared` for common utilities that other extensions might also need.
 
-> **Project-scoped extensions** (e.g. `pure-devkit`) are never published to the git package — they always load via `.pi/settings.json` local path. They stay gitignored and are never added to `package.json`.
-
 ### 1. Create (new extension)
 
 1. **Choose the scope** (see table above).
 2. Create `extensions/<scope>/pure-<name>/index.ts` (or fork into it).
-3. **Add to `.gitignore`**: `extensions/<scope>/pure-<name>/`
-4. **Do NOT add to `package.json` manifest** yet.
-5. Add a local path reference in `.pi/settings.json` so Pi loads the extension directly from source:
+3. **Add to `package.json` manifest**: append `"./extensions/<scope>/pure-<name>/index.ts"` to `pi.extensions`.
+4. Add a local path reference in `.pi/settings.json` so Pi loads the extension directly from source:
 
 ```json
 {
@@ -335,7 +346,8 @@ Most extensions are `global`. Use `project` for tools that only make sense in a 
 
    Paths are relative to the settings file (`.pi/settings.json`), so `../` reaches the project root.
 
-6. `/reload` in Pi and test.
+5. `/reload` in Pi and test.
+6. When stable and the user wants it globally active, move it from `.pi/settings.json` to `~/.pi/agent/settings.json`, commit, and push.
 
 ### 2. Develop & iterate
 
@@ -364,37 +376,28 @@ biome check --write extensions/   # auto-fix
 
 Zero errors required. Warnings acceptable with inline suppressions.
 
-### 4. Promote (user says "promote")
+### 4. Working on an existing extension
 
-When the user approves promotion of a new extension:
+**Before editing**, determine the extension's activation tier:
 
-1. **Remove from `.gitignore`**: delete the `extensions/<scope>/pure-<name>/` line.
-2. **Add to `package.json` manifest**: append `"./extensions/<scope>/pure-<name>/index.ts"` to `pi.extensions`.
-3. **Remove the local path reference** from `.pi/settings.json` `packages`.
-4. Update `CHANGELOG.md` and `README.md`.
-5. `/reload` in Pi to verify it loads from the git package.
+- **Globally active** (listed in `~/.pi/agent/settings.json`):
+  1. Remove it from `~/.pi/agent/settings.json`.
+  2. Add it to `.pi/settings.json`.
+  3. `/reload` and develop.
 
-> **Project-scoped extensions skip this step.** They remain in `.pi/settings.json` and gitignored — they're never added to `package.json`.
+- **Locally active** (already in `.pi/settings.json`, e.g. `pure-statusline`, `pure-vibes`, `pure-devkit`):
+  1. It is already loading from source — edit directly.
+  2. `/reload` and develop.
 
-### 5. Local dev on a published extension
+**When finished**:
 
-When resuming work on an extension already in `package.json` (already published to GitHub):
+- **If it was globally active**: Remove it from `.pi/settings.json`, add it back to `~/.pi/agent/settings.json`, commit, and push.
+- **If it was locally active** (baseline): Keep it in `.pi/settings.json` as the default. For temporary local extensions, remove from `.pi/settings.json` when done.
 
-1. **Add a local path reference** in `.pi/settings.json` `packages`.
-2. Do NOT change `.gitignore` — the extension is already tracked.
-3. Do NOT remove it from `package.json` — it stays in the manifest.
-4. Pi's scope deduplication gives precedence to the project-level entry, so the local source overrides the git package.
-5. Edit → `/reload` → test as usual.
-6. When done, **remove the local path reference** from `.pi/settings.json`. The git package resumes loading.
+### 5. Publish
 
-### 6. Publish (requires user approval)
-
-After each major logical change, auto-commit. **Ask the user before pushing to remote.**
-
-```bash
-git commit -m "description"
-# Ask user: "Ready to push?"
-git push
-```
+- **Commit** after every significant logical change.
+- **Push** when a feature is complete or at user request.
+- Always restore globally active extensions to `~/.pi/agent/settings.json` before pushing, and keep the local baseline (`pure-statusline`, `pure-vibes`, `pure-devkit`) in `.pi/settings.json`.
 
 Then `pi update` or `/reload` in Pi to verify.

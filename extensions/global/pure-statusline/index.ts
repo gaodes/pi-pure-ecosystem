@@ -829,7 +829,8 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 		case "model": {
 			const model = data.model?.name ?? data.model?.id ?? "unknown";
 			const icon = ico("chip", icons, segs) || "";
-			return { content: `${icon} ${model}`, visible: true };
+			const style = (seg as any).style ?? "model";
+			return { content: c(theme, ctx.palette, style, `${icon} ${model}`.trim()), visible: true };
 		}
 		case "token_in":
 			return { content: c(theme, ctx.palette, "tokens", `${ico("token_in", icons, segs) || ""} ${formatCount(data.usageStats.input)}`.trim()), visible: data.usageStats.input > 0 };
@@ -858,14 +859,19 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 		case "context_pct": {
 			const pct = data.contextPercent ?? 0;
 			const icon = ico("database", icons, segs) || "";
-			const color = pct > 80 ? "text" : pct > 50 ? "warning" : "success";
-			return { content: theme.fg(color as ThemeColor, `${icon} ${pct}%`), visible: pct > 0 };
+			const errorThresh = ((seg as any).error_threshold as number) ?? 90;
+			const warnThresh = ((seg as any).warn_threshold as number) ?? 70;
+			let colorKey = ((seg as any).style as string) ?? "context";
+			if (pct >= errorThresh) colorKey = ((seg as any).error_style as string) ?? "error";
+			else if (pct >= warnThresh) colorKey = ((seg as any).warn_style as string) ?? "warning";
+			return { content: c(theme, ctx.palette, colorKey, `${icon} ${pct}%`.trim()), visible: pct > 0 };
 		}
 		case "session": {
 			const name = data.sessionName;
 			if (!name) return { content: "", visible: false };
 			const icon = ico("terminal", icons, segs) || "";
-			return { content: `${icon} ${name}`, visible: true };
+			const style = (seg as any).style ?? "session";
+			return { content: c(theme, ctx.palette, style, `${icon} ${name}`.trim()), visible: true };
 		}
 		case "thinking": {
 			const level = normalizeThinkingLevel(data.thinkingLevel);
@@ -884,30 +890,55 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 		case "path3": {
 			const cwd = data.cwd ?? "";
 			const parts = cwd.split("/").filter(Boolean);
+			const mode = ((seg as any).mode as string) ?? "truncated";
 			const maxParts = ((seg as any).max_parts as number) ?? 3;
-			const displayed = parts.slice(-maxParts);
+			const maxLength = ((seg as any).max_length as number) ?? 40;
 			const prefix = ((seg as any).tilde as boolean) ? "~" : "";
 			const sep = (seg as any).sep ?? "/";
-			const colorKey = (seg as any).color ?? "text";
-			const pathStr = prefix + displayed.join(sep);
+			const style = (seg as any).style ?? "text";
+			let pathStr = "";
+			if (mode === "basename") {
+				pathStr = parts[parts.length - 1] ?? "";
+				if (pathStr && pathStr.length > maxLength) {
+					pathStr = `${pathStr.slice(0, Math.max(1, maxLength - 1))}…`;
+				}
+			} else if (mode === "parent") {
+				const parentParts = parts.slice(0, -1);
+				const displayed = parentParts.slice(-maxParts);
+				pathStr = prefix + displayed.join(sep);
+			} else {
+				const displayed = parts.slice(-maxParts);
+				pathStr = prefix + displayed.join(sep);
+			}
 			if (!pathStr) return { content: "", visible: false };
-			return { content: theme.fg(colorKey, pathStr), visible: true };
+			return { content: c(theme, ctx.palette, style, pathStr), visible: true };
 		}
 		case "git": {
 			const s = data.git;
 			if (!s.branch) return { content: "", visible: false };
 			const icon = ico("git", icons, segs) || "";
-			const parts = [`${icon} ${s.branch}`.trim()];
-			if ((seg as any).show_staged !== false && s.staged > 0) parts.push(theme.fg("success", `+${s.staged}`));
-			if ((seg as any).show_unstaged !== false && s.unstaged > 0) parts.push(theme.fg("error", `~${s.unstaged}`));
-			if ((seg as any).show_untracked !== false && s.untracked > 0) parts.push(theme.fg("text", `?${s.untracked}`));
+			const isDirty = s.staged > 0 || s.unstaged > 0 || s.untracked > 0;
+			const branchStyle = isDirty
+				? ((seg as any).dirty_branch_style as string) ?? "git_dirty"
+				: ((seg as any).branch_style as string) ?? "git_clean";
+			const parts = [c(theme, ctx.palette, branchStyle, `${icon} ${s.branch}`.trim())];
+			if ((seg as any).show_staged !== false && s.staged > 0) {
+				parts.push(c(theme, ctx.palette, ((seg as any).staged_style as string) ?? "git_staged", `+${s.staged}`));
+			}
+			if ((seg as any).show_unstaged !== false && s.unstaged > 0) {
+				parts.push(c(theme, ctx.palette, ((seg as any).unstaged_style as string) ?? "git_unstaged", `~${s.unstaged}`));
+			}
+			if ((seg as any).show_untracked !== false && s.untracked > 0) {
+				parts.push(c(theme, ctx.palette, ((seg as any).untracked_style as string) ?? "git_untracked", `?${s.untracked}`));
+			}
 			return { content: parts.join(" "), visible: true };
 		}
 		case "git_branch": {
 			const branch = data.git.branch;
 			if (!branch) return { content: "", visible: false };
 			const icon = ico("git-branch", icons, segs) || "";
-			return { content: `${icon} ${branch}`, visible: true };
+			const style = (seg as any).style ?? "git_clean";
+			return { content: c(theme, ctx.palette, style, `${icon} ${branch}`.trim()), visible: true };
 		}
 		case "git_status": {
 			if (!cachedGitStatus) {
@@ -922,14 +953,15 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			if (!s || (s.staged === 0 && s.unstaged === 0 && s.untracked === 0)) return { content: "", visible: false };
 			const icon = ico("git-status", icons, segs) || "";
 			const parts: string[] = [];
-			if (s.staged > 0) parts.push(theme.fg("success", `+${s.staged}`));
-			if (s.unstaged > 0) parts.push(theme.fg("error", `~${s.unstaged}`));
-			if (s.untracked > 0) parts.push(theme.fg("text", `?${s.untracked}`));
+			if (s.staged > 0) parts.push(c(theme, ctx.palette, ((seg as any).staged_style as string) ?? "git_staged", `+${s.staged}`));
+			if (s.unstaged > 0) parts.push(c(theme, ctx.palette, ((seg as any).unstaged_style as string) ?? "git_unstaged", `~${s.unstaged}`));
+			if (s.untracked > 0) parts.push(c(theme, ctx.palette, ((seg as any).untracked_style as string) ?? "git_untracked", `?${s.untracked}`));
 			return { content: `${icon} ${parts.join(" ")}`, visible: true };
 		}
 		case "tools": {
 			const iconStr = ico("tools", icons, segs) || "";
-			return { content: theme.fg("dim", `${iconStr} ${data.toolsLoaded}`.trim()), visible: true };
+			const style = (seg as any).style ?? "tools";
+			return { content: c(theme, ctx.palette, style, `${iconStr} ${data.toolsLoaded}`.trim()), visible: true };
 		}
 		case "context_total": {
 			if (!data.contextWindow) return { content: "", visible: false };

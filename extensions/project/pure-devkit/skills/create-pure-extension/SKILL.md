@@ -13,6 +13,8 @@ Follow the project `AGENTS.md` design philosophy while using this skill:
 
 Two workflows: **fork-based** (inspired by existing extensions) or **from-scratch** (new idea). Use the fork-based workflow unless the user explicitly wants something original.
 
+> **New workflow baseline:** All extensions are tracked in Git and listed in `package.json` from creation. Activation is controlled by which `settings.json` references them: **global** `~/.pi/agent/settings.json` (git package) or **local** `.pi/settings.json` (source path). There is no `.gitignore` phase.
+
 ## Workflow A: Fork-Based Creation
 
 When the user identifies one or more extension repos as inspiration.
@@ -34,12 +36,13 @@ Before modifying anything significant, read the `pi-extension` skill reference f
 ```bash
 # Clone the primary inspiration into the project
 git clone <repo-url> /tmp/<source-name>
-cp -R /tmp/<source-name> extensions/pure-<name>
+cp -R /tmp/<source-name> extensions/<scope>/pure-<name>
 ```
 
 **Stage A — test the primary source as-is.** Do not rename or refactor yet. First, verify the upstream clone actually loads:
 
-Add a local path reference in `.pi/settings.json`:
+1. **Add to `package.json` manifest**: append `"./extensions/<scope>/pure-<name>/index.ts"` to `pi.extensions`.
+2. Add a local path reference in `.pi/settings.json`:
 ```json
 {
   "packages": ["../extensions/<scope>/pure-<name>"]
@@ -72,6 +75,7 @@ Remove everything that isn't needed:
 - Remove any build configs (`tsconfig.json`, `webpack.config.js`, etc.) unless truly needed — Pi loads `.ts` via Jiti
 - Keep only the essential source files (ideally a single `index.ts`)
 - If multi-file, keep the minimum structure needed
+- Do NOT add to `.gitignore` — all extensions are committed to this repo
 
 ### 5. Add path helpers (inline, self-contained)
 
@@ -149,7 +153,7 @@ Only include the helpers the extension actually needs:
 ### 7. Check, format, and lint
 
 ```bash
-biome check --write --unsafe extensions/pure-<name>/
+biome check --write --unsafe extensions/<scope>/pure-<name>/
 ```
 
 Fix all errors. Warnings acceptable if the rule is already disabled project-wide.
@@ -171,13 +175,15 @@ Ask the user to `/reload` and test the adapted extension. Do not proceed to prom
 
 ### 9. Promote (after user approval)
 
-1. **Remove from `.gitignore`**: delete the `extensions/<scope>/pure-<name>/` line.
-2. **Add to `package.json` manifest**: append `"./extensions/<scope>/pure-<name>/index.ts"` to `pi.extensions`.
-3. **Remove the local path reference** from `.pi/settings.json` `packages`.
-4. Update `CHANGELOG.md` and `README.md`.
+Promotion now means moving an extension from **local-only** loading to **global** loading via the git package.
+
+1. **Remove the local path reference** from `.pi/settings.json` `packages`.
+2. **Add it to `~/.pi/agent/settings.json`** inside the git package's `extensions` array.
+3. Update `CHANGELOG.md` and `README.md`.
+4. Commit and push.
 5. `/reload` in Pi to verify it loads from the git package.
 
-> **Project-scoped extensions skip this step.** They remain in `.pi/settings.json` and gitignored — they're never added to `package.json`.
+> **Project-scoped extensions skip this step.** They remain in `.pi/settings.json` — they are not added to the global git package.
 
 ---
 
@@ -226,10 +232,10 @@ Same format as fork-based workflow, but Sources/Inspiration cites ideas/articles
 ### 5. Check, format, lint, test, promote
 
 Same steps 7–9 as fork-based workflow. Specifically:
-1. `biome check --write --unsafe extensions/pure-<name>/`
-2. Verify `.pi/settings.json` has a local path reference for the extension
+1. `biome check --write --unsafe extensions/<scope>/pure-<name>/`
+2. Verify the extension is in `package.json` `pi.extensions` and `.pi/settings.json` has a local path reference
 3. Smoke-test: `pi -p "reply with just the word ok" 2>&1 | tail -20` from the project directory. Check for errors and that the agent responded.
-4. When approved, promote (remove from `.gitignore`, add to `package.json`, remove from `.pi/settings.json`)
+4. When approved, promote (remove from `.pi/settings.json`, add to `~/.pi/agent/settings.json`, commit and push)
 
 ---
 
@@ -266,7 +272,7 @@ Report findings to the user before making changes.
 
 ### 4. Make changes
 
-Apply updates to `extensions/pure-<name>/` following the same conventions as the original fork:
+Apply updates to `extensions/<scope>/pure-<name>/` following the same conventions as the original fork:
 
 - Keep inline path helpers, pure-* naming, project-overrides-global config
 - Maintain our README/CHANGELOG format
@@ -274,11 +280,24 @@ Apply updates to `extensions/pure-<name>/` following the same conventions as the
 
 ### 5. Check, test, promote
 
-If the extension is already published (in `package.json`), add a local path reference to `.pi/settings.json` for testing. If not, it should already be referenced there.
+**Before editing, determine the extension's activation tier:**
 
-1. `biome check --write --unsafe extensions/pure-<name>/`
+- **Globally active** (listed in `~/.pi/agent/settings.json`):
+  1. Remove it from `~/.pi/agent/settings.json`.
+  2. Add it to `.pi/settings.json`.
+  3. `/reload` and develop.
+
+- **Locally active** (already in `.pi/settings.json`):
+  1. Edit directly.
+  2. `/reload` and develop.
+
+**When finished**:
+- If it was globally active, remove it from `.pi/settings.json` and add it back to `~/.pi/agent/settings.json`.
+- If it was locally active (baseline), keep it in `.pi/settings.json`.
+
+1. `biome check --write --unsafe extensions/<scope>/pure-<name>/`
 2. `/reload` and test
-3. When done, remove local path reference if the extension is published (git package resumes loading)
+3. Commit after significant changes; push when a feature is complete or at user request
 
 > **Smoke-test after changes.** Run `pi -p "reply with just the word ok" 2>&1 | tail -20` from the project directory. Check for errors and that the agent responded.
 
@@ -289,8 +308,8 @@ If the extension is already published (in `package.json`), add a local path refe
 Before considering the extension ready for user testing:
 
 - [ ] Single `index.ts` entry point (split only if unwieldy)
-- [ ] Added to `.gitignore` (not in `package.json` manifest until promoted)
-- [ ] `package.json` ONLY if extension has npm dependencies — zero-dep extensions omit it
+- [ ] Added to root `package.json` `pi.extensions` manifest immediately
+- [ ] `package.json` (per-extension) ONLY if it has npm dependencies — zero-dep extensions omit it
 - [ ] Inline path helpers (self-contained, no cross-extension deps)
 - [ ] Project-overrides-global: config reads check project first, fall back to global (pass `ctx.cwd`)
 - [ ] Works standalone outside this repo and also follows pure-* conventions inside the ecosystem
@@ -303,6 +322,6 @@ Before considering the extension ready for user testing:
 - [ ] User has tested and approved
 
 **Promotion** (when user says "promote"):
-- [ ] Removed from `.gitignore`
-- [ ] Added to root `package.json` `pi.extensions` manifest
+- [ ] Added to `~/.pi/agent/settings.json` git package entry
 - [ ] Local path reference removed from `.pi/settings.json`
+- [ ] Committed and pushed
