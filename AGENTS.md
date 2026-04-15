@@ -65,7 +65,7 @@ Package filtering controls what loads where (in `settings.json`):
   "packages": [
     {
       "source": "git:github.com/gaodes/pi-pure-ecosystem",
-      "extensions": ["extensions/global/*", "extensions/shared/*"]
+      "extensions": ["extensions/global/*/index.ts", "extensions/shared/*/index.ts"]
     }
   ]
 }
@@ -77,11 +77,13 @@ Package filtering controls what loads where (in `settings.json`):
   "packages": [
     {
       "source": "git:github.com/gaodes/pi-pure-ecosystem",
-      "extensions": ["extensions/project/*", "extensions/shared/*"]
+      "extensions": ["extensions/project/*/index.ts", "extensions/shared/*/index.ts"]
     }
   ]
 }
 ```
+
+> **Glob patterns must match files, not directories.** Use `extensions/<scope>/*/index.ts` in package filters so Pi finds the extension entry points. The repo's root `package.json` also declares these paths in its `pi.extensions` manifest.
 
 Each `pure-<name>/` directory contains:
 
