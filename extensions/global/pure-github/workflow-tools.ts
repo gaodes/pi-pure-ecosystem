@@ -55,14 +55,7 @@ export function createWorkflowTools(client: GHClient) {
 		},
 
 		async view(params: ViewWorkflowParams, options?: ExecOptions) {
-			const args = [
-				"workflow",
-				"view",
-				params.workflow,
-				"--repo",
-				params.repo,
-				"--yaml",
-			];
+			const args = ["workflow", "view", params.workflow, "--repo", params.repo, "--yaml"];
 
 			return client.exec(args, options);
 		},
@@ -84,14 +77,7 @@ export function createWorkflowTools(client: GHClient) {
 		},
 
 		async logs(params: WorkflowLogsParams, options?: ExecOptions) {
-			const args = [
-				"run",
-				"view",
-				params.run_id,
-				"--repo",
-				params.repo,
-				"--log",
-			];
+			const args = ["run", "view", params.run_id, "--repo", params.repo, "--log"];
 
 			if (params.job) {
 				args.push("--job", params.job);
@@ -101,24 +87,12 @@ export function createWorkflowTools(client: GHClient) {
 		},
 
 		async disable(params: DisableWorkflowParams, options?: ExecOptions) {
-			const args = [
-				"workflow",
-				"disable",
-				params.workflow,
-				"--repo",
-				params.repo,
-			];
+			const args = ["workflow", "disable", params.workflow, "--repo", params.repo];
 			return client.exec(args, options);
 		},
 
 		async enable(params: EnableWorkflowParams, options?: ExecOptions) {
-			const args = [
-				"workflow",
-				"enable",
-				params.workflow,
-				"--repo",
-				params.repo,
-			];
+			const args = ["workflow", "enable", params.workflow, "--repo", params.repo];
 			return client.exec(args, options);
 		},
 	};

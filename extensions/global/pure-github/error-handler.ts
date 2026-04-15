@@ -25,9 +25,7 @@ export class GHNotFoundError extends Error {
 	constructor(prefix = "") {
 		const baseMessage = "gh CLI not found in PATH";
 		const instructions = getInstallInstructions();
-		const message = prefix
-			? `${prefix}\n${baseMessage}\n${instructions}`
-			: `${baseMessage}\n${instructions}`;
+		const message = prefix ? `${prefix}\n${baseMessage}\n${instructions}` : `${baseMessage}\n${instructions}`;
 		super(message);
 		this.name = "GHNotFoundError";
 	}
@@ -42,11 +40,7 @@ export class GHAuthError extends Error {
 
 export class GHRateLimitError extends Error {
 	constructor(detail?: string) {
-		super(
-			detail
-				? `GitHub API rate limit hit: ${detail}`
-				: "GitHub API rate limit hit",
-		);
+		super(detail ? `GitHub API rate limit hit: ${detail}` : "GitHub API rate limit hit");
 		this.name = "GHRateLimitError";
 	}
 }

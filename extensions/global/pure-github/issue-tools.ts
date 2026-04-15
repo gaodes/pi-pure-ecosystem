@@ -70,14 +70,7 @@ export function createIssueTools(client: GHClient) {
 			// `gh issue create` does NOT support --json. It prints the issue URL
 			// on stdout; callers can follow up with `issue view --json` for
 			// structured data.
-			const args = [
-				"issue",
-				"create",
-				"--repo",
-				params.repo,
-				"--title",
-				params.title,
-			];
+			const args = ["issue", "create", "--repo", params.repo, "--title", params.title];
 
 			if (params.body) {
 				args.push("--body", params.body);
@@ -126,10 +119,7 @@ export function createIssueTools(client: GHClient) {
 				args.push("--project", params.project);
 			}
 
-			args.push(
-				"--json",
-				"number,title,state,author,updatedAt,createdAt,labels",
-			);
+			args.push("--json", "number,title,state,author,updatedAt,createdAt,labels");
 
 			return client.exec(args, options);
 		},
@@ -149,13 +139,7 @@ export function createIssueTools(client: GHClient) {
 		},
 
 		async close(params: CloseIssueParams, options?: ExecOptions) {
-			const args = [
-				"issue",
-				"close",
-				String(params.number),
-				"--repo",
-				params.repo,
-			];
+			const args = ["issue", "close", String(params.number), "--repo", params.repo];
 
 			if (params.comment) {
 				args.push("--comment", params.comment);
@@ -168,37 +152,17 @@ export function createIssueTools(client: GHClient) {
 		},
 
 		async reopen(params: ReopenIssueParams, options?: ExecOptions) {
-			const args = [
-				"issue",
-				"reopen",
-				String(params.number),
-				"--repo",
-				params.repo,
-			];
+			const args = ["issue", "reopen", String(params.number), "--repo", params.repo];
 			return client.exec(args, options);
 		},
 
 		async comment(params: CommentOnIssueParams, options?: ExecOptions) {
-			const args = [
-				"issue",
-				"comment",
-				String(params.number),
-				"--repo",
-				params.repo,
-				"--body",
-				params.body,
-			];
+			const args = ["issue", "comment", String(params.number), "--repo", params.repo, "--body", params.body];
 			return client.exec(args, options);
 		},
 
 		async edit(params: EditIssueParams, options?: ExecOptions) {
-			const args = [
-				"issue",
-				"edit",
-				String(params.number),
-				"--repo",
-				params.repo,
-			];
+			const args = ["issue", "edit", String(params.number), "--repo", params.repo];
 
 			if (params.title) {
 				args.push("--title", params.title);

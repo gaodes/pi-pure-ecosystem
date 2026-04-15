@@ -135,12 +135,7 @@ export function createRepoTools(client: GHClient) {
 				throw new Error("Repo deletion requires confirm: true");
 			}
 
-			const args = [
-				"repo",
-				"delete",
-				`${params.owner}/${params.name}`,
-				"--yes",
-			];
+			const args = ["repo", "delete", `${params.owner}/${params.name}`, "--yes"];
 			return client.exec(args, options);
 		},
 

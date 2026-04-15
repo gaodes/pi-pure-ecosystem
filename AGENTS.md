@@ -143,7 +143,7 @@ Global (live git package):
 
 | Extension              | Tool            | Command       | Purpose                                                           |
 | --------------------- | --------------- | ------------- | ----------------------------------------------------------------- |
-| `pure-cron`           | `pure_cron`     | `/pure-cron`  | Schedule recurring/one-shot agent prompts                         |
+| `pure-cron`           | `pure_cron`     | `/cron`  | Schedule recurring/one-shot agent prompts                         |
 | `pure-devkit`         | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | `/devkit` | Tools and skills for Pi extension development |
 | `pure-github`         | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* `/gh-status`, `/gh-pr-create`, `/gh-pr-fix`, `/gh-pr-merge` | GitHub PR/repo/workflow tools |
 | `pure-model-switch`   | `switch_model`  | —             | List, search, and switch models with aliases                      |

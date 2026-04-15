@@ -7,7 +7,7 @@ A pi extension for scheduling recurring and one-shot agent prompts with cron-lik
 - **Multiple schedule types** — cron expressions (6-field with seconds), ISO timestamps, relative times (`+10s`, `+5m`, `+1h`), and intervals (`5m`, `1h`)
 - **Session/project scoping** — jobs can be scoped to a session, project, or global
 - **Widget** — live status table below the editor showing all scheduled prompts with next/last run times
-- **Interactive command** — `/pure-cron` for managing jobs via UI
+- **Interactive command** — `/cron` for managing jobs via UI
 - **Persistence** — stored in `~/.pi/agent/pure-cron.json`
 - **Auto-cleanup** — disabled one-shot jobs are cleaned up on session switch/shutdown
 

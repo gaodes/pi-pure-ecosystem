@@ -105,10 +105,7 @@ function authorLogin(author: Actor | null | undefined): string {
 	return author?.login ?? "unknown";
 }
 
-function truncateBody(
-	body: string | null | undefined,
-	max = 200,
-): string | null {
+function truncateBody(body: string | null | undefined, max = 200): string | null {
 	if (!body) return null;
 	const trimmed = body.trim();
 	if (!trimmed) return null;
@@ -165,9 +162,7 @@ export function formatPRView(data: unknown): string {
 				: "checks: pending/failing"
 			: "";
 
-	const mergeable = pr.mergeable
-		? `mergeable: ${pr.mergeable.toLowerCase()}`
-		: "";
+	const mergeable = pr.mergeable ? `mergeable: ${pr.mergeable.toLowerCase()}` : "";
 
 	const statusParts = [mergeable, checks].filter(Boolean).join(" | ");
 	const detailLine = `${branches} | ${changes} | ${fileCount}`;
@@ -212,23 +207,17 @@ export function formatIssueView(data: unknown): string {
 	const header = `Issue #${issue.number}: ${issue.title} [${issue.state}]`;
 
 	const labels =
-		issue.labels && issue.labels.length > 0
-			? `Labels: ${issue.labels.map((l) => l.name ?? "").join(", ")}`
-			: "";
+		issue.labels && issue.labels.length > 0 ? `Labels: ${issue.labels.map((l) => l.name ?? "").join(", ")}` : "";
 
 	const assignees =
 		issue.assignees && issue.assignees.length > 0
 			? `Assignees: ${issue.assignees.map((a) => a.login ?? "").join(", ")}`
 			: "";
 
-	const commentCount = Array.isArray(issue.comments)
-		? `${issue.comments.length} comments`
-		: "";
+	const commentCount = Array.isArray(issue.comments) ? `${issue.comments.length} comments` : "";
 	const created = `Created: ${formatDate(issue.createdAt)} by ${authorLogin(issue.author)}`;
 
-	const metaParts = [labels, assignees, commentCount]
-		.filter(Boolean)
-		.join(" | ");
+	const metaParts = [labels, assignees, commentCount].filter(Boolean).join(" | ");
 	const lines = [header];
 	if (metaParts) lines.push(metaParts);
 	lines.push(created);
@@ -273,9 +262,7 @@ export function formatRepoView(data: unknown): string {
 
 	const stars = `stars: ${repo.stargazerCount ?? 0}`;
 	const forks = `forks: ${repo.forkCount ?? 0}`;
-	const defaultBranch = repo.defaultBranchRef?.name
-		? `default branch: ${repo.defaultBranchRef.name}`
-		: "";
+	const defaultBranch = repo.defaultBranchRef?.name ? `default branch: ${repo.defaultBranchRef.name}` : "";
 
 	const statsParts = [stars, forks, defaultBranch].filter(Boolean).join(" | ");
 	const dates = `Created: ${formatDate(repo.createdAt)} | Updated: ${formatDate(repo.updatedAt)}`;

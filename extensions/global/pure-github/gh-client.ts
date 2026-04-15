@@ -45,11 +45,7 @@ const EXIT_AUTH = 4;
 const EXIT_CANCELLED = 2;
 
 // Rate limit detection: gh emits exit 1 with one of these substrings on stderr.
-const RATE_LIMIT_PATTERNS = [
-	"api rate limit exceeded",
-	"rate limit exceeded",
-	"secondary rate limit",
-];
+const RATE_LIMIT_PATTERNS = ["api rate limit exceeded", "rate limit exceeded", "secondary rate limit"];
 
 /**
  * Build a default PiExecFn that shells out via node:child_process.execFile.
@@ -171,10 +167,7 @@ export class GHClient {
  * Library-friendly factory. Defaults `exec` to a node:child_process-based
  * implementation, making the package usable outside a PI host.
  */
-export function createGHClient(options?: {
-	exec?: PiExecFn;
-	binaryPath?: string;
-}): GHClient {
+export function createGHClient(options?: { exec?: PiExecFn; binaryPath?: string }): GHClient {
 	return new GHClient({
 		exec: options?.exec ?? defaultNodeExec(),
 		binaryPath: options?.binaryPath,

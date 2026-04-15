@@ -128,10 +128,7 @@ export function createPRTools(client: GHClient) {
 				args.push("--limit", String(Math.min(params.limit, MAX_LIMIT)));
 			}
 
-			args.push(
-				"--json",
-				"number,title,state,author,headRefName,baseRefName,updatedAt,createdAt,url",
-			);
+			args.push("--json", "number,title,state,author,headRefName,baseRefName,updatedAt,createdAt,url");
 
 			return client.exec(args, options);
 		},
@@ -157,13 +154,7 @@ export function createPRTools(client: GHClient) {
 		},
 
 		async merge(params: MergePRParams, options?: ExecOptions) {
-			const args = [
-				"pr",
-				"merge",
-				String(params.number),
-				"--repo",
-				params.repo,
-			];
+			const args = ["pr", "merge", String(params.number), "--repo", params.repo];
 
 			if (params.method) {
 				args.push(`--${params.method}`);
@@ -182,18 +173,10 @@ export function createPRTools(client: GHClient) {
 			// `gh pr review --request-changes` and `--comment` require a
 			// non-empty body; callers must validate before reaching this point.
 			if (params.action !== "approve" && !params.body) {
-				throw new Error(
-					`review action '${params.action}' requires a non-empty body`,
-				);
+				throw new Error(`review action '${params.action}' requires a non-empty body`);
 			}
 
-			const args = [
-				"pr",
-				"review",
-				String(params.number),
-				"--repo",
-				params.repo,
-			];
+			const args = ["pr", "review", String(params.number), "--repo", params.repo];
 
 			switch (params.action) {
 				case "approve":
@@ -215,13 +198,7 @@ export function createPRTools(client: GHClient) {
 		},
 
 		async close(params: ClosePRParams, options?: ExecOptions) {
-			const args = [
-				"pr",
-				"close",
-				String(params.number),
-				"--repo",
-				params.repo,
-			];
+			const args = ["pr", "close", String(params.number), "--repo", params.repo];
 
 			if (params.comment) {
 				args.push("--comment", params.comment);
@@ -231,13 +208,7 @@ export function createPRTools(client: GHClient) {
 		},
 
 		async checkout(params: CheckoutPRParams, options?: ExecOptions) {
-			const args = [
-				"pr",
-				"checkout",
-				String(params.number),
-				"--repo",
-				params.repo,
-			];
+			const args = ["pr", "checkout", String(params.number), "--repo", params.repo];
 
 			if (params.branch) {
 				args.push("--branch", params.branch);
@@ -246,25 +217,14 @@ export function createPRTools(client: GHClient) {
 			return client.exec(args, options);
 		},
 
-		async checks(
-			params: ChecksParams,
-			options?: ExecOptions,
-		): Promise<ExecResult> {
-			const args = [
-				"pr",
-				"checks",
-				String(params.number),
-				"--repo",
-				params.repo,
-			];
+		async checks(params: ChecksParams, options?: ExecOptions): Promise<ExecResult> {
+			const args = ["pr", "checks", String(params.number), "--repo", params.repo];
 			if (params.watch) args.push("--watch");
 			if (params.required) args.push("--required");
 
 			// --watch can run for minutes; default to 10 min, caller-provided
 			// options.timeout wins via the spread ordering below.
-			const effectiveOptions: ExecOptions | undefined = params.watch
-				? { timeout: 600_000, ...options }
-				: options;
+			const effectiveOptions: ExecOptions | undefined = params.watch ? { timeout: 600_000, ...options } : options;
 
 			try {
 				return await client.exec(args, effectiveOptions);

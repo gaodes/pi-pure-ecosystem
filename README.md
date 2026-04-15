@@ -8,7 +8,7 @@ Extensions live under `extensions/` with a scope-based folder layout. All extens
 
 | Extension | Version | Tool | Command | Purpose |
 |-----------|---------|------|---------|---------|
-| [pure-cron](extensions/global/pure-cron/) | 0.2.0 | `pure_cron` | `/pure-cron` | Schedule recurring and one-shot agent prompts |
+| [pure-cron](extensions/global/pure-cron/) | 0.2.0 | `pure_cron` | `/cron` | Schedule recurring and one-shot agent prompts |
 | [pure-model-switch](extensions/global/pure-model-switch/) | 0.1.0 | `switch_model` | — | List, search, and switch models with aliases |
 | [pure-sessions](extensions/global/pure-sessions/) | 0.5.0 | — | `/sesh` | Auto-name sessions, browse/resume/rename |
 | [pure-theme](extensions/global/pure-theme/) | 0.2.0 | — | `/theme` | Sync theme with system dark/light mode |

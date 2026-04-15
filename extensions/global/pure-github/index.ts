@@ -93,11 +93,7 @@ export default function pureGithub(pi: ExtensionAPI): void {
 	const binaryPath = process.env.GH_CLI_PATH ?? "gh";
 	const state = {
 		client: new GHClient({ exec: pi.exec.bind(pi), binaryPath }),
-		detectionStatus: "unchecked" as
-			| "unchecked"
-			| "missing"
-			| "unauthenticated"
-			| "ready",
+		detectionStatus: "unchecked" as "unchecked" | "missing" | "unauthenticated" | "ready",
 	};
 
 	/**
@@ -126,8 +122,7 @@ export default function pureGithub(pi: ExtensionAPI): void {
 			const authResult = await pi.exec(bin, ["auth", "status"], {
 				timeout: 5000,
 			});
-			state.detectionStatus =
-				authResult.code === 0 ? "ready" : "unauthenticated";
+			state.detectionStatus = authResult.code === 0 ? "ready" : "unauthenticated";
 		} catch {
 			state.detectionStatus = "unauthenticated";
 		}
@@ -147,9 +142,7 @@ export default function pureGithub(pi: ExtensionAPI): void {
 			throw new GHNotFoundError();
 		}
 		if (state.detectionStatus === "unauthenticated") {
-			throw new Error(
-				"gh CLI is installed but not authenticated. Run: gh auth login",
-			);
+			throw new Error("gh CLI is installed but not authenticated. Run: gh auth login");
 		}
 	}
 
@@ -168,10 +161,7 @@ export default function pureGithub(pi: ExtensionAPI): void {
 				ctx.ui.notify(getInstallInstructions(), "warning");
 				break;
 			case "unauthenticated":
-				ctx.ui.notify(
-					"gh CLI is installed but not authenticated. Run: gh auth login",
-					"warning",
-				);
+				ctx.ui.notify("gh CLI is installed but not authenticated. Run: gh auth login", "warning");
 				break;
 		}
 
@@ -199,23 +189,15 @@ export default function pureGithub(pi: ExtensionAPI): void {
 	): string {
 		if (result.code === 2) {
 			const cancelDetail = result.stderr.trim() || result.stdout.trim();
-			return cancelDetail
-				? `gh command cancelled: ${cancelDetail}`
-				: "gh command cancelled";
+			return cancelDetail ? `gh command cancelled: ${cancelDetail}` : "gh command cancelled";
 		}
 
 		// Summary mode: use the formatter if we have parsed data and a formatter
-		if (
-			options?.detail !== "full" &&
-			options?.summaryFormatter &&
-			result.data != null
-		) {
+		if (options?.detail !== "full" && options?.summaryFormatter && result.data != null) {
 			return options.summaryFormatter(result.data);
 		}
 
-		const raw = result.data
-			? JSON.stringify(result.data, null, 2)
-			: result.stdout || "Success";
+		const raw = result.data ? JSON.stringify(result.data, null, 2) : result.stdout || "Success";
 
 		const truncation = truncateHead(raw);
 		if (!truncation.truncated) {
@@ -256,20 +238,9 @@ For delete action, confirm: true is required — the tool will reject without it
 				"github_repo: repo names use owner/name format for view, clone, fork, delete. Just the name for create",
 			],
 			parameters: Type.Object({
-				action: StringEnum(
-					[
-						"create",
-						"clone",
-						"fork",
-						"list",
-						"view",
-						"delete",
-						"sync",
-					] as const,
-					{
-						description: "Repository action to perform",
-					},
-				),
+				action: StringEnum(["create", "clone", "fork", "list", "view", "delete", "sync"] as const, {
+					description: "Repository action to perform",
+				}),
 				name: Type.Optional(
 					Type.String({
 						description:
@@ -284,43 +255,28 @@ For delete action, confirm: true is required — the tool will reject without it
 				),
 				visibility: Type.Optional(
 					StringEnum(["public", "private", "internal"] as const, {
-						description:
-							"Repo visibility. For create: sets visibility. For list: filters by visibility.",
+						description: "Repo visibility. For create: sets visibility. For list: filters by visibility.",
 					}),
 				),
-				description: Type.Optional(
-					Type.String({ description: "Repository description" }),
-				),
+				description: Type.Optional(Type.String({ description: "Repository description" })),
 				template: Type.Optional(
 					Type.String({
 						description: "Template repository to use (owner/repo)",
 					}),
 				),
-				auto_init: Type.Optional(
-					Type.Boolean({ description: "Initialize with README" }),
-				),
-				directory: Type.Optional(
-					Type.String({ description: "Clone directory" }),
-				),
-				branch: Type.Optional(
-					Type.String({ description: "Branch to clone or sync" }),
-				),
-				default_branch_only: Type.Optional(
-					Type.Boolean({ description: "Fork only default branch" }),
-				),
+				auto_init: Type.Optional(Type.Boolean({ description: "Initialize with README" })),
+				directory: Type.Optional(Type.String({ description: "Clone directory" })),
+				branch: Type.Optional(Type.String({ description: "Branch to clone or sync" })),
+				default_branch_only: Type.Optional(Type.Boolean({ description: "Fork only default branch" })),
 				confirm: Type.Optional(
 					Type.Boolean({
-						description:
-							"Required for delete. Must be true to confirm deletion.",
+						description: "Required for delete. Must be true to confirm deletion.",
 					}),
 				),
-				limit: Type.Optional(
-					Type.Number({ description: "Max results for list. Defaults to 30." }),
-				),
+				limit: Type.Optional(Type.Number({ description: "Max results for list. Defaults to 30." })),
 				detail: Type.Optional(
 					StringEnum(["summary", "full"] as const, {
-						description:
-							"Output detail level. 'summary' (default) returns compact text. 'full' returns raw JSON.",
+						description: "Output detail level. 'summary' (default) returns compact text. 'full' returns raw JSON.",
 					}),
 				),
 			}),
@@ -347,8 +303,7 @@ For delete action, confirm: true is required — the tool will reject without it
 						break;
 
 					case "clone":
-						if (!params.owner || !params.name)
-							throw new Error("owner and name are required for clone");
+						if (!params.owner || !params.name) throw new Error("owner and name are required for clone");
 						result = await tools.clone(
 							{
 								owner: params.owner,
@@ -361,8 +316,7 @@ For delete action, confirm: true is required — the tool will reject without it
 						break;
 
 					case "fork":
-						if (!params.owner || !params.name)
-							throw new Error("owner and name are required for fork");
+						if (!params.owner || !params.name) throw new Error("owner and name are required for fork");
 						result = await tools.fork(
 							{
 								owner: params.owner,
@@ -385,17 +339,12 @@ For delete action, confirm: true is required — the tool will reject without it
 						break;
 
 					case "view":
-						if (!params.owner || !params.name)
-							throw new Error("owner and name are required for view");
-						result = await tools.view(
-							{ owner: params.owner, name: params.name },
-							{ signal },
-						);
+						if (!params.owner || !params.name) throw new Error("owner and name are required for view");
+						result = await tools.view({ owner: params.owner, name: params.name }, { signal });
 						break;
 
 					case "delete":
-						if (!params.owner || !params.name)
-							throw new Error("owner and name are required for delete");
+						if (!params.owner || !params.name) throw new Error("owner and name are required for delete");
 						result = await tools.delete(
 							{
 								owner: params.owner,
@@ -460,76 +409,44 @@ Issue numbers are required for view, close, reopen, comment, edit.`,
 				"github_issue: prefer a single 'list' with search/filters over multiple calls. Do not view each issue individually unless you need full detail",
 			],
 			parameters: Type.Object({
-				action: StringEnum(
-					[
-						"create",
-						"list",
-						"view",
-						"close",
-						"reopen",
-						"comment",
-						"edit",
-					] as const,
-					{
-						description: "Issue action to perform",
-					},
-				),
+				action: StringEnum(["create", "list", "view", "close", "reopen", "comment", "edit"] as const, {
+					description: "Issue action to perform",
+				}),
 				repo: Type.String({ description: "Repository in owner/name format" }),
-				title: Type.Optional(
-					Type.String({ description: "Issue title (for create)" }),
-				),
-				body: Type.Optional(
-					Type.String({ description: "Issue body (markdown supported)" }),
-				),
-				number: Type.Optional(
-					Type.Number({ description: "Issue number (for view, close, etc.)" }),
-				),
+				title: Type.Optional(Type.String({ description: "Issue title (for create)" })),
+				body: Type.Optional(Type.String({ description: "Issue body (markdown supported)" })),
+				number: Type.Optional(Type.Number({ description: "Issue number (for view, close, etc.)" })),
 				state: Type.Optional(
 					StringEnum(["open", "closed", "all"] as const, {
 						description: "Filter by issue state. Defaults to 'open'.",
 					}),
 				),
-				assignee: Type.Optional(
-					Type.String({ description: "Filter by assignee (list)" }),
-				),
-				assignees: Type.Optional(
-					Type.Array(Type.String(), { description: "Assignees (create)" }),
-				),
+				assignee: Type.Optional(Type.String({ description: "Filter by assignee (list)" })),
+				assignees: Type.Optional(Type.Array(Type.String(), { description: "Assignees (create)" })),
 				author: Type.Optional(Type.String({ description: "Filter by author" })),
-				labels: Type.Optional(
-					Type.Array(Type.String(), { description: "Label names" }),
-				),
+				labels: Type.Optional(Type.Array(Type.String(), { description: "Label names" })),
 				search: Type.Optional(
 					Type.String({
 						description:
 							"Search query using GitHub search syntax. E.g., 'login bug in:title', 'label:bug is:open'. Maps to gh --search flag.",
 					}),
 				),
-				limit: Type.Optional(
-					Type.Number({ description: "Max results for list" }),
-				),
+				limit: Type.Optional(Type.Number({ description: "Max results for list" })),
 				milestone: Type.Optional(
 					Type.String({
 						description: "Milestone name (create or list filter)",
 					}),
 				),
-				projects: Type.Optional(
-					Type.Array(Type.String(), { description: "Project names (create)" }),
-				),
-				comment_text: Type.Optional(
-					Type.String({ description: "Comment text" }),
-				),
-				reason: Type.Optional(
-					StringEnum(["completed", "not planned"] as const),
-				),
+				projects: Type.Optional(Type.Array(Type.String(), { description: "Project names (create)" })),
+				comment_text: Type.Optional(Type.String({ description: "Comment text" })),
+				reason: Type.Optional(StringEnum(["completed", "not planned"] as const)),
 				add_labels: Type.Optional(Type.Array(Type.String())),
 				remove_labels: Type.Optional(Type.Array(Type.String())),
 				add_assignees: Type.Optional(Type.Array(Type.String())),
 				remove_assignees: Type.Optional(Type.Array(Type.String())),
 				detail: Type.Optional(
 					StringEnum(["summary", "full"] as const, {
-						description:
-							"Output detail level. 'summary' (default) returns compact text. 'full' returns raw JSON.",
+						description: "Output detail level. 'summary' (default) returns compact text. 'full' returns raw JSON.",
 					}),
 				),
 			}),
@@ -575,10 +492,7 @@ Issue numbers are required for view, close, reopen, comment, edit.`,
 
 					case "view":
 						if (!params.number) throw new Error("number is required for view");
-						result = await tools.view(
-							{ repo: params.repo, number: params.number },
-							{ signal },
-						);
+						result = await tools.view({ repo: params.repo, number: params.number }, { signal });
 						break;
 
 					case "close":
@@ -595,19 +509,13 @@ Issue numbers are required for view, close, reopen, comment, edit.`,
 						break;
 
 					case "reopen":
-						if (!params.number)
-							throw new Error("number is required for reopen");
-						result = await tools.reopen(
-							{ repo: params.repo, number: params.number },
-							{ signal },
-						);
+						if (!params.number) throw new Error("number is required for reopen");
+						result = await tools.reopen({ repo: params.repo, number: params.number }, { signal });
 						break;
 
 					case "comment":
-						if (!params.number)
-							throw new Error("number is required for comment");
-						if (!params.comment_text)
-							throw new Error("comment_text is required for comment");
+						if (!params.number) throw new Error("number is required for comment");
+						if (!params.comment_text) throw new Error("comment_text is required for comment");
 						result = await tools.comment(
 							{
 								repo: params.repo,
@@ -685,43 +593,23 @@ Do NOT chain list then view for every item. Use search/filters to narrow results
 				"github_pr: prefer a single 'list' with search/filters over multiple calls. Do not view each PR individually unless you need full detail",
 			],
 			parameters: Type.Object({
-				action: StringEnum(
-					[
-						"create",
-						"list",
-						"view",
-						"diff",
-						"merge",
-						"review",
-						"close",
-						"checkout",
-					] as const,
-					{
-						description: "PR action to perform",
-					},
-				),
+				action: StringEnum(["create", "list", "view", "diff", "merge", "review", "close", "checkout"] as const, {
+					description: "PR action to perform",
+				}),
 				repo: Type.String({ description: "Repository in owner/name format" }),
-				title: Type.Optional(
-					Type.String({ description: "PR title (for create)" }),
-				),
-				body: Type.Optional(
-					Type.String({ description: "PR body or review body" }),
-				),
+				title: Type.Optional(Type.String({ description: "PR title (for create)" })),
+				body: Type.Optional(Type.String({ description: "PR body or review body" })),
 				head: Type.Optional(
 					Type.String({
-						description:
-							"Head (source) branch. For create: required. For list: filters by head branch name.",
+						description: "Head (source) branch. For create: required. For list: filters by head branch name.",
 					}),
 				),
 				base: Type.Optional(
 					Type.String({
-						description:
-							"Base (target) branch. For create: required. For list: filters by base branch name.",
+						description: "Base (target) branch. For create: required. For list: filters by base branch name.",
 					}),
 				),
-				author: Type.Optional(
-					Type.String({ description: "Filter by author (list)" }),
-				),
+				author: Type.Optional(Type.String({ description: "Filter by author (list)" })),
 				search: Type.Optional(
 					Type.String({
 						description:
@@ -731,38 +619,28 @@ Do NOT chain list then view for every item. Use search/filters to narrow results
 				number: Type.Optional(Type.Number({ description: "PR number" })),
 				state: Type.Optional(
 					StringEnum(["open", "closed", "merged", "all"] as const, {
-						description:
-							"Filter by PR state. Use 'merged' to find merged PRs. Defaults to 'open'.",
+						description: "Filter by PR state. Use 'merged' to find merged PRs. Defaults to 'open'.",
 					}),
 				),
 				draft: Type.Optional(Type.Boolean()),
 				method: Type.Optional(
 					StringEnum(["merge", "squash", "rebase"] as const, {
-						description:
-							"Merge method. Defaults to the repo's configured default.",
+						description: "Merge method. Defaults to the repo's configured default.",
 					}),
 				),
 				auto: Type.Optional(Type.Boolean({ description: "Enable auto-merge" })),
 				delete_branch: Type.Optional(Type.Boolean()),
 				review_action: Type.Optional(
 					StringEnum(["approve", "request-changes", "comment"] as const, {
-						description:
-							"Review action. 'request-changes' and 'comment' require a non-empty body.",
+						description: "Review action. 'request-changes' and 'comment' require a non-empty body.",
 					}),
 				),
-				comment_text: Type.Optional(
-					Type.String({ description: "Comment for close" }),
-				),
-				branch: Type.Optional(
-					Type.String({ description: "Checkout branch name" }),
-				),
-				limit: Type.Optional(
-					Type.Number({ description: "Max results for list" }),
-				),
+				comment_text: Type.Optional(Type.String({ description: "Comment for close" })),
+				branch: Type.Optional(Type.String({ description: "Checkout branch name" })),
+				limit: Type.Optional(Type.Number({ description: "Max results for list" })),
 				detail: Type.Optional(
 					StringEnum(["summary", "full"] as const, {
-						description:
-							"Output detail level. 'summary' (default) returns compact text. 'full' returns raw JSON.",
+						description: "Output detail level. 'summary' (default) returns compact text. 'full' returns raw JSON.",
 					}),
 				),
 			}),
@@ -808,18 +686,12 @@ Do NOT chain list then view for every item. Use search/filters to narrow results
 
 					case "view":
 						if (!params.number) throw new Error("number is required for view");
-						result = await tools.view(
-							{ repo: params.repo, number: params.number },
-							{ signal },
-						);
+						result = await tools.view({ repo: params.repo, number: params.number }, { signal });
 						break;
 
 					case "diff":
 						if (!params.number) throw new Error("number is required for diff");
-						result = await tools.diff(
-							{ repo: params.repo, number: params.number },
-							{ signal },
-						);
+						result = await tools.diff({ repo: params.repo, number: params.number }, { signal });
 						break;
 
 					case "merge":
@@ -837,14 +709,10 @@ Do NOT chain list then view for every item. Use search/filters to narrow results
 						break;
 
 					case "review": {
-						if (!params.number)
-							throw new Error("number is required for review");
-						if (!params.review_action)
-							throw new Error("review_action is required for review");
+						if (!params.number) throw new Error("number is required for review");
+						if (!params.review_action) throw new Error("review_action is required for review");
 						if (params.review_action !== "approve" && !params.body) {
-							throw new Error(
-								`review_action '${params.review_action}' requires a non-empty body`,
-							);
+							throw new Error(`review_action '${params.review_action}' requires a non-empty body`);
 						}
 						result = await tools.review(
 							{
@@ -871,8 +739,7 @@ Do NOT chain list then view for every item. Use search/filters to narrow results
 						break;
 
 					case "checkout":
-						if (!params.number)
-							throw new Error("number is required for checkout");
+						if (!params.number) throw new Error("number is required for checkout");
 						result = await tools.checkout(
 							{
 								repo: params.repo,
@@ -931,12 +798,9 @@ Workflow can be referenced by name, numeric ID, or filename (e.g., "ci.yml").`,
 				"github_workflow: workflow param accepts name, numeric ID, or filename (e.g., 'ci.yml'). run_id is required for logs",
 			],
 			parameters: Type.Object({
-				action: StringEnum(
-					["list", "view", "run", "logs", "disable", "enable"] as const,
-					{
-						description: "Workflow action to perform",
-					},
-				),
+				action: StringEnum(["list", "view", "run", "logs", "disable", "enable"] as const, {
+					description: "Workflow action to perform",
+				}),
 				repo: Type.String({ description: "Repository in owner/name format" }),
 				workflow: Type.Optional(
 					Type.String({
@@ -944,9 +808,7 @@ Workflow can be referenced by name, numeric ID, or filename (e.g., "ci.yml").`,
 							"Workflow name, numeric ID, or filename (e.g., 'ci.yml'). Required for view, run, disable, enable.",
 					}),
 				),
-				branch: Type.Optional(
-					Type.String({ description: "Branch for workflow run" }),
-				),
+				branch: Type.Optional(Type.String({ description: "Branch for workflow run" })),
 				inputs: Type.Optional(
 					Type.Record(Type.String(), Type.String(), {
 						description: "Workflow inputs",
@@ -954,17 +816,13 @@ Workflow can be referenced by name, numeric ID, or filename (e.g., "ci.yml").`,
 				),
 				run_id: Type.Optional(
 					Type.String({
-						description:
-							"Workflow run ID. Required for logs. Get this from GitHub UI or PR status checks.",
+						description: "Workflow run ID. Required for logs. Get this from GitHub UI or PR status checks.",
 					}),
 				),
-				limit: Type.Optional(
-					Type.Number({ description: "Max results for list" }),
-				),
+				limit: Type.Optional(Type.Number({ description: "Max results for list" })),
 				detail: Type.Optional(
 					StringEnum(["summary", "full"] as const, {
-						description:
-							"Output detail level. 'summary' (default) returns compact text. 'full' returns raw JSON.",
+						description: "Output detail level. 'summary' (default) returns compact text. 'full' returns raw JSON.",
 					}),
 				),
 			}),
@@ -977,24 +835,16 @@ Workflow can be referenced by name, numeric ID, or filename (e.g., "ci.yml").`,
 
 				switch (params.action) {
 					case "list":
-						result = await tools.list(
-							{ repo: params.repo, limit: params.limit },
-							{ signal },
-						);
+						result = await tools.list({ repo: params.repo, limit: params.limit }, { signal });
 						break;
 
 					case "view":
-						if (!params.workflow)
-							throw new Error("workflow is required for view");
-						result = await tools.view(
-							{ repo: params.repo, workflow: params.workflow },
-							{ signal },
-						);
+						if (!params.workflow) throw new Error("workflow is required for view");
+						result = await tools.view({ repo: params.repo, workflow: params.workflow }, { signal });
 						break;
 
 					case "run":
-						if (!params.workflow)
-							throw new Error("workflow is required for run");
+						if (!params.workflow) throw new Error("workflow is required for run");
 						result = await tools.run(
 							{
 								repo: params.repo,
@@ -1008,28 +858,17 @@ Workflow can be referenced by name, numeric ID, or filename (e.g., "ci.yml").`,
 
 					case "logs":
 						if (!params.run_id) throw new Error("run_id is required for logs");
-						result = await tools.logs(
-							{ repo: params.repo, run_id: params.run_id },
-							{ signal },
-						);
+						result = await tools.logs({ repo: params.repo, run_id: params.run_id }, { signal });
 						break;
 
 					case "disable":
-						if (!params.workflow)
-							throw new Error("workflow is required for disable");
-						result = await tools.disable(
-							{ repo: params.repo, workflow: params.workflow },
-							{ signal },
-						);
+						if (!params.workflow) throw new Error("workflow is required for disable");
+						result = await tools.disable({ repo: params.repo, workflow: params.workflow }, { signal });
 						break;
 
 					case "enable":
-						if (!params.workflow)
-							throw new Error("workflow is required for enable");
-						result = await tools.enable(
-							{ repo: params.repo, workflow: params.workflow },
-							{ signal },
-						);
+						if (!params.workflow) throw new Error("workflow is required for enable");
+						result = await tools.enable({ repo: params.repo, workflow: params.workflow }, { signal });
 						break;
 
 					default:
