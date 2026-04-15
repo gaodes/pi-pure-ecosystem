@@ -15,7 +15,10 @@ Extensions live under `extensions/` with a scope-based folder layout. All extens
 | [pure-updater](extensions/global/pure-updater/) | 0.2.0 | — | `/update` | Check for Pi updates, install, and generate impact reports |
 | [pure-github](extensions/global/pure-github/) | 0.1.1 | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* | GitHub PR/repo/workflow tools |
 
-> **In development:** `pure-statusline` (configurable status footer), `pure-vibes` (AI-themed working messages).
+| [pure-statusline](extensions/global/pure-statusline/) | *unreleased* | — | `/statusline` | Configurable multi-line status footer |
+| [pure-vibes](extensions/global/pure-vibes/) | *unreleased* | — | `/vibe` | AI-generated themed working messages |
+
+> **In development:** not yet in `package.json` manifest. Load from `.pi/extensions/` for testing.
 
 ## Themes
 
