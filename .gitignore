@@ -3,7 +3,6 @@ node_modules/
 *.tmp
 
 # In-testing extensions (not in package.json manifest)
-extensions/global/pure-github/
 extensions/global/pure-statusline/
 extensions/global/pure-vibes/
 extensions/project/pure-devkit/

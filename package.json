@@ -21,7 +21,8 @@
       "./extensions/global/pure-model-switch/index.ts",
       "./extensions/global/pure-sessions/index.ts",
       "./extensions/global/pure-theme/index.ts",
-      "./extensions/global/pure-updater/index.ts"
+      "./extensions/global/pure-updater/index.ts",
+      "./extensions/global/pure-github/index.ts"
     ],
     "themes": ["./themes"]
   }

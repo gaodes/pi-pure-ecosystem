@@ -13,6 +13,7 @@ Extensions live under `extensions/` with a scope-based folder layout. All extens
 | [pure-sessions](extensions/global/pure-sessions/) | 0.5.0 | — | `/sesh` | Auto-name sessions, browse/resume/rename |
 | [pure-theme](extensions/global/pure-theme/) | 0.2.0 | — | `/theme` | Sync theme with system dark/light mode |
 | [pure-updater](extensions/global/pure-updater/) | 0.2.0 | — | `/update` | Check for Pi updates, install, and generate impact reports |
+| [pure-github](extensions/global/pure-github/) | 0.1.1 | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* | GitHub PR/repo/workflow tools |
 
 > **In development:** `pure-statusline` (configurable status footer), `pure-vibes` (AI-themed working messages).
 
