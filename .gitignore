@@ -5,3 +5,6 @@ node_modules/
 # Not ready for publishing
 extensions/pure-statusline/
 extensions/pure-vibes/
+
+# Local test extensions
+.pi/extensions/
