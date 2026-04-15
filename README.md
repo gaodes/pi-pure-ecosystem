@@ -4,13 +4,15 @@ Personal extensions, themes, and configuration for the [Pi coding agent](https:/
 
 ## Extensions
 
+Extensions live under `extensions/` with a scope-based folder layout. All extensions currently ship globally via package filtering (see below).
+
 | Extension | Version | Tool | Command | Purpose |
 |-----------|---------|------|---------|---------|
-| [pure-cron](extensions/pure-cron/) | 0.2.0 | `pure_cron` | `/pure-cron` | Schedule recurring and one-shot agent prompts |
-| [pure-model-switch](extensions/pure-model-switch/) | 0.1.0 | `switch_model` | — | List, search, and switch models with aliases |
-| [pure-sessions](extensions/pure-sessions/) | 0.5.0 | — | `/sesh` | Auto-name sessions, browse/resume/rename |
-| [pure-theme](extensions/pure-theme/) | 0.2.0 | — | `/theme` | Sync theme with system dark/light mode |
-| [pure-updater](extensions/pure-updater/) | 0.2.0 | — | `/update` | Check for Pi updates, install, and generate impact reports |
+| [pure-cron](extensions/global/pure-cron/) | 0.2.0 | `pure_cron` | `/pure-cron` | Schedule recurring and one-shot agent prompts |
+| [pure-model-switch](extensions/global/pure-model-switch/) | 0.1.0 | `switch_model` | — | List, search, and switch models with aliases |
+| [pure-sessions](extensions/global/pure-sessions/) | 0.5.0 | — | `/sesh` | Auto-name sessions, browse/resume/rename |
+| [pure-theme](extensions/global/pure-theme/) | 0.2.0 | — | `/theme` | Sync theme with system dark/light mode |
+| [pure-updater](extensions/global/pure-updater/) | 0.2.0 | — | `/update` | Check for Pi updates, install, and generate impact reports |
 
 > **In development:** `pure-statusline` (configurable status footer), `pure-vibes` (AI-themed working messages).
 
@@ -23,17 +25,29 @@ Personal extensions, themes, and configuration for the [Pi coding agent](https:/
 
 ## Installation
 
-Copy extensions to Pi's global extensions directory:
+This repo is installed as a git package in Pi's global settings. Extensions are loaded via package filtering:
 
-```bash
-cp -R extensions/pure-<name> ~/.pi/agent/extensions/pure-<name>
+```json
+{
+  "packages": [
+    {
+      "source": "git:github.com/gaodes/pi-pure-ecosystem",
+      "extensions": ["extensions/global/*", "extensions/shared/*"]
+    }
+  ]
+}
 ```
 
-Then `/reload` in Pi.
+To develop locally, see the [development workflow](#development-workflow) below.
 
-For themes:
-```bash
-cp themes/*.json ~/.pi/agent/themes/
+## Extension Scope Layout
+
+```
+extensions/
+├── global/     ← loaded globally only
+├── project/   ← loaded per-project (opt-in via project settings)
+├── workspace/  ← loaded per-workspace (opt-in via project settings)
+└── shared/     ← loaded by all scopes (global, project, workspace)
 ```
 
 ## Conventions

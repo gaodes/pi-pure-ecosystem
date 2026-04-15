@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["extensions/pure-*/**/*.ts"]
+		"includes": ["extensions/global/*/index.ts", "extensions/global/*/*.ts", "extensions/project/*/index.ts", "extensions/project/*/*.ts", "extensions/workspace/*/index.ts", "extensions/workspace/*/*.ts", "extensions/shared/*/index.ts", "extensions/shared/*/*.ts"]
 	},
 	"formatter": {
 		"enabled": true,
