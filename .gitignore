@@ -1,0 +1,7 @@
+node_modules/
+ Disabled/
+*.tmp
+
+# Not ready for publishing
+extensions/pure-statusline/
+extensions/pure-vibes/

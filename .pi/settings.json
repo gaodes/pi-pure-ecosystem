@@ -1,6 +1,8 @@
 {
-  "$comment": "Project-level settings for testing pure-* extensions. Merges with ~/.pi/agent/settings.json.",
-  "extensions": [
-    "../extensions/*"
-  ]
+	"$comment": "Project-level settings for pi-pure-ecosystem development. Local test extensions in .pi/extensions/ are auto-discovered. Sync stable changes to global with: cp -R extensions/pure-* ~/.pi/agent/extensions/",
+	"pure": {
+		"persona": {
+			"id": "🛠️ Extension Dev"
+		}
+	}
 }
