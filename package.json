@@ -20,10 +20,8 @@
       "./extensions/global/pure-cron/index.ts",
       "./extensions/global/pure-model-switch/index.ts",
       "./extensions/global/pure-sessions/index.ts",
-      "./extensions/global/pure-statusline/index.ts",
       "./extensions/global/pure-theme/index.ts",
-      "./extensions/global/pure-updater/index.ts",
-      "./extensions/global/pure-vibes/index.ts"
+      "./extensions/global/pure-updater/index.ts"
     ],
     "themes": ["./themes"]
   }
