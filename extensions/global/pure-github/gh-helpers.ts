@@ -64,9 +64,10 @@ export async function ghGraphql<T = unknown>(
  * Get the current git branch name.
  * Returns `null` if not inside a git repo.
  */
-export async function getCurrentBranch(exec: PiExecFn, binaryPath = "git", _cwd?: string): Promise<string | null> {
+export async function getCurrentBranch(exec: PiExecFn, binaryPath = "git", cwd?: string): Promise<string | null> {
 	try {
 		const result = await exec(binaryPath, ["branch", "--show-current"], {
+			cwd,
 			timeout: 5000,
 		});
 		if (result.code === 0) {

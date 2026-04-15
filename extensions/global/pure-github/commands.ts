@@ -4,7 +4,7 @@
  * User-triggered TUI commands that complement the LLM tools.
  */
 
-import type { ExtensionCommandDefinition } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import type { PiExecFn } from "./gh-client";
 import { ghJson } from "./gh-helpers";
 
@@ -115,7 +115,7 @@ export function createGhStatusCommand(
 	exec: PiExecFn,
 	binaryPath: string,
 	getCwd: () => string,
-): ExtensionCommandDefinition {
+): Parameters<ExtensionAPI["registerCommand"]>[1] {
 	return {
 		description: "Show repo dashboard: open PRs, issues, current branch PR, CI status",
 		handler: async (_args, ctx) => {

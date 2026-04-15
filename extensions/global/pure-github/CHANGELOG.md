@@ -1,3 +1,14 @@
+## [0.2.0] - 2026-04-15
+
+### Added
+
+- New `github_browse` tool for remote GitHub repo inspection without cloning
+- Remote file reading with line ranges and ref support (`read_file`)
+- Directory listing, code search, glob search, and commit search for any repo
+- PR inspection actions: overview, changed files, per-file diff, commit list/detail, checks, and review comments
+- Thread rendering for issues, PRs, and discussions with filtering, participant summaries, and image extraction/download
+- Git-origin auto-detection for `github_browse` owner/repo resolution, with `pure.github.defaultOwner` fallback support
+
 ## [0.1.1] - 2026-04-15
 
 ### Fixed

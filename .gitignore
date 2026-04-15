@@ -7,6 +7,6 @@ extensions/global/pure-statusline/
 extensions/global/pure-vibes/
 extensions/project/pure-devkit/
 
-# Local test copies (loaded by Pi at project scope)
+# Legacy test copies (no longer used — extensions load via .pi/settings.json packages)
 .pi/extensions/
 .pi/npm/

@@ -8,9 +8,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { StringEnum } from "@mariozechner/pi-ai";
-import type { ExtensionAPI, ExtensionCommandDefinition } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { defineTool, getAgentDir, truncateHead } from "@mariozechner/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
+import { createBrowseToolDefinition } from "./browse-tools";
+import { createGhStatusCommand } from "./commands";
 import { GHNotFoundError, getInstallInstructions } from "./error-handler";
 import {
 	formatIssueList,
@@ -27,6 +29,8 @@ import { createPRTools } from "./pr-tools";
 import { createRepoTools } from "./repo-tools";
 import { createWorkflowTools } from "./workflow-tools";
 
+export type { BrowseAction, BrowseEntity, BrowseParams } from "./browse-tools";
+export { createBrowseToolDefinition } from "./browse-tools";
 export { createGhStatusCommand } from "./commands";
 export {
 	GHAuthError,
@@ -112,7 +116,11 @@ export default function pureGithub(pi: ExtensionAPI): void {
 		}
 	}
 
-	function registerDualCommand(shortName: string, longName: string, definition: ExtensionCommandDefinition): void {
+	function registerDualCommand(
+		shortName: string,
+		longName: string,
+		definition: Parameters<ExtensionAPI["registerCommand"]>[1],
+	): void {
 		pi.registerCommand(shortName, definition);
 		pi.registerCommand(longName, definition);
 	}
@@ -922,5 +930,19 @@ Workflow can be referenced by name, numeric ID, or filename (e.g., "ci.yml").`,
 				};
 			},
 		}),
+	);
+
+	// ---------------------------------------------------------------------
+	// github_browse
+	// ---------------------------------------------------------------------
+	pi.registerTool(
+		defineTool(
+			createBrowseToolDefinition({
+				exec: pi.exec.bind(pi),
+				binaryPath,
+				getCwd: () => state.cwd,
+				getDefaultOwner: _getDefaultOwner,
+			}),
+		),
 	);
 }

@@ -40,8 +40,9 @@ Forked from [`@aliou/pi-dev-kit`](https://www.npmjs.com/package/@aliou/pi-dev-ki
 ```
 pi-pure-ecosystem/
 ├── .pi/
-│   ├── settings.json       # Project settings (no extension loading — globals only)
-│   └── extensions/          # ← test location (temporary, cleaned up after testing)
+│   ├── settings.json       # Project settings + local pkg refs for in-testing extensions
+│   ├── extensions/          # ← legacy (no longer used for testing)
+│   └── npm/                 # ← npm deps for project-scope packages
 ├── extensions/              # ← develop extensions here (canonical source)
 │   ├── global/              # ← loaded globally only (package filter)
 │   │   └── pure-<name>/
@@ -295,10 +296,12 @@ Extensions are developed in `extensions/<scope>/pure-<name>/` at the project roo
 
 **New extension → testing → promoted → published.**
 
-| Phase | `.gitignore` | `package.json` manifest | `.pi/extensions/` (test copy) |
+| Phase | `.gitignore` | `package.json` manifest | `.pi/settings.json` (local pkg) |
 |-------|-------------|------------------------|-------------------------------|
-| **New / In testing** | ✅ gitignored | ❌ not in manifest | ✅ loaded from here |
+| **New / In testing** | ✅ gitignored | ❌ not in manifest | ✅ loaded from local path |
 | **Promoted** | ❌ removed from gitignore | ✅ added to manifest | ❌ removed |
+
+> **No copying needed.** Pi loads extensions directly from their source directory via local path references in `.pi/settings.json`. Edit → `/reload` → test. Instant iteration.
 
 ### Extension scopes
 
@@ -319,24 +322,23 @@ Most extensions are `global`. Use `project` for tools that only make sense in a 
 2. Create `extensions/<scope>/pure-<name>/index.ts` (or fork into it).
 3. **Add to `.gitignore`**: `extensions/<scope>/pure-<name>/`
 4. **Do NOT add to `package.json` manifest** yet.
-5. Copy to `.pi/extensions/` for Pi to load locally:
+5. Add a local path reference in `.pi/settings.json` so Pi loads the extension directly from source:
 
-```bash
-mkdir -p .pi/extensions
-cp -R extensions/<scope>/pure-<name> .pi/extensions/pure-<name>
+```json
+{
+  "packages": [
+    "../extensions/<scope>/pure-<name>"
+  ]
+}
 ```
 
-5. `/reload` in Pi and test.
+   Paths are relative to the settings file (`.pi/settings.json`), so `../` reaches the project root.
+
+6. `/reload` in Pi and test.
 
 ### 2. Develop & iterate
 
-Edit files in `extensions/<scope>/pure-<name>/`. Sync the test copy after changes:
-
-```bash
-cp -R extensions/<scope>/pure-<name> .pi/extensions/pure-<name>
-```
-
-Then `/reload` and test. Repeat until stable.
+Edit files in `extensions/<scope>/pure-<name>/`, then `/reload` in Pi. The extension loads directly from source — no copy step needed. Repeat until stable.
 
 ### 3. Check & fix
 
@@ -352,7 +354,7 @@ When the user approves promotion:
 
 1. **Remove from `.gitignore`**: delete the `extensions/<scope>/pure-<name>/` line.
 2. **Add to `package.json` manifest**: append `"./extensions/<scope>/pure-<name>/index.ts"` to `pi.extensions`.
-3. **Remove the test copy**: `rm -rf .pi/extensions/pure-<name>`
+3. **Remove the local path reference** from `.pi/settings.json` `packages`.
 4. Update `CHANGELOG.md` and `README.md`.
 5. `/reload` in Pi to verify it loads from the git package.
 

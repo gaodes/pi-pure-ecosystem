@@ -18,6 +18,7 @@ export interface ExecResult {
 export interface ExecOptions {
 	timeout?: number;
 	signal?: AbortSignal;
+	cwd?: string;
 }
 
 export type PiExecFn = (
@@ -64,6 +65,7 @@ function defaultNodeExec(): PiExecFn {
 				command,
 				args,
 				{
+					cwd: options?.cwd,
 					timeout: options?.timeout,
 					maxBuffer: 64 * 1024 * 1024,
 				},
@@ -127,6 +129,7 @@ export class GHClient {
 	 */
 	async exec(args: string[], options?: ExecOptions): Promise<ExecResult> {
 		const result = await this.piExec(this.binaryPath, args, {
+			cwd: options?.cwd,
 			timeout: options?.timeout ?? 30000,
 			signal: options?.signal,
 		});

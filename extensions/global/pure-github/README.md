@@ -4,11 +4,12 @@ GitHub integration for [Pi](https://github.com/badlogic/pi-mono) — wraps the `
 
 ## Features
 
-- **4 LLM tools**: `github_repo`, `github_issue`, `github_pr`, `github_workflow`
-- **Full CRUD**: create, list, view, edit, close, merge, review, etc.
+- **5 GitHub tools**: `github_repo`, `github_issue`, `github_pr`, `github_workflow`, `github_browse`
+- **Full CRUD + remote browsing**: create, list, view, edit, close, merge, review, read files, search code, inspect PRs, and format threads
 - **gh CLI native**: uses `pi.exec()` to call `gh` — auth handled by `gh auth login`
 - **Auto-detection**: probes `gh` binary + auth status on session start
-- **Compact output**: summary formatters + `detail: "full"` for raw JSON
+- **Compact output**: summary formatters + `detail: "full"` for raw JSON where appropriate
+- **No clone required for browsing**: inspect remote repos, files, code, PRs, issues, and discussions directly via GitHub API
 
 ## Requirements
 
@@ -32,6 +33,12 @@ Actions: `create`, `list`, `view`, `diff`, `merge`, `review`, `close`, `checkout
 ### `github_workflow` — GitHub Actions
 
 Actions: `list`, `view`, `run`, `logs`, `disable`, `enable`
+
+### `github_browse` — Remote repo browsing
+
+Actions: `read_file`, `list_directory`, `search_code`, `glob_files`, `search_commits`, `list_issues`, `list_prs`, `pr_overview`, `list_pr_commits`, `get_pr_commit`, `list_pr_checks`, `list_review_comments`, `list_changes`, `get_change`, `list_participants`, `list_images`, `download_image`, `format`
+
+Useful for reading any GitHub repo without cloning, plus formatting issue/PR/discussion threads and inspecting PR files/checks/commits.
 
 ## Installation
 

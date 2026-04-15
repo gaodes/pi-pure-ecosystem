@@ -24,6 +24,7 @@
  *   - sync_on_start: boolean — auto-switch theme on startup (default: true)
  *   - light_theme: string   — theme name for light mode (default: auto-detect)
  *   - dark_theme: string    — theme name for dark mode (default: auto-detect)
+ *   - widget_display: boolean — show status bar widget (default: true)
  */
 
 import { execFile, spawn } from "node:child_process";
@@ -61,6 +62,7 @@ interface ThemeSettings {
 	sync_on_start: boolean;
 	light_theme?: string;
 	dark_theme?: string;
+	widget_display: boolean;
 }
 
 interface Osc11State {
@@ -77,7 +79,7 @@ interface DetectionTrace {
 	details: string;
 }
 
-const DEFAULT_SETTINGS: ThemeSettings = { sync_on_start: true };
+const DEFAULT_SETTINGS: ThemeSettings = { sync_on_start: true, widget_display: true };
 
 // ─── Theme classification ────────────────────────────────────────────
 
@@ -103,6 +105,7 @@ function loadSettings(): ThemeSettings {
 			sync_on_start: typeof pure?.sync_on_start === "boolean" ? pure.sync_on_start : true,
 			light_theme: typeof pure?.light_theme === "string" ? pure.light_theme : undefined,
 			dark_theme: typeof pure?.dark_theme === "string" ? pure.dark_theme : undefined,
+			widget_display: typeof pure?.widget_display === "boolean" ? pure.widget_display : true,
 		};
 	} catch {
 		return { ...DEFAULT_SETTINGS };
@@ -131,6 +134,9 @@ function saveSettings(settings: ThemeSettings): void {
 	}
 	if (settings.dark_theme !== undefined) {
 		overrides.dark_theme = settings.dark_theme;
+	}
+	if (settings.widget_display !== DEFAULT_SETTINGS.widget_display) {
+		overrides.widget_display = settings.widget_display;
 	}
 
 	if (Object.keys(overrides).length === 0) {
@@ -665,6 +671,11 @@ async function showThemeSelector(
 		label: `Sync on start: ${settings.sync_on_start ? "ON" : "OFF"}`,
 		description: "Auto-switch theme based on system dark/light mode",
 	});
+	items.push({
+		value: "widget:toggle",
+		label: `Status widget: ${settings.widget_display ? "ON" : "OFF"}`,
+		description: "Show theme detection status in the status bar",
+	});
 
 	// Detect current appearance for display
 	const currentTrace = await resolveAppearance(osc11State, { allowOsc11: true, forceOsc11: false });
@@ -768,6 +779,14 @@ async function showThemeSelector(
 		return;
 	}
 
+	if (result === "widget:toggle") {
+		settings.widget_display = !settings.widget_display;
+		saveSettings(settings);
+		ctx.ui.notify(`Status widget: ${settings.widget_display ? "ON" : "OFF"}`, "info");
+		updateStatus(ctx, lastTrace, settings);
+		return;
+	}
+
 	// Switch to selected theme
 	const setResult = ctx.ui.setTheme(result);
 	if ("success" in setResult && !setResult.success) {
@@ -780,7 +799,7 @@ async function showThemeSelector(
 // ─── Status bar ──────────────────────────────────────────────────────
 
 function updateStatus(ctx: ExtensionContext, trace: DetectionTrace | null, settings: ThemeSettings): void {
-	if (!settings.sync_on_start) {
+	if (!settings.sync_on_start || !settings.widget_display) {
 		ctx.ui.setStatus("pure-theme", undefined);
 		return;
 	}
