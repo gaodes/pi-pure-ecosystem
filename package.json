@@ -16,12 +16,7 @@
     "@sinclair/typebox": "*"
   },
   "pi": {
-    "extensions": [
-      "./extensions/global/*/index.ts",
-      "./extensions/project/*/index.ts",
-      "./extensions/workspace/*/index.ts",
-      "./extensions/shared/*/index.ts"
-    ],
-    "themes": ["./themes/*.json"]
+    "extensions": ["./extensions"],
+    "themes": ["./themes"]
   }
 }

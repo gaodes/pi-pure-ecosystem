@@ -83,7 +83,7 @@ Package filtering controls what loads where (in `settings.json`):
 }
 ```
 
-> **Glob patterns must match files, not directories.** Use `extensions/<scope>/*/index.ts` in package filters so Pi finds the extension entry points. The repo's root `package.json` also declares these paths in its `pi.extensions` manifest.
+> **Package filters must match files, not directories.** Use `extensions/<scope>/*/index.ts` in `settings.json` package filters so Pi finds the extension entry points. The repo's root `package.json` uses `"./extensions"` as a conventional directory so auto-discovery works; the package filter in `settings.json` then narrows down which scopes are actually loaded.
 
 Each `pure-<name>/` directory contains:
 
