@@ -242,7 +242,7 @@ const DEFAULT_SEGMENTS: Record<string, SegCfg> = {
 	model: { style: "model", show_thinking_level: false },
 	path: { style: "path", mode: "basename", max_length: 40 },
 	path1: { style: "path1", mode: "basename", max_length: 40 },
-	path2: { style: "path2", mode: "parent" },
+	path2: { style: "path2", mode: "parent", bold: true },
 	git: {
 		branch_style: "git_clean",
 		dirty_branch_style: "git_dirty",
@@ -254,7 +254,7 @@ const DEFAULT_SEGMENTS: Record<string, SegCfg> = {
 		show_untracked: true,
 		untracked_style: "git_untracked",
 	},
-	thinking: { style: "", show_label: false },
+	thinking: { style: "", show_label: false, show_when_off: false },
 	token_in: { style: "tokens" },
 	token_out: { style: "tokens" },
 	token_total: { style: "tokens" },
@@ -824,7 +824,8 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 		case "persona": {
 			const icon = ico("user", icons, segs) || "›";
 			const name = data.persona || "Assistant";
-			return { content: `${theme.fg("syntaxKeyword", icon)} ${name}`, visible: true };
+			const style = (seg as any).style ?? "persona";
+			return { content: c(theme, ctx.palette, style, `${icon} ${name}`.trim()), visible: true };
 		}
 		case "model": {
 			const model = data.model?.name ?? data.model?.id ?? "unknown";
@@ -880,8 +881,8 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			const label = textSet[level] ?? level;
 			const colorKey = THINKING_THEME[level] ?? "dim";
 			const icon = ico("brain", icons, segs) || "";
-			const minimal = (seg as any).minimal as boolean;
-			const content = minimal ? icon : `${icon} ${label}`.trim();
+			const showLabel = (seg as any).show_label === true;
+			const content = showLabel ? `${icon} ${label}`.trim() : icon;
 			return { content: c(theme, ctx.palette, colorKey, content), visible: !!content };
 		}
 		case "path":
@@ -910,7 +911,9 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 				pathStr = prefix + displayed.join(sep);
 			}
 			if (!pathStr) return { content: "", visible: false };
-			return { content: c(theme, ctx.palette, style, `${icon} ${pathStr}`.trim()), visible: true };
+			let rendered = c(theme, ctx.palette, style, `${icon} ${pathStr}`.trim());
+			if ((seg as any).bold === true) rendered = theme.bold(rendered);
+			return { content: rendered, visible: true };
 		}
 		case "git": {
 			const s = data.git;
@@ -1020,7 +1023,7 @@ function truncate(s: string, w: number): string {
 	return out + "…";
 }
 
-function setupFooter(ctx: ExtensionContext) {
+function setupFooter(ctx: ExtensionContext, pi: ExtensionAPI) {
 	ctx.ui.setFooter((tui, theme, footerData) => {
 		tuiRef = tui;
 		const rerender = () => tui.requestRender();
@@ -1041,9 +1044,9 @@ function setupFooter(ctx: ExtensionContext) {
 					data: {
 						cwd: process.cwd(),
 						model: (ctx as any).model,
-						thinkingLevel: normalizeThinkingLevel(getThinkingLevel?.() ?? "off"),
+						thinkingLevel: normalizeThinkingLevel(pi.getThinkingLevel?.() ?? "off"),
 						usageStats: getUsageStats(ctx),
-						contextPercent: 0,
+						contextPercent: ctx.getContextUsage?.()?.percent ?? 0,
 						contextWindow: Number((ctx as any).model?.contextWindow ?? 0),
 						autoCompactEnabled: false,
 						usingSubscription: false,
@@ -1052,7 +1055,7 @@ function setupFooter(ctx: ExtensionContext) {
 						toolTotal,
 						toolsLoaded,
 						toolColors,
-						sessionName: (ctx as any).sessionName ?? "",
+						sessionName: pi.getSessionName?.() ?? "",
 						persona: readPersonaId(),
 						extensionStatuses,
 					},
@@ -1162,8 +1165,7 @@ export default function pureStatusLine(pi: ExtensionAPI) {
 		} catch {
 			toolsLoaded = 0;
 		}
-		if (typeof ctx.getThinkingLevel === "function") getThinkingLevel = () => ctx.getThinkingLevel();
-		if (ctx.hasUI) setupFooter(ctx);
+		if (ctx.hasUI) setupFooter(ctx, pi);
 	});
 
 	pi.on("tool_result", async (event) => {
@@ -1229,6 +1231,6 @@ export default function pureStatusLine(pi: ExtensionAPI) {
 
 	pi.on("tui_ready", async (_event, ctx) => {
 		tuiRef = ctx;
-		if (ctx.hasUI) setupFooter(ctx);
+		if (ctx.hasUI) setupFooter(ctx, pi);
 	});
 }
