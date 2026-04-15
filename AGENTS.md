@@ -15,9 +15,9 @@ When working on Pi internals, read the Pi docs before implementing:
 - Examples: `/opt/homebrew/lib/node_modules/@mariozechner/pi-coding-agent/examples/`
 - Follow any linked `.md` files in those docs.
 
-## Pi dev kit — installed globally
+## Pi dev kit — project scope
 
-[`@aliou/pi-dev-kit`](https://www.npmjs.com/package/@aliou/pi-dev-kit) provides tools, commands, and a skill for building Pi extensions.
+Forked from [`@aliou/pi-dev-kit`](https://www.npmjs.com/package/@aliou/pi-dev-kit), the **pure-devkit** extension provides tools, commands, and skills for building Pi extensions.
 
 **Always use these tools** instead of manual discovery:
 
@@ -28,9 +28,12 @@ When working on Pi internals, read the Pi docs before implementing:
 | `pi_version` | Get the currently running Pi version |
 | `detect_package_manager` | Detect the project's package manager |
 
-**Skill**: `pi-extension` — comprehensive reference for creating, updating, and publishing extensions. Read the skill's reference files before implementing new extensions or making significant changes.
+**Skills**:
+- `pi-extension` — comprehensive reference (12 reference files) for creating, updating, and publishing extensions. Read the skill's reference files before implementing new extensions or making significant changes.
+- `create-pure-extension` — fork-based and from-scratch workflows for creating pure-* extensions.
+- `demo-setup` — set up demo environments for recording extension previews.
 
-**Command**: `/extensions:update [VERSION]` — guided workflow to update Pi extensions to a target version.
+**Command**: `/devkit [VERSION]` — guided workflow to update Pi extensions to a target version.
 
 ## Project structure
 
@@ -141,7 +144,8 @@ Global (live git package):
 | Extension              | Tool            | Command       | Purpose                                                           |
 | --------------------- | --------------- | ------------- | ----------------------------------------------------------------- |
 | `pure-cron`           | `pure_cron`     | `/pure-cron`  | Schedule recurring/one-shot agent prompts                         |
-| `pure-github`         | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* `/gh-status`, `/gh-pr-create`, `/gh-pr-fix`, `/gh-pr-merge` | GitHub PR/repo/workflow tools *(in local testing)*                |
+| `pure-devkit`         | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | `/devkit` | Tools and skills for Pi extension development |
+| `pure-github`         | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* `/gh-status`, `/gh-pr-create`, `/gh-pr-fix`, `/gh-pr-merge` | GitHub PR/repo/workflow tools |
 | `pure-model-switch`   | `switch_model`  | —             | List, search, and switch models with aliases                      |
 | `pure-sessions`       | —               | `/sesh`       | Auto-name sessions, browse/resume/rename                          |
 | `pure-statusline`     | —               | `/statusline` | Configurable multi-line footer with segments, tool counters       |
@@ -287,26 +291,52 @@ When implementing new extensions or major changes, use the `pi-extension` skill'
 
 Extensions are developed in `extensions/<scope>/pure-<name>/` at the project root. This is the **canonical source** — the repo is loaded as a git package in Pi's global settings via package filtering.
 
-### 1. Develop
+### Extension lifecycle
 
-Edit files in `extensions/global/pure-<name>/` (or `project/` / `workspace/` / `shared/`). No build step — Pi loads `.ts` via Jiti at runtime. `npm install` in the extension directory only needed when adding dependencies (e.g. `croner`, `nanoid`).
+**New extension → testing → promoted → published.**
 
-### 2. Register in `package.json`
+| Phase | `.gitignore` | `package.json` manifest | `.pi/extensions/` (test copy) |
+|-------|-------------|------------------------|-------------------------------|
+| **New / In testing** | ✅ gitignored | ❌ not in manifest | ✅ loaded from here |
+| **Promoted** | ❌ removed from gitignore | ✅ added to manifest | ❌ removed |
 
-**Every new extension must be added to the root `package.json` `pi.extensions` manifest.** Pi does not auto-discover directories in the manifest — explicit file paths are required:
+### Extension scopes
 
-```json
-{
-  "pi": {
-    "extensions": [
-      "./extensions/global/pure-cron/index.ts",
-      "./extensions/global/pure-<name>/index.ts"
-    ]
-  }
-}
+Before creating an extension, decide its scope. Scope determines where it lives and when it loads:
+
+| Scope | Directory | Loads when | Use for |
+|-------|-----------|------------|----------|
+| `global` | `extensions/global/` | Always (in every session) | Tools, commands, and behavior needed everywhere |
+| `project` | `extensions/project/` | When opted in via project `.pi/settings.json` | Development tooling specific to a project |
+| `workspace` | `extensions/workspace/` | When opted in via project `.pi/settings.json` | Shared workspace utilities |
+| `shared` | `extensions/shared/` | Always (loaded alongside global) | Utilities used by all scopes |
+
+Most extensions are `global`. Use `project` for tools that only make sense in a specific repo (like a dev-kit). Use `shared` for common utilities that other extensions might also need.
+
+### 1. Create (new extension)
+
+1. **Choose the scope** (see table above).
+2. Create `extensions/<scope>/pure-<name>/index.ts` (or fork into it).
+3. **Add to `.gitignore`**: `extensions/<scope>/pure-<name>/`
+4. **Do NOT add to `package.json` manifest** yet.
+5. Copy to `.pi/extensions/` for Pi to load locally:
+
+```bash
+mkdir -p .pi/extensions
+cp -R extensions/<scope>/pure-<name> .pi/extensions/pure-<name>
 ```
 
-The `settings.json` package filter then narrows which of these registered extensions are actually loaded per-scope.
+5. `/reload` in Pi and test.
+
+### 2. Develop & iterate
+
+Edit files in `extensions/<scope>/pure-<name>/`. Sync the test copy after changes:
+
+```bash
+cp -R extensions/<scope>/pure-<name> .pi/extensions/pure-<name>
+```
+
+Then `/reload` and test. Repeat until stable.
 
 ### 3. Check & fix
 
@@ -314,35 +344,19 @@ The `settings.json` package filter then narrows which of these registered extens
 biome check --write extensions/   # auto-fix
 ```
 
-Zero errors required. Project-wide disabled rules (`noExplicitAny`, `noNonNullAssertion`) are already handled in `biome.json`; other warnings should be fixed unless there is a strong reason not to.
+Zero errors required. Warnings acceptable with inline suppressions.
 
-### 4. Test locally
+### 4. Promote (user says "promote")
 
-Copy the extension to `.pi/extensions/` for Pi to load it at project level. **Always disable the git package copy first** to avoid conflicts:
+When the user approves promotion:
 
-```bash
-# Disable git package loading for the extension being tested
-# (move the git package entry or use pi config)
+1. **Remove from `.gitignore`**: delete the `extensions/<scope>/pure-<name>/` line.
+2. **Add to `package.json` manifest**: append `"./extensions/<scope>/pure-<name>/index.ts"` to `pi.extensions`.
+3. **Remove the test copy**: `rm -rf .pi/extensions/pure-<name>`
+4. Update `CHANGELOG.md` and `README.md`.
+5. `/reload` in Pi to verify it loads from the git package.
 
-# Install local test copy
-mkdir -p .pi/extensions
-cp -R extensions/global/pure-<name> .pi/extensions/pure-<name>
-```
-
-For extensions that are not yet ready for publishing, you can also gitignore `extensions/global/pure-<name>/` and keep the test copy in `.pi/extensions/` indefinitely.
-
-Then `/reload` in Pi and test. The extension loads from `.pi/extensions/` (project-level auto-discovery, which overrides global).
-
-### 5. Restore after testing
-
-```bash
-# Remove test copy
-rm -rf .pi/extensions/pure-<name>
-```
-
-Then `/reload` in Pi. The extension loads from the git package again.
-
-### 6. Publish (requires user approval)
+### 5. Publish (requires user approval)
 
 After each major logical change, auto-commit. **Ask the user before pushing to remote.**
 

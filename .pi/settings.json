@@ -1,11 +1,8 @@
 {
-	"$comment": "Project-level settings for pi-pure-ecosystem development.",
-	"pure": {
-		"persona": {
-			"id": "🛠️ Extension Dev"
-		}
-	},
-	"packages": [
-		"npm:@aliou/pi-dev-kit"
-	]
+  "$comment": "Project-level settings for pi-pure-ecosystem development.",
+  "pure": {
+    "persona": {
+      "id": "Pi Dev"
+    }
+  }
 }

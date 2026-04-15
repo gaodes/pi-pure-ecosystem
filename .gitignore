@@ -2,11 +2,12 @@ node_modules/
  Disabled/
 *.tmp
 
-# Not ready for publishing
+# In-testing extensions (not in package.json manifest)
+extensions/global/pure-github/
 extensions/global/pure-statusline/
 extensions/global/pure-vibes/
+extensions/project/pure-devkit/
 
-# Local test extensions
+# Local test copies (loaded by Pi at project scope)
 .pi/extensions/
-extensions/global/pure-github/
 .pi/npm/
