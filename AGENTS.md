@@ -274,11 +274,12 @@ After developing an extension, before considering the task done:
 1. `biome check extensions/` — zero errors
 2. Update `CHANGELOG.md` with changes
 3. Update `README.md` if behavior changed
-4. Only include `package.json` if extension has npm dependencies
-5. Test locally (see development workflow below)
-6. Auto-commit after each major logical change
-7. **Ask user for approval before pushing to remote**
-8. Push → `pi update` or `/reload` in Pi to verify
+4. **Register the extension in the root `package.json` `pi.extensions` manifest** (explicit file path required)
+5. Only include a per-extension `package.json` if it has npm dependencies
+6. Test locally (see development workflow below)
+7. Auto-commit after each major logical change
+8. **Ask user for approval before pushing to remote**
+9. Push → `pi update` or `/reload` in Pi to verify
 
 When implementing new extensions or major changes, use the `pi-extension` skill's reference files for best practices and patterns.
 
@@ -290,7 +291,24 @@ Extensions are developed in `extensions/<scope>/pure-<name>/` at the project roo
 
 Edit files in `extensions/global/pure-<name>/` (or `project/` / `workspace/` / `shared/`). No build step — Pi loads `.ts` via Jiti at runtime. `npm install` in the extension directory only needed when adding dependencies (e.g. `croner`, `nanoid`).
 
-### 2. Check & fix
+### 2. Register in `package.json`
+
+**Every new extension must be added to the root `package.json` `pi.extensions` manifest.** Pi does not auto-discover directories in the manifest — explicit file paths are required:
+
+```json
+{
+  "pi": {
+    "extensions": [
+      "./extensions/global/pure-cron/index.ts",
+      "./extensions/global/pure-<name>/index.ts"
+    ]
+  }
+}
+```
+
+The `settings.json` package filter then narrows which of these registered extensions are actually loaded per-scope.
+
+### 3. Check & fix
 
 ```bash
 biome check --write extensions/   # auto-fix
@@ -298,7 +316,7 @@ biome check --write extensions/   # auto-fix
 
 Zero errors required. Project-wide disabled rules (`noExplicitAny`, `noNonNullAssertion`) are already handled in `biome.json`; other warnings should be fixed unless there is a strong reason not to.
 
-### 3. Test locally
+### 4. Test locally
 
 Copy the extension to `.pi/extensions/` for Pi to load it at project level. **Always disable the git package copy first** to avoid conflicts:
 
@@ -315,7 +333,7 @@ For extensions that are not yet ready for publishing, you can also gitignore `ex
 
 Then `/reload` in Pi and test. The extension loads from `.pi/extensions/` (project-level auto-discovery, which overrides global).
 
-### 4. Restore after testing
+### 5. Restore after testing
 
 ```bash
 # Remove test copy
@@ -324,7 +342,7 @@ rm -rf .pi/extensions/pure-<name>
 
 Then `/reload` in Pi. The extension loads from the git package again.
 
-### 5. Publish (requires user approval)
+### 6. Publish (requires user approval)
 
 After each major logical change, auto-commit. **Ask the user before pushing to remote.**
 
