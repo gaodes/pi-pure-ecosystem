@@ -112,7 +112,7 @@ export default function pureGithub(pi: ExtensionAPI): void {
 		}
 	}
 
-	function _registerDualCommand(shortName: string, longName: string, definition: ExtensionCommandDefinition): void {
+	function registerDualCommand(shortName: string, longName: string, definition: ExtensionCommandDefinition): void {
 		pi.registerCommand(shortName, definition);
 		pi.registerCommand(longName, definition);
 	}
