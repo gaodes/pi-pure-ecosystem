@@ -6,7 +6,6 @@
     }
   },
   "packages": [
-    "../extensions/global/pure-theme",
     "../extensions/global/pure-statusline",
     "../extensions/global/pure-vibes",
     "../extensions/project/pure-devkit"
