@@ -27,6 +27,7 @@ import { createPRTools } from "./pr-tools";
 import { createRepoTools } from "./repo-tools";
 import { createWorkflowTools } from "./workflow-tools";
 
+export { createGhStatusCommand } from "./commands";
 export {
 	GHAuthError,
 	GHError,
@@ -192,6 +193,13 @@ export default function pureGithub(pi: ExtensionAPI): void {
 	pi.on("session_shutdown", () => {
 		state.detectionStatus = "unchecked";
 	});
+
+	// Commands
+	registerDualCommand(
+		"gh-status",
+		"github-status",
+		createGhStatusCommand(pi.exec.bind(pi), binaryPath, () => state.cwd),
+	);
 
 	/**
 	 * Render a tool result's stdout/data as a truncated text block.
