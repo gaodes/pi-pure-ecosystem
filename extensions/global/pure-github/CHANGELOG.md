@@ -1,3 +1,11 @@
+## [0.2.1] - 2026-04-15
+
+### Changed
+
+- `/gh-status` now opens a themed TUI dashboard in interactive mode instead of only sending a plain text notification
+- Added a plain-text fallback for `/gh-status` when rich UI is unavailable
+- `/gh-status` now includes the current PR URL in fallback text output
+
 ## [0.2.0] - 2026-04-15
 
 ### Added

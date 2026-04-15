@@ -4,7 +4,8 @@
  * User-triggered TUI commands that complement the LLM tools.
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { DynamicBorder, type ExtensionAPI, type ExtensionContext } from "@mariozechner/pi-coding-agent";
+import { Container, Key, matchesKey, Text } from "@mariozechner/pi-tui";
 import type { PiExecFn } from "./gh-client";
 import { ghJson } from "./gh-helpers";
 
@@ -75,7 +76,6 @@ async function fetchRepoStatus(
 	]);
 
 	const currentPR = currentPRRes.code === 0 && currentPRRes.data ? currentPRRes.data : undefined;
-
 	const checks =
 		checksRes.code === 0 && Array.isArray(checksRes.data) && checksRes.data.length > 0 ? checksRes.data[0] : undefined;
 
@@ -97,6 +97,7 @@ function formatStatus(info: StatusInfo, repo: string, branch: string | null): st
 
 	if (info.currentPR) {
 		parts.push(`Current PR: #${info.currentPR.number} [${info.currentPR.state}]`);
+		parts.push(`PR URL: ${info.currentPR.url}`);
 	} else if (branch) {
 		parts.push("Current PR: none");
 	}
@@ -109,6 +110,84 @@ function formatStatus(info: StatusInfo, repo: string, branch: string | null): st
 	}
 
 	return parts.join("\n");
+}
+
+function getCountColor(count: number): "dim" | "accent" | "warning" {
+	if (count <= 0) return "dim";
+	if (count <= 3) return "accent";
+	return "warning";
+}
+
+function getCheckTone(checks?: StatusInfo["checks"]): "dim" | "success" | "warning" | "error" | "accent" {
+	if (!checks) return "dim";
+	const value = (checks.conclusion || checks.status || "").toLowerCase();
+	if (["success", "completed"].includes(value)) return "success";
+	if (["failure", "failed", "cancelled", "timed_out", "action_required"].includes(value)) return "error";
+	if (["queued", "waiting", "requested", "in_progress", "pending", "startup_failure", "stale"].includes(value)) {
+		return "warning";
+	}
+	return "accent";
+}
+
+async function showStatusDialog(
+	ctx: ExtensionContext,
+	repo: string,
+	branch: string | null,
+	info: StatusInfo,
+): Promise<void> {
+	await ctx.ui.custom<string | null>((_tui, theme, _kb, done) => ({
+		render(width: number) {
+			const container = new Container();
+			const line = (text: string) => new Text(text, 1, 0);
+			const blank = () => new Text("", 0, 0);
+			const divider = theme.fg("dim", " • ");
+			const currentPrText = info.currentPR
+				? `${theme.fg("accent", `#${info.currentPR.number}`)} ${theme.fg("muted", `[${info.currentPR.state}]`)}`
+				: branch
+					? theme.fg("dim", "none")
+					: theme.fg("dim", "n/a");
+			const ciText = info.checks
+				? theme.fg(getCheckTone(info.checks), info.checks.conclusion || info.checks.status)
+				: branch
+					? theme.fg("dim", "no recent runs")
+					: theme.fg("dim", "n/a");
+
+			container.addChild(new DynamicBorder((str: string) => theme.fg("accent", str)));
+			container.addChild(line(theme.fg("accent", theme.bold("GitHub Status"))));
+			container.addChild(
+				line(branch ? `${theme.fg("muted", repo)}${divider}${theme.fg("muted", branch)}` : theme.fg("muted", repo)),
+			);
+			container.addChild(blank());
+			container.addChild(
+				line(
+					`${theme.fg("text", "Open issues")}: ${theme.fg(getCountColor(info.openIssues), String(info.openIssues))}`,
+				),
+			);
+			container.addChild(
+				line(`${theme.fg("text", "My PRs")}: ${theme.fg(getCountColor(info.myPRs), String(info.myPRs))}`),
+			);
+			container.addChild(
+				line(
+					`${theme.fg("text", "Review requested")}: ${theme.fg(getCountColor(info.reviewRequested), String(info.reviewRequested))}`,
+				),
+			);
+			container.addChild(line(`${theme.fg("text", "Current PR")}: ${currentPrText}`));
+			if (info.currentPR?.url) {
+				container.addChild(line(`${theme.fg("dim", "URL")}: ${theme.fg("muted", info.currentPR.url)}`));
+			}
+			container.addChild(line(`${theme.fg("text", "CI")}: ${ciText}`));
+			container.addChild(blank());
+			container.addChild(line(theme.fg("dim", "enter/esc/q close")));
+			container.addChild(new DynamicBorder((str: string) => theme.fg("accent", str)));
+			return container.render(width);
+		},
+		invalidate() {},
+		handleInput(data: string) {
+			if (matchesKey(data, Key.enter) || matchesKey(data, Key.escape) || data === "q" || data === "Q") {
+				done(null);
+			}
+		},
+	}));
 }
 
 export function createGhStatusCommand(
@@ -132,7 +211,12 @@ export function createGhStatusCommand(
 			const branch = branchResult.code === 0 ? branchResult.stdout.trim() : null;
 
 			const status = await fetchRepoStatus(exec, binaryPath, repo, branch);
-			ctx.ui.notify(formatStatus(status, repo, branch), "info");
+			if (!ctx.hasUI) {
+				ctx.ui.notify(formatStatus(status, repo, branch), "info");
+				return;
+			}
+
+			await showStatusDialog(ctx, repo, branch, status);
 		},
 	};
 }

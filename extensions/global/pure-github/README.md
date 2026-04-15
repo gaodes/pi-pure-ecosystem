@@ -40,6 +40,19 @@ Actions: `read_file`, `list_directory`, `search_code`, `glob_files`, `search_com
 
 Useful for reading any GitHub repo without cloning, plus formatting issue/PR/discussion threads and inspecting PR files/checks/commits.
 
+## Commands
+
+### `/gh-status`
+
+Shows a themed GitHub status panel for the current repo with:
+- open issue count
+- your open PR count
+- review-requested count
+- current branch PR
+- latest CI result for the current branch
+
+Falls back to plain text notifications when rich UI is not available.
+
 ## Installation
 
 ```bash
