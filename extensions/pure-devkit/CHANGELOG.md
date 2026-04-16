@@ -9,6 +9,7 @@
   - `import-pure-extension` — fork-based workflow, condensed (~150 lines)
   - `update-pure-extension` — sync with upstream
   - `enhance-pure-extension` — add features, fix bugs
+- Deleted redundant `setup-demo` prompt (skill covers everything)
 
 ## [1.0.3] - 2026-04-16
 
@@ -33,4 +34,4 @@
 ### Added
 
 - Forked from `@aliou/pi-dev-kit` v0.6.1
-- All original tools, commands, and skills
+- All original tools, commands, skills, and prompts
