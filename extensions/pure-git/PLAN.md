@@ -18,7 +18,7 @@ Advanced worktree features ported from `@zenobius/pi-worktrees`, adapted to pure
 
 1. **Config via pure-ecosystem standard** — Use `getPurePath("pure-git.json", "config", cwd)` with project→global override. No external config service dependency.
 2. **Hooks via `pi.exec()`** — All hook commands run through `pi.exec()` (async, managed by Pi). Zenobius uses raw `spawn()` — we stay Pi-idiomatic.
-3. **Branch name generator via `complete()`** — Use Pi's built-in `complete()` from `@mariozechner/pi-ai` instead of spawning an external `pi` subprocess. Cleaner, no timeout management, reuses the configured model.
+3. **Branch name generator via `pi` subprocess** — Same as Zenobius: spawns `pi -p 'branch name for ...'` which creates an actual session in the worktree directory. The user can then immediately switch to that session from the browser. Using `complete()` would skip session creation, losing this benefit.
 4. **No glob matching** — Zenobius has complex repo-URL→config matching with glob patterns, specificity scoring, and tie-breaking. We use simple project-name matching: config keyed by project basename or `*` for defaults. Simpler, sufficient for personal use.
 5. **Simplified hook display** — Zenobius has configurable pending/success/error templates with ANSI colors. We use themed `ctx.ui.notify()` calls with emoji prefixes (⏳ → ✓/✗). Less config surface, Pi theme-aware.
 6. **No StatusIndicator class** — Zenobius has a spinner class. We don't need it — `ctx.ui.notify()` is sufficient for our use case.
@@ -49,7 +49,7 @@ extensions/pure-git/
   "onCreate": "echo 'Created {{path}}'",           // string or array of strings
   "onSwitch": null,                                 // Run when switching to existing worktree
   "onBeforeRemove": null,                           // Run before removing, non-zero blocks removal
-  "branchNameGenerator": null,                      // Not used — we use complete() instead
+  "branchNameGenerator": "pi -p 'branch name for {{prompt}}' --model local/model"  // Spawns pi subprocess, creates a session
 
   // Per-project overrides (in <project>/.pi/pure/config/pure-git.json)
   "projects": {
@@ -84,6 +84,11 @@ extensions/pure-git/
   - Expands templates before execution
   - Stops on first failure, returns `{ success, executed, failed? }`
   - Logs output via notify (⏳ running, ✓ success, ✗ failed)
+- `generateBranchName(template, input, cwd)` — spawns `pi` subprocess with timeout
+  - Shell-quotes the input, replaces `{{prompt}}` in template
+  - Validates output via `git check-ref-format --branch`
+  - Returns `{ ok, branchName }` or `{ ok: false, code, message }`
+  - Sets `PI_WORKTREE_PROMPT` env var for subprocess access
 
 ### Step 4: Update `services/git.ts`
 - Add `getRemoteUrl(exec, cwd)` — get origin URL
@@ -120,7 +125,6 @@ extensions/pure-git/
 |-----------------|----------|
 | `@zenobius/pi-extension-config` dependency | pure-git is self-contained |
 | Glob-based repo matching with specificity scoring | Over-engineered for personal use |
-| `branchNameGenerator` spawning external `pi` process | Using `complete()` instead |
 | `StatusIndicator` spinner class | `ctx.ui.notify()` is sufficient |
 | Configurable pending/success/error display templates | Emoji prefixes are simpler |
 | `cmdInit` interactive config setup | Users can edit JSON directly |
@@ -135,8 +139,8 @@ extensions/pure-git/
 |------|-------|--------|
 | `services/templates.ts` | ~25 | Trivial |
 | `services/config.ts` | ~80 | Moderate |
-| `services/hooks.ts` | ~80 | Moderate |
+| `services/hooks.ts` | ~160 | Significant |
 | `services/git.ts` additions | ~15 | Trivial |
 | `commands/worktrees.ts` updates | ~150 | Significant |
 | Docs | ~60 | Easy |
-| **Total** | **~410** | |
+| **Total** | **~490** | |
