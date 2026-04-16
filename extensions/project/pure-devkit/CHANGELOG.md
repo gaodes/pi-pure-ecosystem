@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.1] - 2026-04-16
+
+### Fixed
+
+- Fixed `findPiInstallation()` failing when `require.resolve("@mariozechner/pi-coding-agent/package.json")` is blocked by package exports. Now uses multi-strategy resolution: main export walk-up, global node_modules scan (npm root -g, Homebrew, standard paths), and process.argv walk-up.
+
 ## [1.0.0] - 2026-04-15
 
 ### Added
