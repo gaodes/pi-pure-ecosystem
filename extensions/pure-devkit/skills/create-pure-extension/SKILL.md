@@ -1,6 +1,6 @@
 ---
 name: create-pure-extension
-description: Create a new pure-* extension, either by forking an existing Pi extension or building from scratch. Use when the user asks to create a new extension, add a new pure-* extension, or fork an extension.
+description: Create a new pure-* extension for the pi-pure-ecosystem, either by forking an existing extension or building from scratch. Use when the user asks to create a new extension, add a new pure-* extension, or fork an extension.
 ---
 
 # Create a Pure Extension
@@ -8,7 +8,7 @@ description: Create a new pure-* extension, either by forking an existing Pi ext
 Follow the project `AGENTS.md` design philosophy while using this skill:
 
 - **Simplicity first** — prefer the smallest workable adaptation
-- **Pi built-ins before external tools/packages** — use Pi APIs, `create-pure-extension`, and pi-dev-kit tools first
+- **Pi built-ins before external tools/packages** — use Pi APIs first
 - **Standalone, ecosystem-ready** — the extension must work independently but follow pure-* conventions
 
 This is a **mono repo** — use `/worktrees create` for new features to keep `main` clean.
@@ -253,6 +253,8 @@ This skill has detailed reference files for deeper topics:
 | `references/providers.md` | Provider registration, model definitions |
 | `references/structure.md` | Standalone repo structure (for reference) |
 
+---
+
 ## Workflow A: Fork-Based Creation
 
 When the user identifies one or more extension repos as inspiration.
@@ -326,7 +328,7 @@ biome check --write --unsafe extensions/pure-<name>/
 
 **Gate 1 — Smoke test:**
 ```bash
-pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5
+pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok" 2>&1 | tail -5
 ```
 
 **Gate 2 — Functional test (user confirms):** `/reload` and test tool/command.
@@ -343,6 +345,8 @@ pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5
 ---
 
 ## Workflow B: From-Scratch Creation
+
+When the user wants something entirely new.
 
 ### 1. Interview the user
 
@@ -368,27 +372,6 @@ Create `extensions/pure-<name>/index.ts` with inline path helpers, extension ent
 ### 5. Check, format, lint, test, and promote
 
 Same gates as fork-based workflow.
-
----
-
-## Updating an Extension
-
-### 1. Find the primary source
-
-Read README.md → Sources / Inspiration section.
-
-### 2. Check upstream for changes
-
-Compare upstream changes against our fork and decide what to cherry-pick, skip, or adapt.
-
-### 3. Make changes
-
-Keep inline path helpers, pure-* naming, project-overrides-global config.
-
-### 4. Check, test, restore activation
-
-- Globally active: move to local, develop, restore
-- Locally active: edit directly
 
 ---
 
@@ -419,7 +402,7 @@ Keep inline path helpers, pure-* naming, project-overrides-global config.
 - [ ] Inline path helpers (self-contained)
 - [ ] Project-overrides-global config resolution (pass `ctx.cwd`)
 - [ ] `biome check` passes with zero errors
-- [ ] Smoke-tested: `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok"` exits 0
+- [ ] Smoke-tested: `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok"` exits 0
 - [ ] User confirmed functional test
 - [ ] README.md with Sources / Inspiration section
 - [ ] CHANGELOG.md with initial release entry

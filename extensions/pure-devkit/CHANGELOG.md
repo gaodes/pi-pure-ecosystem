@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.3] - 2026-04-16
+
+### Changed
+
+- Split `create-pure-extension` skill into three focused skills:
+  - `create-pure-extension` — Fork-based and from-scratch workflows for creating new extensions
+  - `update-pure-extension` — Sync extensions with upstream sources
+  - `enhance-pure-extension` — Add features, fix bugs, modify existing extensions
+- Each skill now has its own `references/` directory with shared reference files
+- Updated README.md with detailed skill descriptions and "When to use" tables
+
 ## [1.0.2] - 2026-04-16
 
 ### Changed
