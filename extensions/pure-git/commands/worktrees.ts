@@ -53,6 +53,15 @@ interface CommandContext {
 	pi: ExtensionAPI;
 }
 
+/** Result from switchToWorktree — used by both tool and subcommand */
+export interface SwitchResult {
+	success: boolean;
+	message: string;
+	worktreePath?: string;
+	branch?: string;
+	sessionSwitched?: boolean;
+}
+
 // ── Argument Parsing ─────────────────────────────────────────────────────────
 
 function parseArgs(raw: string): { action: string; name: string; extra: string } | null {
@@ -112,6 +121,103 @@ function formatWorktreeEntry(worktree: WorktreeInfo, aheadBehind?: AheadBehind, 
 	const abStrFormatted = abStr ? ` ${abStr}` : "";
 
 	return `  ${worktree.isCurrent ? "→" : " "} ${worktree.branch.padEnd(24)} ${worktree.path}${markerStr}${abStrFormatted}`;
+}
+
+// ── Shared: switch to worktree ──────────────────────────────────────────────
+
+/**
+ * Switch to a worktree by name. Shared by the /worktrees switch subcommand and
+ * the switch_worktree tool.
+ *
+ * Resolves the worktree, runs onSwitch hook, finds the most recent session,
+ * and switches to it.
+ */
+export async function switchToWorktree(params: {
+	name: string;
+	ctx: ExtensionCommandContext;
+	exec: ExecFn;
+}): Promise<SwitchResult> {
+	const { name, ctx, exec } = params;
+
+	if (!(await isGitRepo(exec, ctx.cwd))) {
+		return { success: false, message: "Not in a git repository" };
+	}
+
+	if (!name.trim()) {
+		return { success: false, message: "Worktree name is required" };
+	}
+
+	const worktrees = await listWorktrees(exec, ctx.cwd);
+	const mainPath = await getMainWorktreePath(exec, ctx.cwd);
+	const project = await getProjectName(exec, ctx.cwd);
+	const worktreePath = getWorktreePath(mainPath, name);
+
+	const target = worktrees.find((wt) => wt.branch === name || wt.path === worktreePath || wt.path.endsWith(`/${name}`));
+
+	if (!target) {
+		return { success: false, message: `Worktree not found: ${name}` };
+	}
+
+	if (target.isCurrent) {
+		return {
+			success: true,
+			message: `Already in worktree '${target.branch}' at ${target.path}`,
+			worktreePath: target.path,
+			branch: target.branch,
+			sessionSwitched: false,
+		};
+	}
+
+	// Run onSwitch hook if configured
+	const settings = getEffectiveConfig(ctx.cwd, project);
+	if (settings.onSwitch) {
+		const tmplCtx = buildTemplateContext({
+			path: target.path,
+			name: basename(target.path),
+			branch: target.branch,
+			project,
+			mainWorktree: mainPath,
+			sessionId: sanitizePathPart(ctx.sessionManager?.getSessionId?.() ?? "session"),
+		});
+
+		const hookResult = await runHook(tmplCtx, settings.onSwitch, exec, ctx.ui.notify.bind(ctx.ui), "onSwitch");
+		if (!hookResult.success) {
+			return { success: false, message: "onSwitch hook failed — switch aborted" };
+		}
+	}
+
+	// Find most recent session for this worktree's cwd
+	const sessions = await SessionManager.list(target.path);
+	const session = sessions.sort((a, b) => b.modified.getTime() - a.modified.getTime())[0];
+
+	if (!session) {
+		return {
+			success: false,
+			message: `No session found for worktree '${target.branch}'. The user needs to start a Pi session there first by running: cd ${target.path} && pi`,
+			worktreePath: target.path,
+			branch: target.branch,
+			sessionSwitched: false,
+		};
+	}
+
+	const res = await ctx.switchSession(session.path);
+	if (res.cancelled) {
+		return {
+			success: false,
+			message: `Session switch to '${target.branch}' was cancelled`,
+			worktreePath: target.path,
+			branch: target.branch,
+			sessionSwitched: false,
+		};
+	}
+
+	return {
+		success: true,
+		message: `Switched to worktree '${target.branch}' — resumed session at ${target.path}`,
+		worktreePath: target.path,
+		branch: target.branch,
+		sessionSwitched: true,
+	};
 }
 
 // ── Subcommand: status ───────────────────────────────────────────────────────
@@ -513,6 +619,26 @@ async function handleClean(c: CommandContext): Promise<void> {
 	ctx.ui.notify(`Cleaned ${name}:\n${steps.map((s) => `  ${s}`).join("\n")}`, "info");
 }
 
+// ── Subcommand: switch ─────────────────────────────────────────────────────
+
+async function handleSwitch(c: CommandContext): Promise<void> {
+	const { ctx, exec } = c;
+	const name = c.args.trim();
+
+	if (!name) {
+		ctx.ui.notify("Usage: /worktrees switch <name>", "error");
+		return;
+	}
+
+	const result = await switchToWorktree({ name, ctx, exec });
+
+	if (result.success) {
+		ctx.ui.notify(result.message, "info");
+	} else {
+		ctx.ui.notify(result.message, "error");
+	}
+}
+
 // ── Worktree Browser (TUI) ───────────────────────────────────────────────
 
 interface WorktreeItem {
@@ -645,60 +771,21 @@ async function browseWorktrees(c: CommandContext): Promise<void> {
 		if (result.action === "switch") {
 			const target = items[result.index!];
 			if (!target) continue;
-			if (target.worktree.isCurrent) {
-				ctx.ui.notify("Already in this worktree.", "info");
-				continue;
+
+			const switchResult = await switchToWorktree({
+				name: target.worktree.branch,
+				ctx,
+				exec,
+			});
+
+			if (switchResult.sessionSwitched) {
+				return; // session switched — we're done
 			}
 
-			const wtPath = target.worktree.path;
-			const wtBranch = target.worktree.branch;
-
-			// Run onSwitch hook if configured
-			if (settings.onSwitch) {
-				const tmplCtx = buildTemplateContext({
-					path: wtPath,
-					name: basename(wtPath),
-					branch: wtBranch,
-					project,
-					mainWorktree: await getMainWorktreePath(exec, ctx.cwd),
-					sessionId: sanitizePathPart(ctx.sessionManager?.getSessionId?.() ?? "session"),
-				});
-
-				const hookResult = await runHook(tmplCtx, settings.onSwitch, exec, ctx.ui.notify.bind(ctx.ui), "onSwitch");
-				if (!hookResult.success) {
-					ctx.ui.notify("onSwitch failed", "error");
-					continue;
-				}
-			}
-
-			// Find most recent session for this worktree's cwd
-			const sessions = await SessionManager.list(wtPath);
-			const session = sessions.sort((a, b) => b.modified.getTime() - a.modified.getTime())[0];
-
-			if (session) {
-				const res = await ctx.switchSession(session.path);
-				if (!res.cancelled) {
-					ctx.ui.notify(`Switched to ${wtBranch} — resumed session`, "info");
-					return;
-				}
+			if (!switchResult.success) {
+				ctx.ui.notify(switchResult.message, "error");
 			} else {
-				const dirty = target.dirty ? " (dirty)" : "";
-				const abParts: string[] = [];
-				if (target.aheadBehind) {
-					if (target.aheadBehind.ahead > 0) abParts.push(`${target.aheadBehind.ahead}↑`);
-					if (target.aheadBehind.behind > 0) abParts.push(`${target.aheadBehind.behind}↓`);
-				}
-				const ab = abParts.length > 0 ? `, ${abParts.join(" ")}` : "";
-				ctx.ui.notify(
-					[
-						`📂 ${wtBranch}${dirty}${ab}`,
-						`   Path: ${wtPath}`,
-						"",
-						"No session found for this worktree.",
-						"Start a new Pi session there to create one.",
-					].join("\n"),
-					"info",
-				);
+				ctx.ui.notify(switchResult.message, "info");
 			}
 			continue;
 		}
@@ -892,7 +979,7 @@ async function browseWorktrees(c: CommandContext): Promise<void> {
 
 export function registerWorktreesCommand(pi: ExtensionAPI, exec: ExecFn): void {
 	pi.registerCommand("worktrees", {
-		description: "Manage Git worktrees (browse/create/list/clean/status/cd/prune)",
+		description: "Manage Git worktrees (browse/create/list/clean/status/cd/prune/switch)",
 		handler: async (args, ctx) => {
 			const parsed = parseArgs(args);
 
@@ -928,9 +1015,12 @@ export function registerWorktreesCommand(pi: ExtensionAPI, exec: ExecFn): void {
 				case "prune":
 					await handlePrune({ args: "", ctx, exec, pi });
 					break;
+				case "switch":
+					await handleSwitch({ args: subArgs, ctx, exec, pi });
+					break;
 				default:
 					ctx.ui.notify(
-						`Unknown action: ${parsed.action}\nUsage: /worktrees [create|list|clean|status|cd|prune] [name]`,
+						`Unknown action: ${parsed.action}\nUsage: /worktrees [create|list|clean|status|cd|prune|switch] [name]`,
 						"error",
 					);
 			}

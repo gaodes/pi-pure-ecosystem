@@ -56,6 +56,34 @@ Print the filesystem path to a worktree. Useful for scripting.
 
 Clean up stale worktree references. Shows a dry-run preview before pruning.
 
+### `/worktrees switch <name>`
+
+Switch to a worktree by name (non-interactive). Resolves the worktree, runs the `onSwitch` hook if configured, finds the most recent Pi session for the worktree's directory, and switches to it. If no session exists, shows an error with instructions to start one.
+
+```bash
+/worktrees switch github-review
+```
+
+## Tools
+
+### `switch_worktree`
+
+An AI-callable tool that switches the current Pi session to a worktree. The agent can use this to hand off testing to the user by switching to a worktree session.
+
+**Parameters:**
+- `name` (string) — Worktree name (branch name or directory name)
+
+**Behavior:**
+- If a session exists for the worktree → switches to it, returns success
+- If no session exists → returns error telling the agent the user needs to start a Pi session there first
+- If worktree not found → returns error
+- If already in the target worktree → returns info
+
+```bash
+# The agent can call this tool directly:
+switch_worktree(name: "github-review")
+```
+
 ## Configuration
 
 Per-repo settings via `pure-git.json`:

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 (2026-04-16)
+
+- **`switch_worktree` tool** — AI-callable tool to programmatically switch Pi sessions to a worktree
+- `/worktrees switch <name>` — Non-interactive subcommand for session switching
+- Extracted shared `switchToWorktree()` logic used by browser, subcommand, and tool
+- Browser switch action now uses shared logic (runs onSwitch hook, finds session, switches)
+
 ## 0.3.0 (2026-04-16)
 
 - **Lifecycle hooks**: `onCreate`, `onSwitch`, `onBeforeRemove` — configurable commands that run automatically during worktree operations
