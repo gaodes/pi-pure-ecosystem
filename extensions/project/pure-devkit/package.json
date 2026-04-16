@@ -3,8 +3,11 @@
 	"version": "1.0.0",
 	"description": "Tools, commands, and skills for developing Pi extensions in the pure-ecosystem",
 	"private": true,
+	"pi": {
+		"extensions": ["./index.ts"],
+		"skills": ["./skills"]
+	},
 	"dependencies": {
-		"@aliou/pi-utils-ui": "^0.1.0",
 		"@sinclair/typebox": "^0.34.41"
 	},
 	"peerDependencies": {

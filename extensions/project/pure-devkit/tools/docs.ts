@@ -1,6 +1,5 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { ToolBody, ToolCallHeader, ToolFooter } from "@aliou/pi-utils-ui";
 import type {
 	AgentToolResult,
 	ExtensionAPI,
@@ -11,6 +10,7 @@ import type {
 import { keyHint } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
+import { ToolBody, ToolCallHeader, ToolFooter } from "./ui";
 import { findPiInstallation } from "./utils";
 
 const DocsParamsSchema = Type.Object({});
