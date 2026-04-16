@@ -189,7 +189,7 @@ function hasNerdFonts(): boolean {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const DEFAULT_COLORS: Record<string, ColorRef> = {
-	model: "mdLink",
+	model: "accent",
 	path: "text",
 	git_clean: "success",
 	git_dirty: "warning",
