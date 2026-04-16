@@ -118,18 +118,23 @@ git push
 
 ---
 
-## Critical Rules (quick reference)
+## Critical Rules
 
-1. **Signal before onUpdate**: `(toolCallId, params, signal, onUpdate, ctx)`
+1. **Execute order**: `(toolCallId, params, signal, onUpdate, ctx)`
 2. **Always `onUpdate?.()`** — optional chaining
 3. **No `.js` in imports**
-4. **Mode awareness**: `ctx.ui.custom()` needs RPC fallback
-5. **Error detection**: check for missing `details` fields
+4. **Mode awareness**: `ctx.ui.custom()` needs RPC fallback — use explicit sentinels for close/cancel
+5. **Error detection**: check for missing `details` fields (framework sets `{}` on throw)
 6. **Signal forwarding**: pass to all async operations
 7. **Never `child_process`**: use `pi.exec()`
 8. **Never `homedir()`**: use `getAgentDir()`
 9. **Typed param alias**: `type MyParams = Static<typeof parameters>`
-10. **API key gating**: check before registering tools
+10. **Entry point pattern**: load config → check enabled → register
+11. **API key gating**: check before registering tools — notify if missing
+12. **Fire-and-forget methods**: `notify`, `setStatus`, etc. don't need `hasUI` check
+13. **No unused `_signal`**: forward or remove — never prefix with `_` if actually used
+14. **Check existing components**: before creating custom TUI, check `pi-tui` or `pi-coding-agent`
+15. **Settings UI**: use `registerSettingsCommand` from `@aliou/pi-utils-settings` when configurable
 
 ---
 

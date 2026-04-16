@@ -136,7 +136,7 @@ Zero errors required. Warnings acceptable with inline suppressions.
 9. Restore globally-active extensions to `~/.pi/agent/settings.json`
 10. `pi update` or `/reload`
 
-When implementing new extensions or major changes, read the `pi-extension` and `create-pure-extension` skills first.
+When implementing new extensions or major changes, read the relevant skill first: `create-pure-extension`, `import-pure-extension`, `update-pure-extension`, or `enhance-pure-extension`.
 
 ## Git Workflow (Mono Repo)
 
@@ -175,3 +175,26 @@ cd .worktrees/<branch-name>/extensions/pure-<name>/
 ```
 
 This keeps changes isolated to the intended extension within the mono repo.
+
+### Testing in Worktrees
+
+Each worktree is a full copy of the repo with its own `.pi/` directory. Two testing paths:
+
+**Agent-side (automated, safe from anywhere):**
+```bash
+# Smoke test in worktree — launches separate Pi subprocess
+pi -e "$PWD/.worktrees/<branch>/extensions/pure-<name>" -ne -p "reply of just ok" 2>&1 | tail -5
+```
+
+**User-side (manual, in worktree context):**
+1. Set up the worktree's `.pi/settings.json` with a local path to the extension.
+2. User switches to the worktree: `cd .worktrees/<branch>` then `pi`, or uses `/worktrees` browser.
+3. User tests the modified extension in that isolated context.
+4. Main worktree is completely unaffected until merge.
+
+**User-side (manual, in main context):**
+1. Temporarily point main's `.pi/settings.json` to the worktree extension path.
+2. User `/reload` and tests.
+3. Restore original path when done.
+
+Prefer the worktree-context approach — it's zero-risk to main.
