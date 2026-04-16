@@ -189,7 +189,7 @@ function hasNerdFonts(): boolean {
 // ═══════════════════════════════════════════════════════════════════════════
 
 const DEFAULT_COLORS: Record<string, ColorRef> = {
-	model: "text",
+	model: "mdLink",
 	path: "text",
 	git_clean: "success",
 	git_dirty: "warning",
@@ -209,6 +209,10 @@ const DEFAULT_COLORS: Record<string, ColorRef> = {
 	separator3: "dim",
 	path1: "text",
 	path2: "text",
+	path2_projects: "warning",
+	path2_workspaces: "mdLink",
+	path2_obsidian: "customMessageLabel",
+	path2_home: "success",
 	persona: "syntaxKeyword",
 	session: "text",
 	thinking_minimal: "thinkingMinimal",
@@ -226,11 +230,11 @@ const DEFAULT_COLORS: Record<string, ColorRef> = {
 
 const DEFAULT_LINES: ConfigRow[] = [
 	{
-		left: ["persona", "separator", "model", "thinking", "separator", "context_pct", "separator", "session"],
+		left: ["persona", "separator", "model", "thinking", "separator", "context_pct"],
 		right: [],
 	},
 	{
-		left: ["path2", "separator", "path1", "git"],
+		left: ["path2", "separator", "path1", "git", "separator", "session"],
 		right: [],
 	},
 	{ left: ["tool_stats"] },
@@ -271,10 +275,10 @@ const DEFAULT_SEGMENTS: Record<string, SegCfg> = {
 	context_total: { style: "context" },
 	cache_read: { style: "tokens" },
 	cache_write: { style: "tokens" },
-	separator: { text: "" },
-	separator1: { text: "" },
-	separator2: { text: "" },
-	separator3: { text: "" },
+	separator: {},
+	separator1: {},
+	separator2: {},
+	separator3: {},
 	tools: { style: "tools", dim_style: "tools_dim", max_tools: 4, show_icon: true, sort_by: "countDesc" },
 	tool_counter: {
 		label: "Tools",
@@ -383,6 +387,33 @@ function _fmtTokens(n: number): string {
 	if (n < 1_000_000) return `${Math.round(n / 1000)}k`;
 	if (n < 10_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
 	return `${Math.round(n / 1_000_000)}M`;
+}
+
+type ContainerType = "projects" | "workspaces" | "obsidian" | "home" | null;
+
+const CONTAINER_DIRS: Array<{ dir: string; tag: string; type: ContainerType }> = [
+	{ dir: "Projects", tag: "P", type: "projects" },
+	{ dir: "Workspaces", tag: "W", type: "workspaces" },
+	{ dir: "Obsidian", tag: "O", type: "obsidian" },
+];
+
+function renderParentPath(cwd: string, parts: string[]): { text: string; container: ContainerType } {
+	for (const { dir, tag, type } of CONTAINER_DIRS) {
+		const idx = parts.indexOf(dir);
+		if (idx >= 0 && idx < parts.length - 1) {
+			const wsName = parts[idx + 1] ?? "";
+			if (wsName === parts[parts.length - 1]) return { text: `[${tag}]`, container: type };
+			return { text: `[${tag}] ${wsName}`, container: type };
+		}
+	}
+	const agentDir = getAgentDir();
+	if (cwd.startsWith(`${agentDir}/`) || cwd === agentDir) {
+		const rel = cwd.slice(agentDir.length).split("/").filter(Boolean);
+		const wsName = rel[0] ?? "";
+		if (!wsName || wsName === parts[parts.length - 1]) return { text: "[H]", container: "home" };
+		return { text: `[H] ${wsName}`, container: "home" };
+	}
+	return { text: parts[parts.length - 2] ?? "", container: null };
 }
 
 function sortTools(entries: Array<[string, number]>, order: ToolSortOrder = "countDesc"): Array<[string, number]> {
@@ -822,14 +853,14 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			if (!data.toolTotal) return { content: "", visible: false };
 			return { content: theme.fg("dim", `${data.toolTotal} uses`), visible: true };
 		case "persona": {
-			const icon = ico("user", icons, segs) || "›";
+			const icon = ico("persona", icons, segs);
 			const name = data.persona || "Assistant";
 			const style = (seg as any).style ?? "persona";
 			return { content: c(theme, ctx.palette, style, `${icon} ${name}`.trim()), visible: true };
 		}
 		case "model": {
 			const model = data.model?.name ?? data.model?.id ?? "unknown";
-			const icon = ico("chip", icons, segs) || "";
+			const icon = ico("model", icons, segs) || "";
 			const style = (seg as any).style ?? "model";
 			return { content: c(theme, ctx.palette, style, `${icon} ${model}`.trim()), visible: true };
 		}
@@ -895,30 +926,34 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 				),
 				visible: data.usageStats.cost > 0,
 			};
-		case "separator":
-			return { content: theme.fg("dim", (seg as any).text ?? "│"), visible: true };
+		case "separator": {
+			const char = (seg as any).text || ico("separator", icons, segs) || "│";
+			const style = (seg as any).style ?? "separator";
+			return { content: c(theme, ctx.palette, style, char), visible: true };
+		}
 		case "separator1":
 		case "separator2":
 		case "separator3":
 		case "separator4": {
-			const char = (seg as any).char ?? " ";
-			const style = (seg as any).style ?? "dim";
-			return { content: theme.fg(style, char), visible: true };
+			const char = (seg as any).char || ico(id, icons, segs) || "│";
+			const style = (seg as any).style ?? id;
+			return { content: c(theme, ctx.palette, style, char), visible: true };
 		}
 		case "context_pct": {
 			const pct = data.contextPercent ?? 0;
-			const icon = ico("database", icons, segs) || "";
+			const icon = ico("context_pct", icons, segs) || "";
 			const errorThresh = ((seg as any).error_threshold as number) ?? 90;
 			const warnThresh = ((seg as any).warn_threshold as number) ?? 70;
 			let colorKey = ((seg as any).style as string) ?? "context";
 			if (pct >= errorThresh) colorKey = ((seg as any).error_style as string) ?? "error";
 			else if (pct >= warnThresh) colorKey = ((seg as any).warn_style as string) ?? "warning";
-			return { content: faint(theme, ctx.palette, colorKey, `${icon} ${pct}%`.trim()), visible: pct > 0 };
+			const pctStr = pct % 1 !== 0 ? pct.toFixed(1) : `${pct}`;
+			return { content: faint(theme, ctx.palette, colorKey, `${icon} ${pctStr}%`.trim()), visible: pct > 0 };
 		}
 		case "session": {
 			const name = data.sessionName;
 			if (!name) return { content: "", visible: false };
-			const icon = ico("terminal", icons, segs) || "";
+			const icon = ico("session", icons, segs) || "";
 			const style = (seg as any).style ?? "session";
 			return { content: c(theme, ctx.palette, style, `${icon} ${name}`.trim()), visible: true };
 		}
@@ -928,7 +963,7 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			const textSet = THINKING_TEXT[hasNerdFonts() ? "nerd" : "ascii"];
 			const label = textSet[level] ?? level;
 			const colorKey = THINKING_THEME[level] ?? "dim";
-			const icon = ico("brain", icons, segs) || "";
+			const icon = ico("thinking", icons, segs) || "";
 			const showLabel = (seg as any).show_label === true;
 			const content = showLabel ? `${icon} ${label}`.trim() : icon;
 			return { content: faint(theme, ctx.palette, colorKey, content), visible: !!content };
@@ -944,7 +979,7 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			const maxLength = ((seg as any).max_length as number) ?? 40;
 			const prefix = ((seg as any).tilde as boolean) ? "~" : "";
 			const sep = (seg as any).sep ?? "/";
-			const style = (seg as any).style ?? "text";
+			let style = (seg as any).style ?? "text";
 			const icon = ico(id, icons, segs) || "";
 			let pathStr = "";
 			if (mode === "basename") {
@@ -953,7 +988,9 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 					pathStr = `${pathStr.slice(0, Math.max(1, maxLength - 1))}…`;
 				}
 			} else if (mode === "parent") {
-				pathStr = parts[parts.length - 2] ?? "";
+				const parent = renderParentPath(cwd, parts);
+				pathStr = parent.text;
+				if (parent.container && id === "path2") style = `path2_${parent.container}`;
 			} else {
 				const displayed = parts.slice(-maxParts);
 				pathStr = prefix + displayed.join(sep);
