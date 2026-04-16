@@ -2,6 +2,8 @@
 
 Git worktree management for the Pi coding agent.
 
+Inspired by [`@zenobius/pi-worktrees`](https://github.com/zenobi-us/pi-worktrees) — lifecycle hooks, template variables, and worktree management patterns adapted to the pure-ecosystem conventions.
+
 ## Commands
 
 ### `/worktrees` — Interactive browser
@@ -48,6 +50,27 @@ Clean up a worktree. Prompts with three options:
 - The `.worktrees/` directory is automatically excluded from git tracking via `.git/info/exclude`
 - All git operations use `pi.exec()` for proper process management
 - **Switching worktrees** uses `ctx.switchSession()` to resume an existing Pi session in the worktree's directory. If no session exists, branch info is displayed instead.
+
+## Configuration (planned)
+
+Per-repo settings via `pure-git.json` in `.pi/pure/config/`:
+
+```jsonc
+{
+  "worktreeRoot": "{{mainWorktree}}/.worktrees",
+  "onCreate": "echo 'Created {{path}}'",       // string or string[]
+  "onSwitch": null,                              // run when switching to existing worktree
+  "onBeforeRemove": null                         // run before removing; non-zero blocks removal
+}
+```
+
+**Template variables**: `{{path}}`, `{{name}}`, `{{branch}}`, `{{project}}`, `{{mainWorktree}}`
+
+## Sources & credits
+
+- **[`@zenobius/pi-worktrees`](https://github.com/zenobi-us/pi-worktrees)** — Primary inspiration. Lifecycle hooks (`onCreate`, `onSwitch`, `onBeforeRemove`), template variable expansion, worktree listing, prune, status, and branch name generation patterns.
+- **[`qualiti/pi-git-commands-extension`](https://github.com/qualiti/pi-git-commands-extension)** — Evaluated for commit command patterns (future phase).
+- **[`@artale/pi-git-graph`](https://github.com/nicholasgasior/pi-artale-git-graph)** — Evaluated for git graph visualization (future phase).
 
 ## Installation
 
