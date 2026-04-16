@@ -5,5 +5,9 @@
       "id": "Pi Dev"
     }
   },
-  "packages": ["../extensions/pure-vibes", "../extensions/pure-devkit"]
+  "packages": [
+    "../extensions/pure-statusline",
+    "../extensions/pure-vibes",
+    "../extensions/project/pure-devkit"
+  ]
 }

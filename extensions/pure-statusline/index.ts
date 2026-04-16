@@ -361,7 +361,7 @@ function faint(theme: Theme, palette: Record<string, ColorRef>, key: string, tex
 	const source = refToRgb(theme, ref);
 	const dim = refToRgb(theme, "dim");
 	if (!source || !dim) return c(theme, palette, key, text);
-	return hexFg(blendToHex(source, dim, factor), text);
+	return hexFg(blendToHex(source, dim, 0.55), text);
 }
 
 /** Resolve icon for a segment: user segment.symbol → user icons[id] → default */
