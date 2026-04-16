@@ -171,17 +171,24 @@ The extension should already be referenced in `.pi/settings.json` from step 2. I
 
 **Gate 1 — Smoke test (automated, mandatory)**
 
-Run from the project directory:
+This test spins up an isolated Pi subprocess with only the extension being tested. It catches load-time crashes (SyntaxError, missing imports, bad schemas, undefined references) **without risking the running terminal**.
+
 ```bash
-pi -p "reply with just the word ok" 2>&1 | tail -20
+EXT_DIR="extensions/<scope>/pure-<name>"
+pi -e "$PWD/$EXT_DIR" -ne -p "reply with just ok" 2>&1 | tail -5
 ```
 
-Check for:
-- **Extension load errors** (TypeError, SyntaxError, missing imports) — these crash before the prompt runs
-- **Exit code** — non-zero means something broke
-- **The word `ok`** in output — confirms the agent actually started and responded
+What this does:
+- `-e $PWD/$EXT_DIR` — load only this extension by directory path
+- `-ne` — disable all other extensions (project settings, global packages, everything)
+- `-p` — pipe mode, run one prompt and exit
 
-Fix any errors before continuing. Do not rely on `/reload` alone — it may silently skip broken extensions.
+Check for:
+- **Exit code 0** — extension loaded, agent responded. `ok` in output confirms full pipeline.
+- **Exit code 1** + `Error: Failed to load extension` — load-time crash. Read the error message (TypeError, SyntaxError, missing module, etc.) and fix before continuing.
+- **Timeout / hang** — extension likely has a top-level `await` or infinite loop in its init function.
+
+This is safe: the extension runs in a **separate Pi process**, not in your live session. Fix any errors before continuing.
 
 **Gate 2 — Functional test (user, mandatory)**
 
@@ -279,7 +286,7 @@ Same gates as fork-based workflow:
 
 1. `biome check --write --unsafe extensions/<scope>/pure-<name>/`
 2. Verify the extension is in `package.json` `pi.extensions` and `.pi/settings.json` has a local path reference
-3. **Smoke-test**: `pi -p "reply with just the word ok" 2>&1 | tail -20` from the project directory. Check for errors and that the agent responded. Fix any errors before continuing.
+3. **Smoke-test**: `pi -e "$PWD/extensions/<scope>/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5` — isolated subprocess test (see Gate 1 for details). Fix errors before continuing.
 4. Ask the user to `/reload` and **functionally test** the extension. Do not proceed until confirmed working.
 5. **Commit checkpoint**: `git add . && git commit -m "pure-<name>: <description>"`
 6. When approved, promote (remove from `.pi/settings.json`, add to `~/.pi/agent/settings.json`, verify global load, push)
@@ -341,7 +348,7 @@ Apply updates to `extensions/<scope>/pure-<name>/` following the same convention
 **When finished, run the three testing gates:**
 
 1. `biome check --write --unsafe extensions/<scope>/pure-<name>/`
-2. **Smoke-test**: `pi -p "reply with just the word ok" 2>&1 | tail -20`. Fix errors before continuing.
+2. **Smoke-test**: `pi -e "$PWD/extensions/<scope>/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5` — isolated subprocess test. Fix errors before continuing.
 3. Ask the user to `/reload` and **functionally test**. Do not proceed until confirmed working.
 4. **Commit checkpoint**: `git add . && git commit -m "pure-<name>: <description>"`
 
@@ -363,7 +370,7 @@ Before considering the extension ready for user testing:
 - [ ] Works standalone outside this repo and also follows pure-* conventions inside the ecosystem
 - [ ] TypeBox schemas for tool parameters
 - [ ] `biome check` passes with zero errors
-- [ ] Smoke-tested: `pi -p "reply ok"` runs without extension load errors
+- [ ] Smoke-tested: `pi -e "$PWD/extensions/<scope>/pure-<name>" -ne -p "reply with just ok"` exits 0 in isolated subprocess
 - [ ] User confirmed functional test
 - [ ] README.md with Sources / Inspiration section
 - [ ] CHANGELOG.md with initial release entry

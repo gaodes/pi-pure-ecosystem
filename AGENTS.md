@@ -191,7 +191,7 @@ Zero errors required. Warnings acceptable with inline suppressions.
 3. Update `README.md` if behavior changed
 4. Listed in root `package.json` `pi.extensions`
 5. Only include per-extension `package.json` if deps are needed
-6. Smoke-test: `pi -p "reply with just the word ok" 2>&1 | tail -20`
+6. Smoke-test (isolated subprocess): `pi -e "$PWD/extensions/<scope>/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5`
 7. Commit after significant changes
 8. Push when a feature is complete or at user request
 9. Restore globally-active extensions to `~/.pi/agent/settings.json`
