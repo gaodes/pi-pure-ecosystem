@@ -51,6 +51,8 @@ All skills share detailed reference files:
 | `references/hooks.md` | Event handlers |
 | `references/providers.md` | Provider registration |
 
+Additionally, see [`docs/api-reference.md`](docs/api-reference.md) for a comprehensive, versioned index of all Pi Coding Agent utilities, tools, hooks, and APIs.
+
 ## Sources / Inspiration
 
 - [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) — Primary source. Licensed MIT.
