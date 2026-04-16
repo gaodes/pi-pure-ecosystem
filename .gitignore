@@ -2,4 +2,7 @@ node_modules/
  Disabled/
 *.tmp
 
+# Runtime state recreated by extensions
+.pi/pure/
+
 # All extensions are tracked in this repo.
