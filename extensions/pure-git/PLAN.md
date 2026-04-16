@@ -9,7 +9,7 @@ Advanced worktree features ported from `@zenobius/pi-worktrees`, adapted to pure
 | Per-repo settings | `pi-worktrees.config.json` via `@zenobius/pi-extension-config` | `pure-git.json` via `getPurePath()` (pure-ecosystem standard) |
 | Template variables | `{{path}}`, `{{name}}`, `{{branch}}`, `{{project}}`, `{{mainWorktree}}` | Same, plus `{{sessionId}}` and `{{timestamp}}` for logs |
 | Lifecycle hooks | `onCreate`, `onSwitch`, `onBeforeRemove` | Same, run via `pi.exec()` not `spawn()` |
-| Branch name generator | External `pi -p` subprocess | Use Pi's `complete()` API — no external process needed |
+| Branch name generator | External `pi -p` subprocess | Same approach — spawns `pi` subprocess, creates a session in the worktree directory |
 | `/worktrees status` | Shows project, branch, isWorktree, main path, total worktrees | Same |
 | `/worktrees cd <name>` | Print path to worktree | Same (just shows the path) |
 | `/worktrees prune` | `git worktree prune` with dry-run preview | Same |
