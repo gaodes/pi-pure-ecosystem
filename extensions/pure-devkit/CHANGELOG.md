@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.0.2] - 2026-04-16
+
+### Changed
+
+- Consolidated `pi-extension` skill into `create-pure-extension`:
+  - Integrated decision table (What to Build), tool development section, mode awareness, display methods
+  - Added condensed Critical Rules (~15 essential rules)
+  - All reference files moved to `create-pure-extension/references/`
+  - Deleted `pi-extension` skill directory
+
 ## [1.0.1] - 2026-04-16
 
 ### Fixed

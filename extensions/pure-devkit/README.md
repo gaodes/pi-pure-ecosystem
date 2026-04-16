@@ -1,6 +1,6 @@
 # pure-devkit
 
-Tools, commands, and skills for developing Pi extensions. Forked from [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) and adapted for the pure-ecosystem, with integrated guidance from [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi).
+Tools, commands, and skills for developing Pi extensions. Forked from [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) and adapted for the pure-ecosystem.
 
 ## Tools
 
@@ -22,24 +22,32 @@ Tools, commands, and skills for developing Pi extensions. Forked from [`@aliou/p
 
 | Skill | Description |
 |-------|-------------|
-| `pi-extension` | Comprehensive reference for creating, updating, and publishing Pi extensions (12 reference files) |
-| `create-pure-extension` | Fork-based and from-scratch workflows for creating pure-* extensions |
+| `create-pure-extension` | Fork-based and from-scratch workflows for creating pure-* extensions (with 8 reference files) |
 | `demo-setup` | Set up demo environments for recording extension previews |
 
-## Prompts
+## Reference Files
 
-| Prompt | Description |
-|--------|-------------|
-| `setup-demo` | Create a demo environment for a Pi extension |
+The `create-pure-extension` skill includes detailed reference files:
+
+| File | Content |
+|------|---------|
+| `references/tools.md` | Tool registration, rendering patterns, streaming, multi-action tools |
+| `references/modes.md` | Mode awareness (Interactive/RPC/Print), three-tier pattern |
+| `references/components.md` | TUI components catalog, custom components |
+| `references/commands.md` | Command registration, command vs tool |
+| `references/messages.md` | sendMessage, notify, custom message renderers |
+| `references/hooks.md` | Event handlers, blocking/cancelling, spawn hooks |
+| `references/providers.md` | Provider registration, model definitions |
+| `references/structure.md` | Standalone repo structure (for reference) |
 
 ## Differences from upstream
 
 - Flattened `src/` directory structure (no build step)
-- Integrated extending-pi decision guide into the pi-extension skill
+- Consolidated skills into `create-pure-extension` with integrated decision table
 - Bundled the `create-pure-extension` skill
 - Pure-ecosystem naming and conventions
 
 ## Sources / Inspiration
 
-- [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) — Primary source. Tools, commands, and the pi-extension skill with reference files. Licensed MIT.
-- [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi) — Decision guide for extending Pi (skill vs extension vs theme). The skill-creator sub-skill's guidance on skill authoring informed the integrated decision guide. Licensed MIT.
+- [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) — Primary source. Tools, commands, and reference files for extension development. Licensed MIT.
+- [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi) — Decision guide for extending Pi (skill vs extension vs theme). Licensed MIT.

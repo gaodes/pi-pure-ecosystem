@@ -4,16 +4,21 @@ Personal Pi extensions, themes, and configuration. Named with the `pure-` prefix
 
 This is the **development workspace**. Extensions are sourced as a git package (`git:github.com/gaodes/pi-pure-ecosystem` in global settings). Pi clones the repo and loads extensions from there.
 
-**High-level workflow**: determine activation tier → move globally-active extensions to local settings if needed → develop in `extensions/` → check/lint/format → commit → push to GitHub when a feature is complete or at user request → restore globally-active extensions to global settings → `pi update` or `/reload` in Pi.
+**High-level workflow**: use `/worktrees create` for new features → develop in the extension directory within the worktree → `/worktrees clean` when done → promote from main.
+
+> **For Git operations**, use `pure-git` (`/worktrees` command). See its README for details.
+> **For creating extensions**, use the `create-pure-extension` skill.
 
 > **For detailed step-by-step instructions** on creating, forking, updating, or promoting extensions, use the **`create-pure-extension`** skill.
 
 ## Project structure
 
 ```
-pi-pure-ecosystem/
+pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 ├── .pi/
 │   └── settings.json       # Local source-path overrides
+├── .worktrees/              # Feature worktrees (managed via /worktrees)
+│   └── <feature>/          # Each worktree has the full mono repo
 ├── extensions/              # ← flat, all extensions here
 │   └── pure-<name>/        # one directory per extension
 ├── themes/
@@ -48,6 +53,7 @@ When working on an extension, if it is globally active, temporarily move it to `
 | --------------------- | --------------- | ------------- | ----------------------------------------------------------------- |
 | `pure-cron`           | `pure_cron`     | `/cron`       | Schedule recurring/one-shot agent prompts                         |
 | `pure-devkit`         | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | `/devkit` | Tools and skills for Pi extension development |
+| `pure-git`            | —                   | `/worktrees` | Git worktree management: create, list, clean |
 | `pure-github`         | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* `/gh-status`, `/gh-pr-create`, `/gh-pr-fix`, `/gh-pr-merge` | GitHub PR/repo/workflow tools |
 | `pure-model-switch`   | `switch_model`  | —             | List, search, and switch models with aliases                      |
 | `pure-sessions`       | —               | `/sesh`       | Auto-name sessions, browse/resume/rename                          |
@@ -131,3 +137,41 @@ Zero errors required. Warnings acceptable with inline suppressions.
 10. `pi update` or `/reload`
 
 When implementing new extensions or major changes, read the `pi-extension` and `create-pure-extension` skills first.
+
+## Git Workflow (Mono Repo)
+
+This is a **mono repo** — all extensions live in `extensions/`. Use Git worktrees for parallel development.
+
+### Branch Naming
+
+| Type | Pattern | Example |
+|------|---------|--------|
+| Feature | `<name>-<feature>` | `github-review`, `sessions-bookmarks` |
+| Topic | `<type>/<description>` | `fix/cron-tz-bug`, `docs/api-examples` |
+
+### Worktree Lifecycle
+
+1. **Start**: `/worktrees create <branch-name>`
+   - Creates branch from `main`
+   - Creates worktree at `.worktrees/<branch-name>/`
+
+2. **Develop**: `cd .worktrees/<branch-name>/extensions/pure-<name>/`
+   - Work on the specific extension
+   - Commit to the feature branch
+
+3. **Finish**: `/worktrees clean <branch-name>`
+   - Merges branch to `main`
+   - Deletes worktree and branch
+
+4. **Promote**: From main worktree
+   - Test and verify
+   - Move from local to global settings
+
+### Best Practice: `cd` Into Extension Directory
+
+When working in a feature worktree, `cd` into the extension directory:
+```bash
+cd .worktrees/<branch-name>/extensions/pure-<name>/
+```
+
+This keeps changes isolated to the intended extension within the mono repo.
