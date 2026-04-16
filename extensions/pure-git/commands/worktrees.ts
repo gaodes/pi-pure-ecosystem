@@ -1,9 +1,12 @@
 /**
  * pure-git — /worktrees command handler
  *
- * Subcommands: create <name> [base], list, clean <name>
+ * Subcommands: create <name> [base], list, clean <name>, status, cd <name>, prune
+ * Interactive browser with switch/create/delete/merge keybindings.
+ * Lifecycle hooks: onCreate, onSwitch, onBeforeRemove.
  */
 
+import { basename } from "node:path";
 import {
 	DynamicBorder,
 	type ExtensionAPI,
@@ -11,7 +14,7 @@ import {
 	SessionManager,
 } from "@mariozechner/pi-coding-agent";
 import { Container, type SelectItem, SelectList, Text } from "@mariozechner/pi-tui";
-import type { ExecFn } from "../services/git";
+import { getEffectiveConfig, getWorktreeRoot, hasHooks } from "../services/config";
 import {
 	type AheadBehind,
 	branchExists,
@@ -19,20 +22,27 @@ import {
 	createBranch,
 	createWorktree,
 	deleteBranch,
+	type ExecFn,
 	ensureWorktreeDirExcluded,
 	getAheadBehind,
 	getCurrentBranch,
 	getMainBranch,
 	getMainWorktreePath,
+	getProjectName,
 	getWorktreePath,
 	isGitRepo,
+	isWorktree,
 	isWorktreeDirty,
 	listWorktrees,
 	mergeBranch,
+	pruneWorktrees,
+	pruneWorktreesDry,
 	pushBranch,
 	removeWorktree,
 	type WorktreeInfo,
 } from "../services/git";
+import { runHook } from "../services/hooks";
+import { sanitizePathPart, type TemplateContext } from "../services/templates";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -68,6 +78,22 @@ function validateWorktreeName(name: string): string | null {
 	return null;
 }
 
+// ── Template context builder ─────────────────────────────────────────────────
+
+function buildTemplateContext(params: {
+	path: string;
+	name: string;
+	branch: string;
+	project: string;
+	mainWorktree: string;
+	sessionId?: string;
+}): TemplateContext {
+	return {
+		...params,
+		timestamp: new Date().toISOString().replace(/[:.]/g, "-"),
+	};
+}
+
 // ── Formatting ───────────────────────────────────────────────────────────────
 
 function formatWorktreeEntry(worktree: WorktreeInfo, aheadBehind?: AheadBehind, dirty?: boolean): string {
@@ -86,6 +112,121 @@ function formatWorktreeEntry(worktree: WorktreeInfo, aheadBehind?: AheadBehind, 
 	const abStrFormatted = abStr ? ` ${abStr}` : "";
 
 	return `  ${worktree.isCurrent ? "→" : " "} ${worktree.branch.padEnd(24)} ${worktree.path}${markerStr}${abStrFormatted}`;
+}
+
+// ── Subcommand: status ───────────────────────────────────────────────────────
+
+async function handleStatus(c: CommandContext): Promise<void> {
+	const { ctx, exec } = c;
+
+	if (!(await isGitRepo(exec, ctx.cwd))) {
+		ctx.ui.notify("Not in a git repository", "error");
+		return;
+	}
+
+	const isWt = await isWorktree(exec, ctx.cwd);
+	const mainPath = await getMainWorktreePath(exec, ctx.cwd);
+	const project = await getProjectName(exec, ctx.cwd);
+	const branch = await getCurrentBranch(exec, ctx.cwd);
+	const worktrees = await listWorktrees(exec, ctx.cwd);
+
+	const lines = [
+		`Project: ${project}`,
+		`Current path: ${ctx.cwd}`,
+		`Branch: ${branch}`,
+		`Is worktree: ${isWt ? "Yes" : "No (main repository)"}`,
+		`Main worktree: ${mainPath}`,
+		`Total worktrees: ${worktrees.length}`,
+	];
+
+	if (hasHooks(ctx.cwd, project)) {
+		const settings = getEffectiveConfig(ctx.cwd, project);
+		lines.push("");
+		lines.push("Hooks:");
+		if (settings.onCreate) lines.push(`  onCreate: ${settings.onCreate}`);
+		if (settings.onSwitch) lines.push(`  onSwitch: ${settings.onSwitch}`);
+		if (settings.onBeforeRemove) lines.push(`  onBeforeRemove: ${settings.onBeforeRemove}`);
+		if (settings.branchNameGenerator) lines.push(`  branchNameGenerator: ${settings.branchNameGenerator}`);
+	}
+
+	ctx.ui.notify(lines.join("\n"), "info");
+}
+
+// ── Subcommand: cd ───────────────────────────────────────────────────────────
+
+async function handleCd(c: CommandContext): Promise<void> {
+	const { ctx, exec } = c;
+	const name = c.args.trim();
+
+	if (!(await isGitRepo(exec, ctx.cwd))) {
+		ctx.ui.notify("Not in a git repository", "error");
+		return;
+	}
+
+	const worktrees = await listWorktrees(exec, ctx.cwd);
+	const mainPath = await getMainWorktreePath(exec, ctx.cwd);
+
+	if (!name) {
+		const main = worktrees.find((wt) => wt.isMain);
+		if (main) {
+			ctx.ui.notify(`Main worktree: ${main.path}`, "info");
+		}
+		return;
+	}
+
+	const project = await getProjectName(exec, ctx.cwd);
+	const wtRoot = getWorktreeRoot(ctx.cwd, project, mainPath);
+	const target = worktrees.find(
+		(wt) => basename(wt.path) === name || wt.path === name || wt.path === `${wtRoot}/${name}`,
+	);
+
+	if (!target) {
+		ctx.ui.notify(`Worktree not found: ${name}`, "error");
+		return;
+	}
+
+	ctx.ui.notify(`Worktree path: ${target.path}`, "info");
+}
+
+// ── Subcommand: prune ────────────────────────────────────────────────────────
+
+async function handlePrune(c: CommandContext): Promise<void> {
+	const { ctx, exec } = c;
+
+	if (!(await isGitRepo(exec, ctx.cwd))) {
+		ctx.ui.notify("Not in a git repository", "error");
+		return;
+	}
+
+	let dryRun: string;
+	try {
+		dryRun = await pruneWorktreesDry(exec, ctx.cwd);
+	} catch (err) {
+		ctx.ui.notify(`Failed to check stale worktrees: ${(err as Error).message}`, "error");
+		return;
+	}
+
+	if (!dryRun.trim()) {
+		ctx.ui.notify("No stale worktree references to prune", "info");
+		return;
+	}
+
+	const confirmed = await ctx.ui.confirm(
+		"Prune stale worktrees?",
+		`The following stale references will be removed:\n\n${dryRun}`,
+	);
+
+	if (!confirmed) {
+		ctx.ui.notify("Cancelled", "info");
+		return;
+	}
+
+	try {
+		await pruneWorktrees(exec, ctx.cwd);
+		ctx.ui.notify("✓ Stale worktree references pruned", "info");
+	} catch (err) {
+		ctx.ui.notify(`Failed to prune: ${(err as Error).message}`, "error");
+	}
 }
 
 // ── Subcommand: create ──────────────────────────────────────────────────────
@@ -107,6 +248,9 @@ async function handleCreate(c: CommandContext): Promise<void> {
 
 	// Determine base branch: default to current branch
 	const baseBranch = c.extra || (await getCurrentBranch(exec, ctx.cwd));
+	const mainPath = await getMainWorktreePath(exec, ctx.cwd);
+	const project = await getProjectName(exec, ctx.cwd);
+	const worktreePath = getWorktreePath(mainPath, name);
 
 	// Check if branch already exists
 	if (await branchExists(exec, name, ctx.cwd)) {
@@ -115,11 +259,39 @@ async function handleCreate(c: CommandContext): Promise<void> {
 	}
 
 	// Check if worktree directory already exists
-	const mainPath = await getMainWorktreePath(exec, ctx.cwd);
-	const worktreePath = getWorktreePath(mainPath, name);
 	const worktrees = await listWorktrees(exec, ctx.cwd);
 	const existing = worktrees.find((wt) => wt.path === worktreePath || wt.branch === name);
 	if (existing) {
+		// If we have an onSwitch hook and the user is in UI mode, offer to switch
+		const settings = getEffectiveConfig(ctx.cwd, project);
+		if (settings.onSwitch && ctx.hasUI) {
+			const shouldSwitch = await ctx.ui.confirm(
+				"Worktree already exists",
+				`Path: ${existing.path}\nBranch: ${existing.branch}\n\nSwitch to this worktree and run onSwitch?`,
+			);
+			if (!shouldSwitch) {
+				ctx.ui.notify("Cancelled", "info");
+				return;
+			}
+
+			const tmplCtx = buildTemplateContext({
+				path: existing.path,
+				name: basename(existing.path),
+				branch: existing.branch,
+				project,
+				mainWorktree: mainPath,
+				sessionId: sanitizePathPart(ctx.sessionManager?.getSessionId?.() ?? "session"),
+			});
+
+			const result = await runHook(tmplCtx, settings.onSwitch, exec, ctx.ui.notify.bind(ctx.ui), "onSwitch");
+			if (!result.success) {
+				ctx.ui.notify("onSwitch failed", "error");
+				return;
+			}
+			ctx.ui.notify(`Worktree path: ${existing.path}`, "info");
+			return;
+		}
+
 		ctx.ui.notify(`Worktree already exists: ${existing.path} (${existing.branch})`, "error");
 		return;
 	}
@@ -148,15 +320,24 @@ async function handleCreate(c: CommandContext): Promise<void> {
 	await ensureWorktreeDirExcluded(exec, ctx.cwd);
 
 	ctx.ui.notify(
-		[
-			`✓ Created worktree: ${name}`,
-			`  Branch: ${name} (from ${baseBranch})`,
-			`  Path:   ${worktreePath}`,
-			``,
-			`  cd ${worktreePath}`,
-		].join("\n"),
+		[`✓ Created worktree: ${name}`, `  Branch: ${name} (from ${baseBranch})`, `  Path:   ${worktreePath}`].join("\n"),
 		"info",
 	);
+
+	// Run onCreate hook if configured
+	const settings = getEffectiveConfig(ctx.cwd, project);
+	if (settings.onCreate) {
+		const tmplCtx = buildTemplateContext({
+			path: worktreePath,
+			name,
+			branch: name,
+			project,
+			mainWorktree: mainPath,
+			sessionId: sanitizePathPart(ctx.sessionManager?.getSessionId?.() ?? "session"),
+		});
+
+		await runHook(tmplCtx, settings.onCreate, exec, ctx.ui.notify.bind(ctx.ui), "onCreate");
+	}
 }
 
 // ── Subcommand: list ────────────────────────────────────────────────────────
@@ -210,6 +391,7 @@ async function handleClean(c: CommandContext): Promise<void> {
 
 	const worktrees = await listWorktrees(exec, ctx.cwd);
 	const mainPath = await getMainWorktreePath(exec, ctx.cwd);
+	const project = await getProjectName(exec, ctx.cwd);
 	const worktreePath = getWorktreePath(mainPath, name);
 
 	// Find target worktree
@@ -228,6 +410,31 @@ async function handleClean(c: CommandContext): Promise<void> {
 	if (target.isCurrent) {
 		ctx.ui.notify("Cannot remove the current worktree. Switch to another first.", "error");
 		return;
+	}
+
+	// Run onBeforeRemove hook if configured
+	const settings = getEffectiveConfig(ctx.cwd, project);
+	if (settings.onBeforeRemove) {
+		const tmplCtx = buildTemplateContext({
+			path: target.path,
+			name: basename(target.path),
+			branch: target.branch,
+			project,
+			mainWorktree: mainPath,
+			sessionId: sanitizePathPart(ctx.sessionManager?.getSessionId?.() ?? "session"),
+		});
+
+		const hookResult = await runHook(
+			tmplCtx,
+			settings.onBeforeRemove,
+			exec,
+			ctx.ui.notify.bind(ctx.ui),
+			"onBeforeRemove",
+		);
+		if (!hookResult.success) {
+			ctx.ui.notify("onBeforeRemove failed — removal blocked", "error");
+			return;
+		}
 	}
 
 	// Choose action
@@ -330,6 +537,9 @@ async function browseWorktrees(c: CommandContext): Promise<void> {
 	if (worktrees.length === 0) {
 		ctx.ui.notify("No worktrees found. Press 'c' to create one.", "info");
 	}
+
+	const project = await getProjectName(exec, ctx.cwd);
+	const settings = getEffectiveConfig(ctx.cwd, project);
 
 	// Main browser loop — refreshes after each action
 	while (true) {
@@ -443,6 +653,24 @@ async function browseWorktrees(c: CommandContext): Promise<void> {
 			const wtPath = target.worktree.path;
 			const wtBranch = target.worktree.branch;
 
+			// Run onSwitch hook if configured
+			if (settings.onSwitch) {
+				const tmplCtx = buildTemplateContext({
+					path: wtPath,
+					name: basename(wtPath),
+					branch: wtBranch,
+					project,
+					mainWorktree: await getMainWorktreePath(exec, ctx.cwd),
+					sessionId: sanitizePathPart(ctx.sessionManager?.getSessionId?.() ?? "session"),
+				});
+
+				const hookResult = await runHook(tmplCtx, settings.onSwitch, exec, ctx.ui.notify.bind(ctx.ui), "onSwitch");
+				if (!hookResult.success) {
+					ctx.ui.notify("onSwitch failed", "error");
+					continue;
+				}
+			}
+
 			// Find most recent session for this worktree's cwd
 			const sessions = await SessionManager.list(wtPath);
 			const session = sessions.sort((a, b) => b.modified.getTime() - a.modified.getTime())[0];
@@ -498,10 +726,35 @@ async function browseWorktrees(c: CommandContext): Promise<void> {
 			continue;
 		}
 
+		const mainPath = await getMainWorktreePath(exec, ctx.cwd);
 		const mainBranch2 = await getMainBranch(exec, ctx.cwd);
 
 		// ── Delete only ─────────────────────────────────────────────
 		if (result.action === "delete") {
+			// Run onBeforeRemove hook if configured
+			if (settings.onBeforeRemove) {
+				const tmplCtx = buildTemplateContext({
+					path: target.worktree.path,
+					name: basename(target.worktree.path),
+					branch: target.worktree.branch,
+					project,
+					mainWorktree: mainPath,
+					sessionId: sanitizePathPart(ctx.sessionManager?.getSessionId?.() ?? "session"),
+				});
+
+				const hookResult = await runHook(
+					tmplCtx,
+					settings.onBeforeRemove,
+					exec,
+					ctx.ui.notify.bind(ctx.ui),
+					"onBeforeRemove",
+				);
+				if (!hookResult.success) {
+					ctx.ui.notify("onBeforeRemove failed — removal blocked", "error");
+					continue;
+				}
+			}
+
 			const confirmed = await ctx.ui.confirm(
 				`Delete ${target.worktree.branch}?`,
 				`This will remove the worktree and delete the branch.\nNo merge will be performed.\n\nContinue?`,
@@ -561,6 +814,30 @@ async function browseWorktrees(c: CommandContext): Promise<void> {
 
 		// ── Merge + Delete ───────────────────────────────────────────
 		if (result.action === "merge_delete") {
+			// Run onBeforeRemove hook if configured
+			if (settings.onBeforeRemove) {
+				const tmplCtx = buildTemplateContext({
+					path: target.worktree.path,
+					name: basename(target.worktree.path),
+					branch: target.worktree.branch,
+					project,
+					mainWorktree: mainPath,
+					sessionId: sanitizePathPart(ctx.sessionManager?.getSessionId?.() ?? "session"),
+				});
+
+				const hookResult = await runHook(
+					tmplCtx,
+					settings.onBeforeRemove,
+					exec,
+					ctx.ui.notify.bind(ctx.ui),
+					"onBeforeRemove",
+				);
+				if (!hookResult.success) {
+					ctx.ui.notify("onBeforeRemove failed — removal blocked", "error");
+					continue;
+				}
+			}
+
 			const confirmed = await ctx.ui.confirm(
 				`Merge and delete ${target.worktree.branch}?`,
 				`This will merge into ${mainBranch2}, then remove the worktree and branch.\n\nContinue?`,
@@ -615,7 +892,7 @@ async function browseWorktrees(c: CommandContext): Promise<void> {
 
 export function registerWorktreesCommand(pi: ExtensionAPI, exec: ExecFn): void {
 	pi.registerCommand("worktrees", {
-		description: "Manage Git worktrees (browse/create/list/clean)",
+		description: "Manage Git worktrees (browse/create/list/clean/status/cd/prune)",
 		handler: async (args, ctx) => {
 			const parsed = parseArgs(args);
 
@@ -640,8 +917,22 @@ export function registerWorktreesCommand(pi: ExtensionAPI, exec: ExecFn): void {
 				case "rm":
 					await handleClean({ args: subArgs, ctx, exec, pi });
 					break;
+				case "status":
+				case "info":
+					await handleStatus({ args: "", ctx, exec, pi });
+					break;
+				case "cd":
+				case "path":
+					await handleCd({ args: subArgs, ctx, exec, pi });
+					break;
+				case "prune":
+					await handlePrune({ args: "", ctx, exec, pi });
+					break;
 				default:
-					ctx.ui.notify(`Unknown action: ${parsed.action}\nUsage: /worktrees [create|list|clean] [name]`, "error");
+					ctx.ui.notify(
+						`Unknown action: ${parsed.action}\nUsage: /worktrees [create|list|clean|status|cd|prune] [name]`,
+						"error",
+					);
 			}
 		},
 	});

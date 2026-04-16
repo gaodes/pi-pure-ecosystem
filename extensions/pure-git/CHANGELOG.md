@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0 (2026-04-16)
+
+- **Lifecycle hooks**: `onCreate`, `onSwitch`, `onBeforeRemove` — configurable commands that run automatically during worktree operations
+- **Template variables**: `{{path}}`, `{{name}}`, `{{branch}}`, `{{project}}`, `{{mainWorktree}}`, `{{prompt}}`
+- **Per-repo configuration**: `pure-git.json` with project-overrides-global resolution
+- **Branch name generator**: spawns `pi` subprocess to generate branch names (creates a session you can switch to)
+- `/worktrees status` — Show current worktree info (project, branch, isWorktree, hooks)
+- `/worktrees cd <name>` — Print path to worktree
+- `/worktrees prune` — Clean up stale worktree references with dry-run preview
+- Browser: `onSwitch` hook runs on switch, `onBeforeRemove` blocks removal on failure
+- `onBeforeRemove` is blocking — non-zero exit prevents worktree removal
+- Hook commands accept string or string[] (run sequentially, stop on first failure)
+
 ## 0.2.0 (2026-04-16)
 
 - Interactive worktree browser (invoked with bare `/worktrees`)

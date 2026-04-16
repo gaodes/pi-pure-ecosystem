@@ -107,6 +107,25 @@ export async function getMainBranch(exec: ExecFn, cwd: string): Promise<string> 
 	}
 }
 
+export async function getRemoteUrl(exec: ExecFn, cwd: string, remote = "origin"): Promise<string | null> {
+	try {
+		return await git(exec, ["remote", "get-url", remote], cwd);
+	} catch {
+		return null;
+	}
+}
+
+export async function isWorktree(_exec: ExecFn, cwd: string): Promise<boolean> {
+	try {
+		const gitPath = join(cwd, ".git");
+		if (!existsSync(gitPath)) return false;
+		const { statSync } = await import("node:fs");
+		return statSync(gitPath).isFile();
+	} catch {
+		return false;
+	}
+}
+
 // ── Branch Operations ───────────────────────────────────────────────────────
 
 export async function branchExists(exec: ExecFn, branch: string, cwd: string): Promise<boolean> {
@@ -270,8 +289,17 @@ export async function ensureWorktreeDirExcluded(exec: ExecFn, cwd: string): Prom
 }
 
 // ── Stash Operations ────────────────────────────────────────────────────────
-
 export async function stash(exec: ExecFn, cwd: string): Promise<boolean> {
 	const result = await gitRaw(exec, ["stash", "--include-untracked"], cwd);
 	return result.code === 0;
+}
+
+// ── Prune Operations ─────────────────────────────────────────────────────────
+
+export async function pruneWorktreesDry(exec: ExecFn, cwd: string): Promise<string> {
+	return await git(exec, ["worktree", "prune", "--dry-run"], cwd);
+}
+
+export async function pruneWorktrees(exec: ExecFn, cwd: string): Promise<void> {
+	await git(exec, ["worktree", "prune"], cwd);
 }

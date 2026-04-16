@@ -21,14 +21,12 @@ Port patterns from `qualiti/pi-git-commands-extension`:
 - **Git hooks manager** — Install pre-commit, commit-msg, pre-push hooks from templates (from `@artale/pi-git-hooks`)
 - Per-project hook configuration via `.pi/settings.json`
 
-## Phase 5: Advanced Worktree Features
+## Future worktree enhancements
 
-Graduated from `@zenobius/pi-worktrees`:
+See [NOT-PORTED.md](./NOT-PORTED.md) for features from `@zenobius/pi-worktrees` that were evaluated but skipped:
 
-- Per-repo settings via `.pi/settings.json` (no external config service)
-- Template variables: `{{path}}`, `{{name}}`, `{{branch}}`, `{{project}}`
-- Lifecycle hooks: `onCreate`, `onSwitch`, `onBeforeRemove`
-- Branch name generator via Pi AI
-- `/worktrees status` — Current worktree info with ahead/behind
-- `/worktrees cd <name>` — Print path to worktree
-- `/worktrees prune` — Clean up stale worktree references
+- Configurable hook display templates and ANSI colors
+- Logfile support for hook output
+- Interactive config setup wizard (`cmdInit`, `cmdSettings`)
+- `StatusIndicator` spinner class
+- Real-time command output streaming in hooks
