@@ -1,21 +1,17 @@
 {
-  "name": "@gaodes/pi-cron",
-  "version": "0.2.0",
-  "description": "Schedule recurring and one-shot agent prompts for the Pi coding agent",
-  "keywords": ["pi-package", "pi-extension", "pi", "cron", "scheduler"],
+  "name": "@gaodes/pi-sessions",
+  "version": "0.5.1",
+  "description": "Auto-name, browse, and resume Pi coding agent sessions with emoji-prefixed names",
+  "keywords": ["pi-package", "pi-extension", "pi", "sessions", "resume"],
   "license": "MIT",
   "author": "gaodes",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gaodes/pi-pure-ecosystem.git",
-    "directory": "extensions/pure-cron"
+    "directory": "extensions/pure-sessions"
   },
   "pi": {
     "extensions": ["./index.ts"]
-  },
-  "dependencies": {
-    "croner": "^8.1.2",
-    "nanoid": "^5.1.7"
   },
   "peerDependencies": {
     "@mariozechner/pi-ai": "*",

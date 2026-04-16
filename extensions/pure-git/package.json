@@ -1,30 +1,24 @@
 {
-  "name": "@gaodes/pi-cron",
-  "version": "0.2.0",
-  "description": "Schedule recurring and one-shot agent prompts for the Pi coding agent",
-  "keywords": ["pi-package", "pi-extension", "pi", "cron", "scheduler"],
+  "name": "@gaodes/pi-git",
+  "version": "0.1.0",
+  "description": "Git worktree management for the Pi coding agent",
+  "keywords": ["pi-package", "pi-extension", "pi", "git", "worktree"],
   "license": "MIT",
   "author": "gaodes",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gaodes/pi-pure-ecosystem.git",
-    "directory": "extensions/pure-cron"
+    "directory": "extensions/pure-git"
   },
   "pi": {
     "extensions": ["./index.ts"]
   },
-  "dependencies": {
-    "croner": "^8.1.2",
-    "nanoid": "^5.1.7"
-  },
   "peerDependencies": {
-    "@mariozechner/pi-ai": "*",
     "@mariozechner/pi-coding-agent": "*",
     "@mariozechner/pi-tui": "*",
     "@sinclair/typebox": "*"
   },
   "peerDependenciesMeta": {
-    "@mariozechner/pi-ai": { "optional": true },
     "@mariozechner/pi-coding-agent": { "optional": true },
     "@mariozechner/pi-tui": { "optional": true },
     "@sinclair/typebox": { "optional": true }

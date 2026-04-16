@@ -1,0 +1,24 @@
+{
+  "name": "@gaodes/pi-model-switch",
+  "version": "0.1.0",
+  "description": "Model listing, search, and switching tool for the Pi coding agent",
+  "keywords": ["pi-package", "pi-extension", "pi", "model", "switch"],
+  "license": "MIT",
+  "author": "gaodes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaodes/pi-pure-ecosystem.git",
+    "directory": "extensions/pure-model-switch"
+  },
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*",
+    "@sinclair/typebox": "*"
+  },
+  "peerDependenciesMeta": {
+    "@mariozechner/pi-coding-agent": { "optional": true },
+    "@sinclair/typebox": { "optional": true }
+  }
+}

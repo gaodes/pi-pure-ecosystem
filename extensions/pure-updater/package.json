@@ -1,0 +1,24 @@
+{
+  "name": "@gaodes/pi-updater",
+  "version": "0.2.0",
+  "description": "Check, prompt, and install Pi coding agent updates with impact reports",
+  "keywords": ["pi-package", "pi-extension", "pi", "update", "updater"],
+  "license": "MIT",
+  "author": "gaodes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaodes/pi-pure-ecosystem.git",
+    "directory": "extensions/pure-updater"
+  },
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*",
+    "@sinclair/typebox": "*"
+  },
+  "peerDependenciesMeta": {
+    "@mariozechner/pi-coding-agent": { "optional": true },
+    "@sinclair/typebox": { "optional": true }
+  }
+}
