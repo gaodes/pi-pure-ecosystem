@@ -48,37 +48,59 @@ For each upstream change, decide:
 
 Report findings to the user before making changes.
 
-### 4. Make changes
+### 4. Create worktree and apply changes
 
-Apply updates to `extensions/pure-<name>/` following the same conventions as the original fork:
+All upstream syncs are done in a worktree to keep main clean.
+
+```bash
+/worktrees create <branch-name>
+```
+
+Set up the worktree's `.pi/settings.json` to load the extension:
+```json
+{ "packages": ["./extensions/pure-<name>"] }
+```
+
+Write this to `.worktrees/<branch-name>/.pi/settings.json`.
+
+If the extension is **globally active**, also remove it from `~/.pi/agent/settings.json`.
+
+Apply updates to the worktree's `extensions/pure-<name>/` following the same conventions as the original fork:
 
 - Keep inline path helpers, pure-* naming, project-overrides-global config
 - Maintain our README/CHANGELOG format
 - Update CHANGELOG.md with changes brought from upstream
 
-### 5. Check, test, and restore activation
+Commit to the feature branch as you go.
 
-**Before editing, determine the extension's activation tier:**
+### 5. Test
 
-- **Globally active** (listed in `~/.pi/agent/settings.json`):
-  1. Remove it from `~/.pi/agent/settings.json`.
-  2. Add it to `.pi/settings.json`.
-  3. `/reload` and develop.
+**Agent-side smoke test** (subprocess, safe from anywhere):
+```bash
+pi -e "$PWD/.worktrees/<branch>/extensions/pure-<name>" -ne -p "reply of just ok" 2>&1 | tail -5
+```
 
-- **Locally active** (already in `.pi/settings.json`):
-  1. Edit directly.
-  2. `/reload` and develop.
+**User-side functional test** (session switch):
+1. Run `biome check --write --unsafe` on the worktree files.
+2. Call the `switch_worktree` tool with the branch name.
+3. Pi session switches to the worktree — user tests the extension.
+4. User confirms working (or reports issues).
+5. Switch back to main: `switch_worktree` with branch `main`, or `/worktrees switch main`.
 
-**When finished, run the three testing gates:**
+Do not proceed to merge until the user confirms the functional test.
 
-1. `biome check --write --unsafe extensions/pure-<name>/`
-2. **Smoke-test**: `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok" 2>&1 | tail -5`
-3. Ask the user to `/reload` and **functionally test**. Do not proceed until confirmed working.
-4. **Commit checkpoint**: `git add . && git commit -m "pure-<name>: sync with upstream"`
+### 6. Merge and restore activation
 
-**Restore activation:**
-- If it was globally active, remove it from `.pi/settings.json` and add it back to `~/.pi/agent/settings.json`. Verify global load with `/reload`, then `git push`.
-- If it was locally active (baseline), keep it in `.pi/settings.json`.
+```bash
+/worktrees clean <branch-name>
+```
+
+Choose **merge and delete** to merge the branch into main and clean up.
+
+**Restore activation if the extension was globally active:**
+1. Add it back to `~/.pi/agent/settings.json`
+2. `/reload` to verify global load
+3. `git push`
 
 ---
 
@@ -124,15 +146,17 @@ This skill uses the same reference files as `create-pure-extension`:
 - [ ] Found primary source from README.md → Sources / Inspiration
 - [ ] Checked upstream for changes (cloned/fetched, compared, noted differences)
 - [ ] Decided what to cherry-pick / skip / adapt
+- [ ] Created worktree for the sync
+- [ ] Set up worktree's `.pi/settings.json` with extension path
+- [ ] Removed globally-active extension from `~/.pi/agent/settings.json` (if applicable)
 - [ ] Applied changes while keeping pure-* conventions
 - [ ] Updated CHANGELOG.md with upstream sync entry
 - [ ] `biome check` passes with zero errors
-- [ ] Smoke-tested: `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok"` exits 0
-- [ ] User confirmed functional test
-- [ ] Commit checkpoint: `git add . && git commit -m "pure-<name>: sync with upstream"`
+- [ ] Smoke-tested in worktree subprocess
+- [ ] User confirmed functional test via `switch_worktree`
+- [ ] Merged to main via `/worktrees clean`
 
 **Restore activation if globally active:**
-- [ ] Removed from `.pi/settings.json`
 - [ ] Added back to `~/.pi/agent/settings.json`
 - [ ] Global load verified with `/reload`
 - [ ] Pushed to remote

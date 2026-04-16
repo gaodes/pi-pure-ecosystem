@@ -53,7 +53,7 @@ When working on an extension, if it is globally active, temporarily move it to `
 | --------------------- | --------------- | ------------- | ----------------------------------------------------------------- |
 | `pure-cron`           | `pure_cron`     | `/cron`       | Schedule recurring/one-shot agent prompts                         |
 | `pure-devkit`         | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | `/devkit` | Tools and skills for Pi extension development |
-| `pure-git`            | —                   | `/worktrees` | Git worktree management: create, list, clean |
+| `pure-git`            | `switch_worktree`    | `/worktrees` | Git worktree management: create, list, clean, switch |
 | `pure-github`         | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* `/gh-status`, `/gh-pr-create`, `/gh-pr-fix`, `/gh-pr-merge` | GitHub PR/repo/workflow tools |
 | `pure-model-switch`   | `switch_model`  | —             | List, search, and switch models with aliases                      |
 | `pure-sessions`       | —               | `/sesh`       | Auto-name sessions, browse/resume/rename                          |
@@ -178,23 +178,35 @@ This keeps changes isolated to the intended extension within the mono repo.
 
 ### Testing in Worktrees
 
-Each worktree is a full copy of the repo with its own `.pi/` directory. Two testing paths:
+Each worktree is a full copy of the repo with its own `.pi/` directory.
 
-**Agent-side (automated, safe from anywhere):**
+**Agent-side smoke test** (automated, safe from anywhere):
 ```bash
-# Smoke test in worktree — launches separate Pi subprocess
 pi -e "$PWD/.worktrees/<branch>/extensions/pure-<name>" -ne -p "reply of just ok" 2>&1 | tail -5
 ```
 
-**User-side (manual, in worktree context):**
-1. Set up the worktree's `.pi/settings.json` with a local path to the extension.
-2. User switches to the worktree: `cd .worktrees/<branch>` then `pi`, or uses `/worktrees` browser.
-3. User tests the modified extension in that isolated context.
-4. Main worktree is completely unaffected until merge.
+**User-side functional test** (via `switch_worktree` tool):
+1. Agent sets up the worktree's `.pi/settings.json` with the extension path.
+2. Agent calls the `switch_worktree` tool with the branch name.
+3. Pi session switches to the worktree — user tests the extension there.
+4. Agent or user switches back: `switch_worktree` with `main`, or `/worktrees switch main`.
+5. Main worktree is completely unaffected until merge.
 
-**User-side (manual, in main context):**
+This is the preferred testing path. The agent can hand off testing to the user by switching the session, and switch back when done.
+
+**Fallback: user-side in main context** (only if no worktree session exists):
 1. Temporarily point main's `.pi/settings.json` to the worktree extension path.
 2. User `/reload` and tests.
 3. Restore original path when done.
 
-Prefer the worktree-context approach — it's zero-risk to main.
+### Worktree `.pi/settings.json` setup
+
+When developing in a worktree, the agent must create `.pi/settings.json` inside the worktree to load the extension being developed:
+
+```json
+{
+  "packages": ["./extensions/pure-<name>"]
+}
+```
+
+This lets Pi load the extension from the worktree copy, not from main.

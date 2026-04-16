@@ -138,11 +138,20 @@ pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok" 2>&1 | tail -5
 
 **Functional test:** Add to `.pi/settings.json`, `/reload`, test.
 
+**If developing in a worktree:**
+1. Smoke test: `pi -e "$PWD/.worktrees/<branch>/extensions/pure-<name>" -ne -p "reply of just ok"`
+2. Functional test: call `switch_worktree` tool to switch session to worktree, user tests, switch back.
+
 ### 6. Commit and promote
 
 ```bash
 git add . && git commit -m "pure-<name>: initial creation"
 git push
+```
+
+**If in a worktree**, merge first:
+```bash
+/worktrees clean <branch-name>
 ```
 
 **Promote:**
