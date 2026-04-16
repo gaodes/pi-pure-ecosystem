@@ -34,7 +34,7 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 - `pure-cron`, `pure-github`, `pure-model-switch`, `pure-sessions`, `pure-theme`, `pure-updater`
 
 **Locally active** — loaded from source paths in `.pi/settings.json`:
-- `pure-statusline`, `pure-vibes`, `pure-devkit`
+- `pure-statusline`, `pure-vibes`, `pi-devkit`
 
 When working on an extension, if it is globally active, temporarily move it to `.pi/settings.json`. When finished, restore it to `~/.pi/agent/settings.json`.
 
@@ -52,7 +52,7 @@ When working on an extension, if it is globally active, temporarily move it to `
 | Extension              | Tool            | Command       | Purpose                                                           |
 | --------------------- | --------------- | ------------- | ----------------------------------------------------------------- |
 | `pure-cron`           | `pure_cron`     | `/cron`       | Schedule recurring/one-shot agent prompts                         |
-| `pure-devkit`         | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | `/devkit` | Tools and skills for Pi extension development |
+| `pi-devkit`           | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | `/devkit` | Tools and skills for Pi extension development |
 | `pure-git`            | `switch_worktree`    | `/worktrees` | Git worktree management: create, list, clean, switch |
 | `pure-github`         | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* `/gh-status`, `/gh-pr-create`, `/gh-pr-fix`, `/gh-pr-merge` | GitHub PR/repo/workflow tools |
 | `pure-model-switch`   | `switch_model`  | —             | List, search, and switch models with aliases                      |

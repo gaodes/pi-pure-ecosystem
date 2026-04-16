@@ -2,11 +2,8 @@
   "$comment": "Project-level settings for pi-pure-ecosystem development.",
   "pure": {
     "persona": {
-      "id": "Pi Dev"
+      "id": "Pure Dev"
     }
   },
-  "packages": [
-    "../extensions/pure-vibes",
-    "../extensions/pure-devkit"
-  ]
+  "packages": ["../extensions/pure-vibes", "../extensions/pi-devkit"]
 }

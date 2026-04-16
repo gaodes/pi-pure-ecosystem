@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0] - 2026-04-16
+
+### Changed
+
+- Renamed extension from `pure-devkit` to `pi-devkit` — generic tooling, usable across all Pi projects
+- Moved pure-ecosystem-specific skills (`create-pure-extension`, `import-pure-extension`, `update-pure-extension`, `enhance-pure-extension`) to the pure-ecosystem repo's `.pi/skills/` directory
+- Cleaned README and docs of pure-ecosystem-specific references
+
 ## [1.0.4] - 2026-04-16
 
 ### Changed

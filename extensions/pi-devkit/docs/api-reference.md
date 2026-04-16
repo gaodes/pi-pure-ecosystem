@@ -1,7 +1,6 @@
 # Pi Coding Agent API Reference
 
-> Complete reference of utilities, tools, hooks, and APIs available in Pi Coding Agent v0.67.4.  
-> For use in `pure-devkit` and pure-ecosystem extensions.
+> Complete reference of utilities, tools, hooks, and APIs available in Pi Coding Agent v0.67.4.
 
 ---
 
@@ -615,4 +614,4 @@ All built-in examples live in the Pi package at `examples/extensions/`.
 
 ---
 
-*Generated for pure-devkit. Last updated: 2026-04-16*
+*Generated for pi-devkit. Last updated: 2026-04-16*

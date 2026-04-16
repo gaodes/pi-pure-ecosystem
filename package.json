@@ -26,7 +26,7 @@
       "./extensions/pure-updater/index.ts",
       "./extensions/pure-vibes/index.ts",
       "./extensions/pure-git/index.ts",
-      "./extensions/pure-devkit/index.ts"
+      "./extensions/pi-devkit/index.ts"
     ],
     "themes": ["./themes"]
   }

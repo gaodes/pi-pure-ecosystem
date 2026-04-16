@@ -1,6 +1,6 @@
-# pure-devkit
+# pi-devkit
 
-Tools, commands, and skills for developing Pi extensions. Forked from [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) and adapted for the pure-ecosystem.
+Tools, commands, and skills for developing Pi extensions. Forked from [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit).
 
 ## Tools
 
@@ -22,24 +22,11 @@ Tools, commands, and skills for developing Pi extensions. Forked from [`@aliou/p
 
 | Skill | Description |
 |-------|-------------|
-| `create-pure-extension` | Build a new extension from scratch |
-| `import-pure-extension` | Import/fork an external extension |
-| `update-pure-extension` | Sync with upstream sources |
-| `enhance-pure-extension` | Add features or fix bugs |
-| `demo-setup` | Set up demo environments |
-
-## When to Use Each Skill
-
-| Request | Use |
-|----------|-----|
-| Build something new from scratch | `create-pure-extension` |
-| Fork an existing external extension | `import-pure-extension` |
-| Sync with upstream changes | `update-pure-extension` |
-| Modify an extension we own | `enhance-pure-extension` |
+| `demo-setup` | Set up demo environments for recording extension previews |
 
 ## Reference Files
 
-All skills share detailed reference files:
+The bundled skill shares detailed reference files:
 
 | File | Content |
 |------|---------|
