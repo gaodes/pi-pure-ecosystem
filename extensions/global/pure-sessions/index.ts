@@ -1432,8 +1432,12 @@ export default function (pi: ExtensionAPI) {
 	// session_switch is not a real Pi event —
 	// session_start fires on resume/switch already, covering this case
 
-	const renameFromQuery = async (query: string, ctx: ExtensionContext): Promise<void> => {
-		const config = loadConfig(ctx.cwd);
+	const renameFromQuery = async (
+		query: string,
+		ctx: ExtensionContext,
+		configOverride?: Partial<ResolvedConfig>,
+	): Promise<void> => {
+		const config = { ...loadConfig(ctx.cwd), ...configOverride };
 		if (!config.enabled) return;
 
 		if (pi.getSessionName()) {
@@ -1514,8 +1518,7 @@ export default function (pi: ExtensionAPI) {
 		}
 
 		debugNotify(ctx, config, `[pure-sessions] agent_end: naming from conversation summary`);
-		const regenConfig = { ...config, prompt: config.regenPrompt };
-		void renameFromQuery(summary, regenConfig, ctx);
+		void renameFromQuery(summary, ctx, { prompt: config.regenPrompt });
 	});
 
 	// ============================================================================
