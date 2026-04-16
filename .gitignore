@@ -5,4 +5,7 @@ node_modules/
 # Runtime state recreated by extensions
 .pi/pure/
 
+# Git worktrees (managed by pure-git)
+.worktrees/
+
 # All extensions are tracked in this repo.
