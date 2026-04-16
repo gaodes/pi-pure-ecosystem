@@ -20,6 +20,10 @@
 - Nerd Font auto-detection with ASCII fallback
 - `/statusline` command for config management
 
+### Changed
+
+- `context_pct` and `thinking` segments now render colored but faded (blended toward dim) using the same token family (`thinking_minimal` / `thinking_medium` / `thinking_high`) so intensity is consistent across both
+
 ### Design
 
 - Inspired by [Starship](https://starship.rs/): per-segment config with style/symbol/disabled

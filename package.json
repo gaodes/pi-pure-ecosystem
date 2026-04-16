@@ -17,15 +17,15 @@
   },
   "pi": {
     "extensions": [
-      "./extensions/global/pure-cron/index.ts",
-      "./extensions/global/pure-github/index.ts",
-      "./extensions/global/pure-model-switch/index.ts",
-      "./extensions/global/pure-sessions/index.ts",
-      "./extensions/global/pure-statusline/index.ts",
-      "./extensions/global/pure-theme/index.ts",
-      "./extensions/global/pure-updater/index.ts",
-      "./extensions/global/pure-vibes/index.ts",
-      "./extensions/project/pure-devkit/index.ts"
+      "./extensions/pure-cron/index.ts",
+      "./extensions/pure-github/index.ts",
+      "./extensions/pure-model-switch/index.ts",
+      "./extensions/pure-sessions/index.ts",
+      "./extensions/pure-statusline/index.ts",
+      "./extensions/pure-theme/index.ts",
+      "./extensions/pure-updater/index.ts",
+      "./extensions/pure-vibes/index.ts",
+      "./extensions/pure-devkit/index.ts"
     ],
     "themes": ["./themes"]
   }

@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["extensions/{global,project,workspace,shared}/**/*.ts"]
+		"includes": ["extensions/**/*.ts"]
 	},
 	"formatter": {
 		"enabled": true,

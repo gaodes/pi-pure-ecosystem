@@ -8,50 +8,14 @@ This is the **development workspace**. Extensions are sourced as a git package (
 
 > **For detailed step-by-step instructions** on creating, forking, updating, or promoting extensions, use the **`create-pure-extension`** skill.
 
-## Pi docs — always read first
-
-When working on Pi internals, read the Pi docs before implementing:
-
-- Main: `/opt/homebrew/lib/node_modules/@mariozechner/pi-coding-agent/README.md`
-- Docs: `/opt/homebrew/lib/node_modules/@mariozechner/pi-coding-agent/docs/`
-- Examples: `/opt/homebrew/lib/node_modules/@mariozechner/pi-coding-agent/examples/`
-- Follow any linked `.md` files in those docs.
-
-## Pi dev kit — project scope
-
-Forked from [`@aliou/pi-dev-kit`](https://www.npmjs.com/package/@aliou/pi-dev-kit), the **pure-devkit** extension provides tools, commands, and skills for building Pi extensions.
-
-**Always use these tools** instead of manual discovery:
-
-| Tool | Purpose |
-|------|----------|
-| `pi_docs` | List Pi documentation files (README, docs/, examples/) |
-| `pi_changelog` / `pi_changelog_versions` | Read Pi changelog entries (local or fetch from GitHub) |
-| `pi_version` | Get the currently running Pi version |
-| `detect_package_manager` | Detect the project's package manager |
-
-**Skills**:
-- `pi-extension` — comprehensive reference (12 reference files) for creating, updating, and publishing extensions.
-- `create-pure-extension` — fork-based and from-scratch workflows for creating pure-* extensions.
-- `demo-setup` — set up demo environments for recording extension previews.
-
-**Command**: `/devkit [VERSION]` — guided workflow to update Pi extensions to a target version.
-
 ## Project structure
 
 ```
 pi-pure-ecosystem/
 ├── .pi/
 │   └── settings.json       # Local source-path overrides
-├── extensions/              # ← canonical source
-│   ├── global/
-│   │   └── pure-<name>/
-│   ├── project/
-│   │   └── pure-<name>/
-│   ├── workspace/
-│   │   └── pure-<name>/
-│   └── shared/
-│       └── pure-<name>/
+├── extensions/              # ← flat, all extensions here
+│   └── pure-<name>/        # one directory per extension
 ├── themes/
 ├── biome.json
 ├── .gitignore
@@ -59,22 +23,13 @@ pi-pure-ecosystem/
 └── README.md
 ```
 
-> All extensions are tracked in Git and listed in the root `package.json` `pi.extensions` manifest from creation.
-
 ### Activation tiers (base state)
 
 **Globally active** — loaded from the git package in `~/.pi/agent/settings.json`:
-- `pure-cron`
-- `pure-github`
-- `pure-model-switch`
-- `pure-sessions`
-- `pure-theme`
-- `pure-updater`
+- `pure-cron`, `pure-github`, `pure-model-switch`, `pure-sessions`, `pure-theme`, `pure-updater`
 
 **Locally active** — loaded from source paths in `.pi/settings.json`:
-- `pure-statusline`
-- `pure-vibes`
-- `pure-devkit`
+- `pure-statusline`, `pure-vibes`, `pure-devkit`
 
 When working on an extension, if it is globally active, temporarily move it to `.pi/settings.json`. When finished, restore it to `~/.pi/agent/settings.json`.
 
@@ -100,28 +55,6 @@ When working on an extension, if it is globally active, temporarily move it to `
 | `pure-theme`          | —               | `/theme`      | Sync theme with system dark/light mode                            |
 | `pure-updater`        | —               | `/update`     | Check for pi updates, prompt on new versions, install and restart |
 | `pure-vibes`          | —               | `/vibe`       | AI-generated themed working messages                              |
-
-### Extension conventions
-
-- **Name**: `pure-<name>` (directory, config file, widget ID, message type, storage paths)
-- **Tool/command names**: prefer short descriptive names; fall back to `pure_<name>` or `/pure-<name>` only if nothing better fits.
-- **Structure**: single `index.ts` entry point. Split only when readability clearly benefits.
-- **package.json** (per-extension): only if npm dependencies are needed. Zero-dependency extensions omit it.
-- **Self-contained**: inline path helpers, no cross-extension dependencies.
-- **TypeBox schemas**: use `@sinclair/typebox` (`Type`, `Static`) for tool parameters.
-- **Settings namespace**: `pure.<name>.*`
-- **Storage paths**:
-  - Global: `~/.pi/agent/pure/{config,cache}/pure-<name>.json`
-  - Project: `<project>/.pi/pure/{config,cache}/pure-<name>.json`
-- **Config reads**: project first, fall back to global.
-- **Scaffold global config** on first load if missing. Never scaffold project config (opt-in).
-- **Auto-migrate** from old flat paths on first load.
-- **CHANGELOG.md**: GitHub-style (`## [version] - YYYY-MM-DD`). Update when behavior changes.
-- **README.md**: must include a **Sources / Inspiration** section. For forked extensions, the first linked repo is the primary upstream source.
-
-### Creating new extensions
-
-Read the **`create-pure-extension`** skill for fork-based and from-scratch workflows. It covers interviewing, cloning upstream sources, renaming to pure-* conventions, adding inline path helpers, README/CHANGELOG scaffolding, local testing, and promotion.
 
 ## Key Pi API packages
 
@@ -191,7 +124,7 @@ Zero errors required. Warnings acceptable with inline suppressions.
 3. Update `README.md` if behavior changed
 4. Listed in root `package.json` `pi.extensions`
 5. Only include per-extension `package.json` if deps are needed
-6. Smoke-test (isolated subprocess): `pi -e "$PWD/extensions/<scope>/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5`
+6. Smoke-test (isolated subprocess): `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5`
 7. Commit after significant changes
 8. Push when a feature is complete or at user request
 9. Restore globally-active extensions to `~/.pi/agent/settings.json`

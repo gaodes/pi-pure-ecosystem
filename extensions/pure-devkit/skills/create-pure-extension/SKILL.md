@@ -13,7 +13,25 @@ Follow the project `AGENTS.md` design philosophy while using this skill:
 
 Two workflows: **fork-based** (inspired by existing extensions) or **from-scratch** (new idea). Use the fork-based workflow unless the user explicitly wants something original.
 
-> **New workflow baseline:** All extensions are tracked in Git and listed in `package.json` from creation. Activation is controlled by which `settings.json` references them: **global** `~/.pi/agent/settings.json` (git package) or **local** `.pi/settings.json` (source path). There is no `.gitignore` phase.
+> **Workflow baseline:** All extensions live in `extensions/pure-<name>/` and are tracked in Git from creation. Activation is controlled by which `settings.json` references them: **global** `~/.pi/agent/settings.json` (git package) or **local** `.pi/settings.json` (source path). There is no `.gitignore` phase.
+
+## Extension conventions
+
+- **Name**: `pure-<name>` (directory, config file, widget ID, message type, storage paths)
+- **Tool/command names**: prefer short descriptive names; fall back to `pure_<name>` or `/pure-<name>` only if nothing better fits.
+- **Structure**: single `index.ts` entry point. Split only when readability clearly benefits.
+- **package.json** (per-extension): only if npm dependencies are needed. Zero-dependency extensions omit it.
+- **Self-contained**: inline path helpers, no cross-extension dependencies.
+- **TypeBox schemas**: use `@sinclair/typebox` (`Type`, `Static`) for tool parameters.
+- **Settings namespace**: `pure.<name>.*`
+- **Storage paths**:
+  - Global: `~/.pi/agent/pure/{config,cache}/pure-<name>.json`
+  - Project: `<project>/.pi/pure/{config,cache}/pure-<name>.json`
+- **Config reads**: project first, fall back to global.
+- **Scaffold global config** on first load if missing. Never scaffold project config (opt-in).
+- **Auto-migrate** from old flat paths on first load.
+- **CHANGELOG.md**: GitHub-style (`## [version] - YYYY-MM-DD`). Update when behavior changes.
+- **README.md**: must include a **Sources / Inspiration** section. For forked extensions, the first linked repo is the primary upstream source.
 
 ## Workflow A: Fork-Based Creation
 
@@ -36,20 +54,20 @@ Before modifying anything significant, read the `pi-extension` skill reference f
 ```bash
 # Clone the primary inspiration into the project
 git clone <repo-url> /tmp/<source-name>
-cp -R /tmp/<source-name> extensions/<scope>/pure-<name>
+cp -R /tmp/<source-name> extensions/pure-<name>
 ```
 
 **Stage A — test the primary source as-is.** Do not rename or refactor yet. First, verify the upstream clone actually loads:
 
-1. **Add to `package.json` manifest**: append `"./extensions/<scope>/pure-<name>/index.ts"` to `pi.extensions`.
+1. **Add to `package.json` manifest**: append `"./extensions/pure-<name>/index.ts"` to `pi.extensions`.
 2. Add a local path reference in `.pi/settings.json`:
 ```json
 {
-  "packages": ["../extensions/<scope>/pure-<name>"]
+  "packages": ["../extensions/pure-<name>"]
 }
 ```
 
-Then ask the user to `/reload` and test. Wait for confirmation before proceeding.
+Then run the smoke test (see below) and ask the user to `/reload` for functional testing. Wait for confirmation before proceeding.
 
 ### 3. Rename to pure-* conventions
 
@@ -153,19 +171,19 @@ Only include the helpers the extension actually needs:
 ### 7. Check, format, and lint
 
 ```bash
-biome check --write --unsafe extensions/<scope>/pure-<name>/
+biome check --write --unsafe extensions/pure-<name>/
 ```
 
 Fix all errors. Warnings acceptable if the rule is already disabled project-wide.
 
-### 8. Local testing (Stage B)
+### 8. Local testing
 
 After renaming, cleanup, path-helper work, and docs, run the extension through three gates before promotion.
 
 The extension should already be referenced in `.pi/settings.json` from step 2. If not, add it:
 ```json
 {
-  "packages": ["../extensions/<scope>/pure-<name>"]
+  "packages": ["../extensions/pure-<name>"]
 }
 ```
 
@@ -174,12 +192,11 @@ The extension should already be referenced in `.pi/settings.json` from step 2. I
 This test spins up an isolated Pi subprocess with only the extension being tested. It catches load-time crashes (SyntaxError, missing imports, bad schemas, undefined references) **without risking the running terminal**.
 
 ```bash
-EXT_DIR="extensions/<scope>/pure-<name>"
-pi -e "$PWD/$EXT_DIR" -ne -p "reply with just ok" 2>&1 | tail -5
+pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5
 ```
 
 What this does:
-- `-e $PWD/$EXT_DIR` — load only this extension by directory path
+- `-e $PWD/extensions/pure-<name>` — load only this extension by directory path
 - `-ne` — disable all other extensions (project settings, global packages, everything)
 - `-p` — pipe mode, run one prompt and exit
 
@@ -246,20 +263,19 @@ When the user wants something entirely new.
 
 Ask these questions before writing any code:
 
-1. **What scope?** — `global` (always loaded), `project` (opt-in per-project), `workspace` (opt-in per-workspace), or `shared` (always, utilities)?
-2. **What does the extension do?** — one-sentence goal
-3. **What triggers it?** — command, tool, event hook, or automatic?
-4. **Does it need persistence?** — config file, cache, or stateless?
-5. **Does it need a UI?** — widget, interactive command, or fire-and-forget?
-6. **Does it need external APIs?** — which ones, how authenticated?
-7. **Any existing extensions that do something similar?** — check for patterns to reuse
+1. **What does the extension do?** — one-sentence goal
+2. **What triggers it?** — command, tool, event hook, or automatic?
+3. **Does it need persistence?** — config file, cache, or stateless?
+4. **Does it need a UI?** — widget, interactive command, or fire-and-forget?
+5. **Does it need external APIs?** — which ones, how authenticated?
+6. **Any existing extensions that do something similar?** — check for patterns to reuse
 
 ### 2. Design before coding
 
 Based on the interview, decide:
 
-- Extension scope (from step 1)
 - Extension name (`pure-<name>`)
+- Activation tier: **global** (always loaded via git package) or **local** (project-only via `.pi/settings.json`)
 - What it registers: tool, command, hooks, widget, or combination
 - Config structure and settings
 - File layout (single `index.ts` or split)
@@ -268,7 +284,7 @@ Read the `pi-extension` skill reference files for the relevant areas (tools, com
 
 ### 3. Implement
 
-Create `extensions/<scope>/pure-<name>/index.ts` with:
+Create `extensions/pure-<name>/index.ts` with:
 
 - Inline path helpers (only what's needed)
 - Extension entry point (default export function)
@@ -284,9 +300,9 @@ Same format as fork-based workflow, but Sources/Inspiration cites ideas/articles
 
 Same gates as fork-based workflow:
 
-1. `biome check --write --unsafe extensions/<scope>/pure-<name>/`
+1. `biome check --write --unsafe extensions/pure-<name>/`
 2. Verify the extension is in `package.json` `pi.extensions` and `.pi/settings.json` has a local path reference
-3. **Smoke-test**: `pi -e "$PWD/extensions/<scope>/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5` — isolated subprocess test (see Gate 1 for details). Fix errors before continuing.
+3. **Smoke-test**: `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5`
 4. Ask the user to `/reload` and **functionally test** the extension. Do not proceed until confirmed working.
 5. **Commit checkpoint**: `git add . && git commit -m "pure-<name>: <description>"`
 6. When approved, promote (remove from `.pi/settings.json`, add to `~/.pi/agent/settings.json`, verify global load, push)
@@ -308,7 +324,7 @@ Read the extension's `README.md` → **Sources / Inspiration** section. The firs
 git clone --depth 1 <upstream-url> /tmp/<source-name>
 ```
 
-Compare the upstream source against our `extensions/<scope>/pure-<name>/index.ts`:
+Compare the upstream source against our `extensions/pure-<name>/index.ts`:
 
 - Read the upstream's main source file(s)
 - Check the upstream's CHANGELOG for releases since our fork
@@ -326,7 +342,7 @@ Report findings to the user before making changes.
 
 ### 4. Make changes
 
-Apply updates to `extensions/<scope>/pure-<name>/` following the same conventions as the original fork:
+Apply updates to `extensions/pure-<name>/` following the same conventions as the original fork:
 
 - Keep inline path helpers, pure-* naming, project-overrides-global config
 - Maintain our README/CHANGELOG format
@@ -347,8 +363,8 @@ Apply updates to `extensions/<scope>/pure-<name>/` following the same convention
 
 **When finished, run the three testing gates:**
 
-1. `biome check --write --unsafe extensions/<scope>/pure-<name>/`
-2. **Smoke-test**: `pi -e "$PWD/extensions/<scope>/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5` — isolated subprocess test. Fix errors before continuing.
+1. `biome check --write --unsafe extensions/pure-<name>/`
+2. **Smoke-test**: `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5`
 3. Ask the user to `/reload` and **functionally test**. Do not proceed until confirmed working.
 4. **Commit checkpoint**: `git add . && git commit -m "pure-<name>: <description>"`
 
@@ -370,7 +386,7 @@ Before considering the extension ready for user testing:
 - [ ] Works standalone outside this repo and also follows pure-* conventions inside the ecosystem
 - [ ] TypeBox schemas for tool parameters
 - [ ] `biome check` passes with zero errors
-- [ ] Smoke-tested: `pi -e "$PWD/extensions/<scope>/pure-<name>" -ne -p "reply with just ok"` exits 0 in isolated subprocess
+- [ ] Smoke-tested: `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok"` exits 0 in isolated subprocess
 - [ ] User confirmed functional test
 - [ ] README.md with Sources / Inspiration section
 - [ ] CHANGELOG.md with initial release entry

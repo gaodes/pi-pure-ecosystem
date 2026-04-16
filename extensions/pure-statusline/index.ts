@@ -5,9 +5,9 @@
 
 import { spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { basename, dirname, join } from "node:path";
+import { dirname, join } from "node:path";
 import type { AssistantMessage } from "@mariozechner/pi-ai";
-import type { ExtensionAPI, ExtensionContext, ReadonlyFooterDataProvider, Theme, ThemeColor } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, Theme, ThemeColor } from "@mariozechner/pi-coding-agent";
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 
@@ -262,7 +262,7 @@ const DEFAULT_SEGMENTS: Record<string, SegCfg> = {
 	context_pct: {
 		style: "success",
 		warn_style: "warning",
-		error_style: "text",
+		error_style: "error",
 		warn_threshold: 50,
 		error_threshold: 80,
 		show_auto_icon: false,
@@ -315,7 +315,7 @@ function hexBg(hex: string, text: string): string {
 }
 
 const RAINBOW = ["#b281d6", "#d787af", "#febc38", "#e4c00f", "#89d281", "#00afaf", "#178fb9", "#b281d6"];
-function rainbow(text: string): string {
+function _rainbow(text: string): string {
 	let result = "";
 	let ci = 0;
 	for (const char of text) {
@@ -342,6 +342,7 @@ function refToRgb(theme: Theme, ref: ColorRef): [number, number, number] | null 
 		return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 	}
 	const ansi = theme.getFgAnsi(ref as ThemeColor);
+	// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape matching
 	const m = ansi.match(/\x1b\[38;2;(\d+);(\d+);(\d+)m/);
 	if (!m) return null;
 	return [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)];
@@ -354,7 +355,7 @@ function blendToHex(source: [number, number, number], target: [number, number, n
 	return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
-function cFaint(theme: Theme, palette: Record<string, ColorRef>, key: string, text: string, factor = 0.72): string {
+function faint(theme: Theme, palette: Record<string, ColorRef>, key: string, text: string): string {
 	const ref = palette[key] ?? DEFAULT_COLORS[key];
 	if (!ref) return theme.fg("dim", text);
 	const source = refToRgb(theme, ref);
@@ -372,11 +373,11 @@ function ico(segId: string, userIcons: Record<string, string>, segs: Record<stri
 	return (hasNerdFonts() ? NERD : ASCII)[segId] ?? "";
 }
 
-function withIcon(i: string, text: string): string {
+function _withIcon(i: string, text: string): string {
 	return i ? `${i} ${text}` : text;
 }
 
-function fmtTokens(n: number): string {
+function _fmtTokens(n: number): string {
 	if (n < 1000) return n.toString();
 	if (n < 10_000) return `${(n / 1000).toFixed(1)}k`;
 	if (n < 1_000_000) return `${Math.round(n / 1000)}k`;
@@ -732,7 +733,7 @@ let toolsLoaded = 0;
 const toolColors: Record<string, `#${string}`> = {};
 let _colorIdx = 0;
 
-let cachedPillPalette: { themeName: string; colors: string[] } | null = null;
+let _cachedPillPalette: { themeName: string; colors: string[] } | null = null;
 
 function isLightTheme(theme: Theme): boolean {
 	// Check theme name first (covers built-in and common names)
@@ -758,7 +759,6 @@ function dimHex(hex: string, isDark: boolean): string {
 	const factor = isDark ? 0.85 : 0.55;
 	return `\x1b[38;2;${Math.round(r * factor)};${Math.round(g * factor)};${Math.round(b * factor)}m`;
 }
-
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Segment Rendering
@@ -834,19 +834,67 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			return { content: c(theme, ctx.palette, style, `${icon} ${model}`.trim()), visible: true };
 		}
 		case "token_in":
-			return { content: c(theme, ctx.palette, "tokens", `${ico("token_in", icons, segs) || ""} ${formatCount(data.usageStats.input)}`.trim()), visible: data.usageStats.input > 0 };
+			return {
+				content: c(
+					theme,
+					ctx.palette,
+					"tokens",
+					`${ico("token_in", icons, segs) || ""} ${formatCount(data.usageStats.input)}`.trim(),
+				),
+				visible: data.usageStats.input > 0,
+			};
 		case "token_out":
-			return { content: c(theme, ctx.palette, "tokens", `${ico("token_out", icons, segs) || ""} ${formatCount(data.usageStats.output)}`.trim()), visible: data.usageStats.output > 0 };
+			return {
+				content: c(
+					theme,
+					ctx.palette,
+					"tokens",
+					`${ico("token_out", icons, segs) || ""} ${formatCount(data.usageStats.output)}`.trim(),
+				),
+				visible: data.usageStats.output > 0,
+			};
 		case "token_total": {
 			const total = data.usageStats.input + data.usageStats.output;
-			return { content: c(theme, ctx.palette, "tokens", `${ico("token_total", icons, segs) || ""} ${formatCount(total)}`.trim()), visible: total > 0 };
+			return {
+				content: c(
+					theme,
+					ctx.palette,
+					"tokens",
+					`${ico("token_total", icons, segs) || ""} ${formatCount(total)}`.trim(),
+				),
+				visible: total > 0,
+			};
 		}
 		case "cache_read":
-			return { content: c(theme, ctx.palette, "tokens", `${ico("cache_read", icons, segs) || ""} ${formatCount(data.usageStats.cacheRead)}`.trim()), visible: data.usageStats.cacheRead > 0 };
+			return {
+				content: c(
+					theme,
+					ctx.palette,
+					"tokens",
+					`${ico("cache_read", icons, segs) || ""} ${formatCount(data.usageStats.cacheRead)}`.trim(),
+				),
+				visible: data.usageStats.cacheRead > 0,
+			};
 		case "cache_write":
-			return { content: c(theme, ctx.palette, "tokens", `${ico("cache_write", icons, segs) || ""} ${formatCount(data.usageStats.cacheWrite)}`.trim()), visible: data.usageStats.cacheWrite > 0 };
+			return {
+				content: c(
+					theme,
+					ctx.palette,
+					"tokens",
+					`${ico("cache_write", icons, segs) || ""} ${formatCount(data.usageStats.cacheWrite)}`.trim(),
+				),
+				visible: data.usageStats.cacheWrite > 0,
+			};
 		case "cost":
-			return { content: c(theme, ctx.palette, "cost", `${ico("cost", icons, segs) || ""} $${data.usageStats.cost.toFixed(3)}`.trim()), visible: data.usageStats.cost > 0 };
+			return {
+				content: c(
+					theme,
+					ctx.palette,
+					"cost",
+					`${ico("cost", icons, segs) || ""} $${data.usageStats.cost.toFixed(3)}`.trim(),
+				),
+				visible: data.usageStats.cost > 0,
+			};
 		case "separator":
 			return { content: theme.fg("dim", (seg as any).text ?? "│"), visible: true };
 		case "separator1":
@@ -865,7 +913,7 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			let colorKey = ((seg as any).style as string) ?? "context";
 			if (pct >= errorThresh) colorKey = ((seg as any).error_style as string) ?? "error";
 			else if (pct >= warnThresh) colorKey = ((seg as any).warn_style as string) ?? "warning";
-			return { content: c(theme, ctx.palette, colorKey, `${icon} ${pct}%`.trim()), visible: pct > 0 };
+			return { content: faint(theme, ctx.palette, colorKey, `${icon} ${pct}%`.trim()), visible: pct > 0 };
 		}
 		case "session": {
 			const name = data.sessionName;
@@ -883,7 +931,7 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			const icon = ico("brain", icons, segs) || "";
 			const showLabel = (seg as any).show_label === true;
 			const content = showLabel ? `${icon} ${label}`.trim() : icon;
-			return { content: c(theme, ctx.palette, colorKey, content), visible: !!content };
+			return { content: faint(theme, ctx.palette, colorKey, content), visible: !!content };
 		}
 		case "path":
 		case "path1":
@@ -921,8 +969,8 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			const icon = ico("git", icons, segs) || "";
 			const isDirty = s.staged > 0 || s.unstaged > 0 || s.untracked > 0;
 			const branchStyle = isDirty
-				? ((seg as any).dirty_branch_style as string) ?? "git_dirty"
-				: ((seg as any).branch_style as string) ?? "git_clean";
+				? (((seg as any).dirty_branch_style as string) ?? "git_dirty")
+				: (((seg as any).branch_style as string) ?? "git_clean");
 			const parts = [c(theme, ctx.palette, branchStyle, `${icon} ${s.branch}`.trim())];
 			if ((seg as any).show_staged !== false && s.staged > 0) {
 				parts.push(c(theme, ctx.palette, ((seg as any).staged_style as string) ?? "git_staged", `+${s.staged}`));
@@ -931,7 +979,9 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 				parts.push(c(theme, ctx.palette, ((seg as any).unstaged_style as string) ?? "git_unstaged", `~${s.unstaged}`));
 			}
 			if ((seg as any).show_untracked !== false && s.untracked > 0) {
-				parts.push(c(theme, ctx.palette, ((seg as any).untracked_style as string) ?? "git_untracked", `?${s.untracked}`));
+				parts.push(
+					c(theme, ctx.palette, ((seg as any).untracked_style as string) ?? "git_untracked", `?${s.untracked}`),
+				);
 			}
 			return { content: parts.join(" "), visible: true };
 		}
@@ -944,20 +994,27 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 		}
 		case "git_status": {
 			if (!cachedGitStatus) {
-				pendingGitStatus = pendingGitStatus ?? runGit(["status", "--porcelain"], 500).then((out) => {
-					cachedGitStatus = parseGitPorcelain(out ?? "");
-					cachedGitStatus.ts = Date.now();
-					pendingGitStatus = null;
-					invalidateGitBranch();
-				});
+				pendingGitStatus =
+					pendingGitStatus ??
+					runGit(["status", "--porcelain"], 500).then((out) => {
+						cachedGitStatus = parseGitPorcelain(out ?? "");
+						cachedGitStatus.ts = Date.now();
+						pendingGitStatus = null;
+						invalidateGitBranch();
+					});
 			}
 			const s = cachedGitStatus;
 			if (!s || (s.staged === 0 && s.unstaged === 0 && s.untracked === 0)) return { content: "", visible: false };
 			const icon = ico("git-status", icons, segs) || "";
 			const parts: string[] = [];
-			if (s.staged > 0) parts.push(c(theme, ctx.palette, ((seg as any).staged_style as string) ?? "git_staged", `+${s.staged}`));
-			if (s.unstaged > 0) parts.push(c(theme, ctx.palette, ((seg as any).unstaged_style as string) ?? "git_unstaged", `~${s.unstaged}`));
-			if (s.untracked > 0) parts.push(c(theme, ctx.palette, ((seg as any).untracked_style as string) ?? "git_untracked", `?${s.untracked}`));
+			if (s.staged > 0)
+				parts.push(c(theme, ctx.palette, ((seg as any).staged_style as string) ?? "git_staged", `+${s.staged}`));
+			if (s.unstaged > 0)
+				parts.push(c(theme, ctx.palette, ((seg as any).unstaged_style as string) ?? "git_unstaged", `~${s.unstaged}`));
+			if (s.untracked > 0)
+				parts.push(
+					c(theme, ctx.palette, ((seg as any).untracked_style as string) ?? "git_untracked", `?${s.untracked}`),
+				);
 			return { content: `${icon} ${parts.join(" ")}`, visible: true };
 		}
 		case "tools": {
@@ -970,7 +1027,7 @@ function renderSegment(id: SegmentId, ctx: RenderCtx): Seg {
 			return { content: c(theme, ctx.palette, "context", formatCount(data.contextWindow)), visible: true };
 		}
 		default: {
-			const style = (seg as any).style as string ?? "text";
+			const style = ((seg as any).style as string) ?? "text";
 			const icon = (seg as any).icon ? ico((seg as any).icon as string, icons, segs) : "";
 			const text = (seg as any).text as string | undefined;
 			if (!icon && !text) return { content: "", visible: false };
@@ -1013,6 +1070,7 @@ function truncate(s: string, w: number): string {
 	if (w < 1) return "";
 	let out = "";
 	let cw = 0;
+	// biome-ignore lint/suspicious/noControlCharactersInRegex: stripping ANSI escape codes
 	const clean = s.replace(/\x1b\[[0-9;]*m/g, "");
 	for (const c of clean) {
 		const cwc = c.charCodeAt(0) > 127 ? 2 : 1;
@@ -1020,7 +1078,7 @@ function truncate(s: string, w: number): string {
 		out += c;
 		cw += cwc;
 	}
-	return out + "…";
+	return `${out}…`;
 }
 
 function setupFooter(ctx: ExtensionContext, pi: ExtensionAPI) {
@@ -1065,7 +1123,12 @@ function setupFooter(ctx: ExtensionContext, pi: ExtensionAPI) {
 				if (cfg?.show_extension_statuses !== false && extensionStatuses.size > 0) {
 					const sorted = Array.from(extensionStatuses.entries())
 						.sort(([a], [b]) => a.localeCompare(b))
-						.map(([, text]) => text.replace(/[\r\n\t]/g, " ").replace(/ +/g, " ").trim());
+						.map(([, text]) =>
+							text
+								.replace(/[\r\n\t]/g, " ")
+								.replace(/ +/g, " ")
+								.trim(),
+						);
 					const inner = Math.max(1, width - 2);
 					const statusLine = theme.fg("dim", truncate(sorted.join(" "), inner));
 					rendered.push(` ${statusLine} `);
@@ -1082,7 +1145,7 @@ function setupFooter(ctx: ExtensionContext, pi: ExtensionAPI) {
 
 let tuiRef: any = null;
 let currentCtx: any = null;
-let getThinkingLevel: (() => ThinkingLevel) | null = null;
+const _getThinkingLevel: (() => ThinkingLevel) | null = null;
 
 function resetToolCounts() {
 	for (const k of Object.keys(toolCounts)) delete toolCounts[k];
@@ -1130,16 +1193,15 @@ function showAllSegs(ctx: ExtensionContext) {
 // Command Handlers
 // ═══════════════════════════════════════════════════════════════════════════
 
-function readPersona(_args: any, ctx: ExtensionContext): string {
+function _readPersona(_args: any, ctx: ExtensionContext): string {
 	const name = ctx.sessionManager?.getSessionMeta?.()?.persona ?? "Assistant";
 	return `Current persona: ${name}`;
 }
 
-function readSession(_args: any, ctx: ExtensionContext): string {
+function _readSession(_args: any, ctx: ExtensionContext): string {
 	const name = ctx.sessionName ?? "Unnamed";
 	return `Session: ${name}`;
 }
-
 
 export default function pureStatusLine(pi: ExtensionAPI) {
 	ensureConfig();
@@ -1157,7 +1219,7 @@ export default function pureStatusLine(pi: ExtensionAPI) {
 	pi.on("session_start", async (_event, ctx) => {
 		ensureConfig();
 		clearConfigCache();
-		cachedPillPalette = null;
+		_cachedPillPalette = null;
 		currentCtx = ctx;
 		resetToolCounts();
 		try {

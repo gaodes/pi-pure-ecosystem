@@ -6,8 +6,8 @@
     }
   },
   "packages": [
-    "../extensions/global/pure-statusline",
-    "../extensions/global/pure-vibes",
-    "../extensions/project/pure-devkit"
+    "../extensions/pure-statusline",
+    "../extensions/pure-vibes",
+    "../extensions/pure-devkit"
   ]
 }
