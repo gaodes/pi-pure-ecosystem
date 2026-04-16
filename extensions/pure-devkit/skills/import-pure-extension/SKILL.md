@@ -26,6 +26,8 @@ Ask the user:
 - **Primary source**: which extension to fork (repo URL)?
 - **What to keep, add, or change**?
 
+> **Tip**: If the primary source repo credits its own inspirations (e.g. another repo it was forked from or derived from), note those too. The README's **Sources / Inspiration** section should trace the full lineage — not just the immediate upstream, but where that upstream originally came from. This helps understand the extension's heritage and avoids losing attribution.
+
 ### 2. Clone and verify
 
 ```bash
@@ -78,6 +80,18 @@ function loadConfig<T>(filename: string, category: "config" | "cache", cwd?: str
 ### 6. Create README.md and CHANGELOG.md
 
 README must include **Sources / Inspiration** section linking to upstream.
+
+Include the full derivation chain:
+- **Primary source** — the repo you forked from
+- **Upstream of upstream** — if the primary source itself was derived from or inspired by another project, include that too (check the upstream's README, package.json credits, or git history)
+
+Example:
+```markdown
+## Sources / Inspiration
+
+- [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) — Primary source. Licensed MIT.
+- [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi) — Original decision guide that pi-dev-kit was derived from. Licensed MIT.
+```
 
 ### 7. Check, lint, test
 
@@ -153,7 +167,8 @@ git push
 - [ ] Renamed to pure-* conventions
 - [ ] Stripped unnecessary files
 - [ ] Added inline path helpers
-- [ ] Created README.md with Sources / Inspiration
+- [ ] Traced full source lineage (upstream of upstream, if any)
+- [ ] Created README.md with Sources / Inspiration (full derivation chain)
 - [ ] Created CHANGELOG.md
 - [ ] `biome check` passes zero errors
 - [ ] Smoke test passed

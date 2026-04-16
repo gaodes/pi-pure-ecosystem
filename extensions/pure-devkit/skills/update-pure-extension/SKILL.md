@@ -23,6 +23,8 @@ This skill updates extensions we maintain in the pure-ecosystem by checking upst
 
 Read the extension's `README.md` → **Sources / Inspiration** section. The first linked repo is the primary source (the upstream the extension was forked from).
 
+Also check whether the upstream has added new credits or inspirations since our last sync — if so, update our README's Sources section to reflect the full lineage.
+
 If there is no upstream (from-scratch extension), inform the user — there are no upstream changes to pull.
 
 ### 2. Check upstream for changes
