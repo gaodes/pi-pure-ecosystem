@@ -1,42 +1,36 @@
 # Changelog
 
+## [1.0.4] - 2026-04-16
+
+### Changed
+
+- Split `create-pure-extension` into four focused skills:
+  - `create-pure-extension` — from-scratch workflow only (~200 lines, streamlined)
+  - `import-pure-extension` — fork-based workflow, condensed (~150 lines)
+  - `update-pure-extension` — sync with upstream
+  - `enhance-pure-extension` — add features, fix bugs
+
 ## [1.0.3] - 2026-04-16
 
 ### Changed
 
-- Split `create-pure-extension` skill into three focused skills:
-  - `create-pure-extension` — Fork-based and from-scratch workflows for creating new extensions
-  - `update-pure-extension` — Sync extensions with upstream sources
-  - `enhance-pure-extension` — Add features, fix bugs, modify existing extensions
-- Each skill now has its own `references/` directory with shared reference files
-- Updated README.md with detailed skill descriptions and "When to use" tables
+- Split `create-pure-extension` into three focused skills
 
 ## [1.0.2] - 2026-04-16
 
 ### Changed
 
-- Consolidated `pi-extension` skill into `create-pure-extension`:
-  - Integrated decision table (What to Build), tool development section, mode awareness, display methods
-  - Added condensed Critical Rules (~15 essential rules)
-  - All reference files moved to `create-pure-extension/references/`
-  - Deleted `pi-extension` skill directory
+- Consolidated `pi-extension` skill into `create-pure-extension`
 
 ## [1.0.1] - 2026-04-16
 
 ### Fixed
 
-- Fixed `findPiInstallation()` failing when `require.resolve("@mariozechner/pi-coding-agent/package.json")` is blocked by package exports. Now uses multi-strategy resolution: main export walk-up, global node_modules scan (npm root -g, Homebrew, standard paths), and process.argv walk-up.
+- Fixed `findPiInstallation()` failing on package exports
 
 ## [1.0.0] - 2026-04-15
 
 ### Added
 
-- Forked from `@aliou/pi-dev-kit` v0.6.1 (https://github.com/aliou/pi-dev-kit)
-- All original tools: `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`
-- Original command: `/extensions:update [VERSION]`
-- Original skill: `pi-extension` with all 12 reference files
-- Original skill: `demo-setup` and prompt: `setup-demo`
-- Integrated extending-pi decision guide from `tmustier/pi-extensions`
-- Bundled `create-pure-extension` skill from the pure-ecosystem project
-- Flattened `src/` directory structure for pure-ecosystem conventions
-- Adapted imports and structure to work without build step
+- Forked from `@aliou/pi-dev-kit` v0.6.1
+- All original tools, commands, and skills

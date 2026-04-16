@@ -6,86 +6,52 @@ Tools, commands, and skills for developing Pi extensions. Forked from [`@aliou/p
 
 | Tool | Description |
 |------|-------------|
-| `pi_docs` | List Pi markdown documentation files (README, docs/, examples/) |
+| `pi_docs` | List Pi markdown documentation files |
 | `pi_version` | Get the version of the currently running Pi instance |
-| `pi_changelog` | Get changelog entry for a Pi version (latest by default) |
+| `pi_changelog` | Get changelog entry for a Pi version |
 | `pi_changelog_versions` | List all available Pi changelog versions |
-| `detect_package_manager` | Detect the package manager used in the current project |
+| `detect_package_manager` | Detect the package manager used |
 
 ## Commands
 
 | Command | Description |
 |---------|-------------|
-| `/devkit [VERSION]` | Guided workflow to update Pi extensions to a target version |
+| `/devkit [VERSION]` | Guided workflow to update Pi extensions |
 
 ## Skills
 
 | Skill | Description |
 |-------|-------------|
-| `create-pure-extension` | Fork-based and from-scratch workflows for creating pure-* extensions |
-| `update-pure-extension` | Sync pure-* extensions with upstream sources |
-| `enhance-pure-extension` | Add features, fix bugs, or modify existing pure-* extensions |
-| `demo-setup` | Set up demo environments for recording extension previews |
+| `create-pure-extension` | Build a new extension from scratch |
+| `import-pure-extension` | Import/fork an external extension |
+| `update-pure-extension` | Sync with upstream sources |
+| `enhance-pure-extension` | Add features or fix bugs |
+| `demo-setup` | Set up demo environments |
 
-## Skills in Detail
+## When to Use Each Skill
 
-### create-pure-extension
-
-Create a new pure-* extension, either by forking an existing extension or building from scratch.
-
-**When to use:** User asks to create a new extension, add a new pure-* extension, or fork an extension.
-
-**Workflows:**
-- **Fork-based**: Clone an existing extension, rename to pure-* conventions, adapt
-- **From-scratch**: Interview user, design, implement, test
-
-### update-pure-extension
-
-Update a pure-* extension by syncing with upstream sources.
-
-**When to use:** User asks to update, sync, or pull changes for an extension we created.
-
-**Workflow:**
-1. Find primary source from README.md → Sources / Inspiration
-2. Check upstream for changes
-3. Cherry-pick, skip, or adapt
-4. Test and restore activation
-
-### enhance-pure-extension
-
-Enhance or modify a pure-* extension we maintain.
-
-**When to use:** User asks to add a feature, fix a bug, or change behavior of an existing extension we own.
-
-**Workflow:**
-1. Determine scope of change
-2. Move globally-active to local for development
-3. Make changes following pure-* conventions
-4. Test and restore activation
+| Request | Use |
+|----------|-----|
+| Build something new from scratch | `create-pure-extension` |
+| Fork an existing external extension | `import-pure-extension` |
+| Sync with upstream changes | `update-pure-extension` |
+| Modify an extension we own | `enhance-pure-extension` |
 
 ## Reference Files
 
-All three extension skills share detailed reference files:
+All skills share detailed reference files:
 
 | File | Content |
 |------|---------|
-| `references/tools.md` | Tool registration, rendering patterns, streaming, multi-action tools |
-| `references/modes.md` | Mode awareness (Interactive/RPC/Print), three-tier pattern |
-| `references/components.md` | TUI components catalog, custom components |
-| `references/commands.md` | Command registration, vs tools |
-| `references/messages.md` | sendMessage, notify, custom message renderers |
-| `references/hooks.md` | Event handlers, blocking/cancelling, spawn hooks |
-| `references/providers.md` | Provider registration, model definitions |
-| `references/structure.md` | Standalone repo structure (for reference) |
-
-## Differences from upstream
-
-- Flattened `src/` directory structure (no build step)
-- Consolidated into three focused skills: create, update, enhance
-- Bundled the extension skills with integrated decision table and critical rules
-- Pure-ecosystem naming and conventions
+| `references/tools.md` | Tool registration, rendering patterns |
+| `references/modes.md` | Mode awareness (Interactive/RPC/Print) |
+| `references/components.md` | TUI components catalog |
+| `references/commands.md` | Command registration |
+| `references/messages.md` | sendMessage, notify |
+| `references/hooks.md` | Event handlers |
+| `references/providers.md` | Provider registration |
 
 ## Sources / Inspiration
 
-- [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) — Primary source. Tools, commands, and reference files for extension development. Licensed MIT.
-- [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi) — Decision guide for extending Pi (skill vs extension vs theme). Licensed MIT.
+- [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) — Primary source. Licensed MIT.
+- [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi) — Decision guide. Licensed MIT.
