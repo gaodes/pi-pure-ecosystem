@@ -29,7 +29,7 @@ If the request doesn't clearly match one, ask before proceeding.
 ### Simplicity
 - A 300-line `index.ts` beats a 10-file module split.
 - No build step — Pi loads `.ts` via Jiti at runtime.
-- No cross-extension dependencies. Each extension is self-contained.
+- No cross-extension dependencies by default. Prefer self-containment; leverage shared resources when duplication justifies it.
 - Only add npm packages when Pi genuinely lacks the capability.
 
 ### Functionality
@@ -47,11 +47,11 @@ If the request doesn't clearly match one, ask before proceeding.
 
 ### Naming & Structure
 
-- **Name**: `pure-<name>` (or `pi-devkit` for the generic dev tool)
+- **Name**: `pure-<name>` (`pi-devkit` is deprecated — future shared tools will live in `pure-utils`)
 - **Entry point**: `index.ts` at extension root
-- **Structure**: single `index.ts`. Split only if unwieldy.
+- **Structure**: single `index.ts`. Split when justified.
 - **package.json**: only if npm deps needed. Pi packages are **peer dependencies**, never `dependencies`.
-- **Self-contained**: inline path helpers, no cross-extension deps.
+- **Self-contained**: inline path helpers, no cross-extension deps by default.
 - **Config reads**: project first, fall back to global.
 
 ### What to Build
@@ -64,6 +64,8 @@ If the request doesn't clearly match one, ask before proceeding.
 | Change appearance | Theme | `theme.json` |
 
 If `bash` + instructions can do it → **Skill**. Need hooks, typed tools, UI → **Extension**.
+
+> **Note**: Skills and Themes are listed as build targets but dedicated creation workflows are not yet defined. Use the general extension workflow as a guide, or ask.
 
 ### Mode Awareness
 
@@ -87,7 +89,7 @@ Read `references/modes.md` for full details, examples, and method behavior table
 
 All non-trivial changes happen in a worktree. The agent creates, configures, and cleans up worktrees using bash and tools — not slash commands.
 
-**Create** a branch and worktree:
+**Create** a branch and worktree — prefer the `pure-git` extension (`switch_worktree` tool); fall back to bash:
 ```bash
 git checkout main && git checkout -b <branch-name>
 git worktree add .worktrees/<branch-name> <branch-name>
@@ -102,7 +104,7 @@ If the extension is **globally active**, remove it from `~/.pi/agent/settings.js
 
 **Test:** call `switch_worktree` tool with the branch name → user tests → `switch_worktree` with branch `main` to return.
 
-**Finish** — merge and clean up from the main repo root:
+**Finish** — merge and clean up from the main repo root (prefer `pure-git`; fall back to bash):
 ```bash
 cd <main-repo-root>
 git checkout main && git merge <branch-name>
