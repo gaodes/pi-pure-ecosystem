@@ -2,6 +2,13 @@
 
 Shared utilities and reference tools for Pi extension development. Replaces the deprecated `pi-devkit` extension.
 
+## Sources
+
+All tools and utilities are ported from the deprecated `pi-devkit` extension:
+- Original: `extensions/pi-devkit/tools/{package-manager,version,docs,changelog}.ts`
+- Original: `extensions/pi-devkit/tools/utils.ts`
+- Original: `extensions/pi-devkit/tools/ui.ts`
+
 ## Tools
 
 | Tool | Purpose |

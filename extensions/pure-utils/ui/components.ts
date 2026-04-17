@@ -1,3 +1,4 @@
+// Ported from extensions/pi-devkit/tools/ui.ts
 import type { Component, Theme, ToolRenderResultOptions } from "@mariozechner/pi-coding-agent";
 import { Text, truncateToWidth } from "@mariozechner/pi-tui";
 
