@@ -1,4 +1,4 @@
-// Ported from @aliou/pi-dev-kit via extensions/pi-devkit/tools/pi-changelog.ts
+// Originally from @aliou/pi-dev-kit via extensions/pi-devkit/tools/pi-changelog.ts
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type {

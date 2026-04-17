@@ -1,4 +1,4 @@
-// Ported from @aliou/pi-dev-kit via extensions/pi-devkit/tools/pi-version.ts
+// Originally from @aliou/pi-dev-kit via extensions/pi-devkit/tools/pi-version.ts
 import type {
 	AgentToolResult,
 	ExtensionAPI,
