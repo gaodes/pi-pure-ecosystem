@@ -26,7 +26,8 @@
       "./extensions/pure-statusline/index.ts",
       "./extensions/pure-theme/index.ts",
       "./extensions/pure-updater/index.ts",
-      "./extensions/pure-git/index.ts"
+      "./extensions/pure-git/index.ts",
+      "./extensions/pure-utils/index.ts"
     ],
     "themes": [
       "./themes"

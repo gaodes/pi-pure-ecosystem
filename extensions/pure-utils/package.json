@@ -1,0 +1,25 @@
+{
+  "name": "@gaodes/pure-utils",
+  "version": "0.1.0",
+  "description": "Shared utilities and reference tools for Pi extension development",
+  "keywords": ["pi-package", "pi-extension", "pure-utils", "utilities"],
+  "license": "MIT",
+  "author": "gaodes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaodes/pi-pure-ecosystem.git",
+    "directory": "extensions/pure-utils"
+  },
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*",
+    "@mariozechner/pi-tui": "*",
+    "@sinclair/typebox": "*"
+  },
+  "peerDependenciesMeta": {
+    "@mariozechner/pi-coding-agent": { "optional": true },
+    "@mariozechner/pi-tui": { "optional": true }
+  }
+}
