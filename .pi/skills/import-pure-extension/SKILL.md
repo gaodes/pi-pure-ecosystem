@@ -113,6 +113,9 @@ Create `extensions/pure-<name>/PLAN.md` with:
 | `child_process.exec` | `pi.exec()` | Pi API convention |
 | `os.homedir()` | `getAgentDir()` | Pi API convention |
 
+## License
+<original license type> — preserved from <primary-source>
+
 ## Sources for future updates
 - <primary-repo-url>
 - <secondary-repo-url> (for feature X, Y)
@@ -135,19 +138,22 @@ Based on the plan:
 **If cloning and adapting:**
 1. Copy source files into `extensions/pure-<name>/`
 2. Strip: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
-3. Flatten `src/` to root — pure-* convention is flat structure
+3. Flatten `src/` to root when the extension is small (≤5 files). Keep subdirectories when justified by size or logical separation (e.g. `services/`, `tools/`). Don't force flat structure if it hurts readability.
 4. Rename to pure-* conventions (tool names, commands, storage paths)
-5. Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
-6. Add `pure-utils` dependency if config/cache storage is needed (import from `@gaodes/pi-pure-utils`)
-7. Create minimal `package.json` (name + version only — full manifest at publish time)
-8. Create `CHANGELOG.md` with initial entry
-9. Create `.upstream` file for automation
-10. Create `README.md` with full Sources / Inspiration lineage
+5. Check the source license — preserve it in a `LICENSE` file and note it in README
+6. Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
+7. Add `pure-utils` dependency if config/cache storage is needed (import from `@gaodes/pi-pure-utils`)
+8. Create minimal `package.json` (name + version only — full manifest at publish time)
+9. Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
+10. Create `CHANGELOG.md` with initial entry
+11. Create `.upstream` file for automation
+12. Create `README.md` with full Sources / Inspiration lineage
 
 **If writing from scratch:**
 1. Create directory structure following pure-* conventions
 2. Implement features from the plan, using the source as reference
-3. Follow all the same steps 6-10 above
+3. Check the source license — preserve it in a `LICENSE` file and note it in README
+4. Follow all the same steps 6-12 above
 
 #### Dependency Audit
 
@@ -166,9 +172,10 @@ For each third-party import in the source, check if Pi provides an equivalent:
 #### Sources / Inspiration
 
 README must include the full derivation chain:
-- **Primary source** — the repo you forked from
+- **Primary source** — the repo you forked from, with license
 - **Upstream of upstream** — if the primary source itself was derived from another project
 - **Other sources** — repos that contributed ideas but aren't the primary
+- **License** — the original source's license type
 
 Example:
 ```markdown
@@ -176,6 +183,10 @@ Example:
 
 - [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) — Primary source. Licensed MIT.
 - [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi) — Original decision guide. Licensed MIT.
+
+## License
+
+MIT (inherited from primary source)
 ```
 
 #### `.upstream` file
@@ -214,52 +225,38 @@ Ask user to add to `.pi/settings.json` locally and `/reload` for functional test
 
 ---
 
-## Phase 4: Ship
+## Phase 4: Commit
 
-### 9. Commit
+### 9. Commit and push
 
 ```bash
 git add extensions/pure-<name>/
 git commit -m "pure-<name>: initial import from <source>"
-```
-
-### 10. Publish and activate
-
-1. **Publish to npm** using the `publish-pure-extension` skill:
-   - Bump version in `package.json` and `CHANGELOG.md` if needed
-   - Full manifest gets created at this point
-   - Publish: `npm publish --access public`
-
-2. **Activate globally** — add to `~/.pi/agent/settings.json` as an npm package:
-   ```json
-   "npm:@gaodes/pi-pure-<name>"
-   ```
-
-3. **Remove from local `.pi/settings.json`** if it was there for testing
-
-4. **Verify**: `pi list` should show the new extension
-
-**Exception**: If the user asks to test from GitHub before npm, add to the git package entry temporarily. Remove once published to npm.
-
-### 11. Push
-
-```bash
 git push
 ```
 
 If in a worktree, merge first: `/worktrees clean <branch-name>`
 
+**This completes the import.** Publishing to npm and global activation are separate steps — use the `publish-pure-extension` skill when the user is ready.
+
 ---
 
 ## Reference Files
 
+The `references/` directory contains detailed Pi API reference material for tool authoring, rendering, commands, hooks, modes, and more. Consult these when implementing extension features during import.
+
 | File | Content |
 |------|---------|
-| `references/tools.md` | Tool registration, rendering patterns |
+| `references/tools.md` | Tool registration, execute signature, rendering patterns, error handling |
 | `references/modes.md` | Mode awareness (Interactive/RPC/Print) |
 | `references/commands.md` | Command registration |
 | `references/messages.md` | sendMessage, notify |
 | `references/hooks.md` | Event handlers |
+| `references/components.md` | TUI component authoring |
+| `references/structure.md` | Extension directory structure |
+| `references/testing.md` | Testing patterns |
+| `references/state.md` | State management |
+| `references/publish.md` | Publishing workflow details |
 
 ---
 
@@ -277,7 +274,7 @@ If in a worktree, merge first: `/worktrees clean <branch-name>`
 10. **API key gating**: check before registering tools — notify if missing
 11. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. State dependency gracefully — provide install instructions if missing, don't crash Pi.
 12. **Check existing components**: before creating custom TUI, check `pi-tui` or `pi-coding-agent`
-13. **Settings UI**: use `registerSettingsCommand` from `@aliou/pi-utils-settings` when configurable
+13. **License preservation**: check source license, preserve in `LICENSE` file, note in README
 
 ---
 
@@ -297,7 +294,10 @@ If in a worktree, merge first: `/worktrees clean <branch-name>`
 - [ ] `biome check` passes zero errors
 - [ ] Smoke test passed
 - [ ] User confirmed functional test
-- [ ] Committed
-- [ ] Published to npm via `publish-pure-extension` skill
-- [ ] Activated globally as npm package
-- [ ] Pushed to remote
+- [ ] Source license checked and preserved in `LICENSE` file
+- [ ] `.npmignore` created
+- [ ] Committed and pushed
+
+---
+
+**After import**: use the `publish-pure-extension` skill to publish to npm and activate globally.
