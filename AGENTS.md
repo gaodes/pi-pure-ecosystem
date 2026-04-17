@@ -7,9 +7,7 @@ This is the **development workspace**. Extensions are sourced as a git package (
 **High-level workflow**: use `/worktrees create` for new features → develop in the extension directory within the worktree → `/worktrees clean` when done → promote from main.
 
 > **For Git operations**, use `pure-git` (`/worktrees` command). See its README for details.
-> **For creating extensions**, use the `create-pure-extension` skill.
-
-> **For detailed step-by-step instructions** on creating, forking, updating, or promoting extensions, use the **`create-pure-extension`** skill.
+> **For extension development**, use the `pure-extensions-dev` skill.
 
 ## Project structure
 
@@ -136,7 +134,7 @@ Zero errors required. Warnings acceptable with inline suppressions.
 9. Restore globally-active extensions to `~/.pi/agent/settings.json`
 10. `pi update` or `/reload`
 
-When implementing new extensions or major changes, read the relevant skill first: `create-pure-extension`, `import-pure-extension`, `update-pure-extension`, or `enhance-pure-extension`.
+When implementing new extensions or major changes, read the `pure-extensions-dev` skill first.
 
 ## Git Workflow (Mono Repo)
 
