@@ -23,6 +23,11 @@ Things to tackle for the pure-extensions-dev skill and project AGENTS.md.
 
 - [ ] **Implement/use the pi-devkit tools** — The skill should leverage pi-devkit tools (`pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`) where applicable instead of manual bash equivalents
 
+## Missing skills to create
+
+- [ ] **Create a pure-meta-skill** — A dedicated skill for creating Pi skills (SKILL.md files, prompt templates, etc.). The "What to Build" table in SKILL.md lists Skills as a type but has no dedicated workflow for them
+- [ ] **Create a pure-theme skill** — A dedicated skill for creating Pi themes (theme.json). The "What to Build" table lists Themes as a type but has no dedicated workflow for them
+
 ## Missing features
 
 - [ ] **Import the themes** — The mono repo has a `themes/` directory but no theme is defined there yet. The skill should cover theme creation/import workflow
