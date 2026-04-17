@@ -2,6 +2,12 @@
 
 Things to tackle for the pure-extensions-dev skill and project AGENTS.md.
 
+## Cross-platform & terminal compatibility
+
+- [ ] **Extensions must integrate well with Ghostty terminal** — Test extensions in Ghostty specifically, handle any terminal-specific quirks
+- [ ] **Extensions should work on macOS and Linux** — Headless Linux and macOS is not headless. Design for both systems unless features specifically require a GUI and are not working in terminal. In that case, ask the user. This is the primary approach but not a hard constraint
+- [ ] **Flag macOS-only or GUI-dependent extensions** — If an extension contains macOS-only features or makes use of a GUI, it should be flagged as such in its README and catalog entry
+
 ## SKILL.md & AGENTS.md audit
 
 - [ ] **Fix the design philosophy** — SKILL.md says "Follow the project AGENTS.md design philosophy" but the design philosophy section in AGENTS.md may need updating to reflect the new skill structure and conventions
