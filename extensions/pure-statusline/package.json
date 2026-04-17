@@ -1,8 +1,15 @@
 {
-  "name": "@gaodes/pi-statusline",
+  "name": "@gaodes/pi-pure-statusline",
   "version": "0.1.0",
   "description": "Configurable status footer for the Pi coding agent with Starship-inspired segment config",
-  "keywords": ["pi-package", "pi-extension", "pi", "statusline", "footer", "status"],
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "statusline",
+    "footer",
+    "status"
+  ],
   "license": "MIT",
   "author": "gaodes",
   "repository": {
@@ -11,7 +18,9 @@
     "directory": "extensions/pure-statusline"
   },
   "pi": {
-    "extensions": ["./index.ts"]
+    "extensions": [
+      "./index.ts"
+    ]
   },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*",
@@ -19,8 +28,14 @@
     "@sinclair/typebox": "*"
   },
   "peerDependenciesMeta": {
-    "@mariozechner/pi-coding-agent": { "optional": true },
-    "@mariozechner/pi-tui": { "optional": true },
-    "@sinclair/typebox": { "optional": true }
+    "@mariozechner/pi-coding-agent": {
+      "optional": true
+    },
+    "@mariozechner/pi-tui": {
+      "optional": true
+    },
+    "@sinclair/typebox": {
+      "optional": true
+    }
   }
 }

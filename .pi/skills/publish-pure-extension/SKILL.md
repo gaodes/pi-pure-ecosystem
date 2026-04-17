@@ -5,7 +5,9 @@ description: Publish a pure-* extension to npm. Bumps version, updates changelog
 
 # Publish Pure Extension
 
-Publish a `pure-*` or `pi-*` extension from the mono repo to npm as `@gaodes/pi-<name>`.
+Publish a `pure-*` or `pi-*` extension from the mono repo to npm as `@gaodes/pi-pure-<name>`.
+
+The `pi-devkit` extension is the exception — it uses `@gaodes/pi-devkit` (no `pure` prefix) since it's a generic development tool.
 
 ## Versioning Policy
 
@@ -132,7 +134,7 @@ cd extensions/<name> && npm pack --dry-run 2>&1
 ```
 
 Verify:
-- Package name is `@gaodes/pi-<name>`
+- Package name is `@gaodes/pi-pure-<name>` (or `@gaodes/pi-devkit` for the devkit)
 - Files are correct (no unexpected files, no missing files)
 - `.npmignore` excludes `node_modules/`, `CHANGELOG.md`, `.DS_Store`
 
@@ -144,7 +146,7 @@ cd extensions/<name> && npm publish --access public 2>&1
 
 Successful output ends with:
 ```
-+ @gaodes/pi-<name>@X.Y.Z
++ @gaodes/pi-pure-<name>@X.Y.Z
 ```
 
 If it fails with `EPUBLISHCONFLICT`, the version already exists — bump and retry.
@@ -155,7 +157,7 @@ If it fails with `EPUBLISHCONFLICT`, the version already exists — bump and ret
 
 ```bash
 git add extensions/<name>/package.json extensions/<name>/CHANGELOG.md
-git commit -m "release: @gaodes/pi-<name>@X.Y.Z"
+git commit -m "release: @gaodes/pi-pure-<name>@X.Y.Z"
 git push
 ```
 
@@ -177,7 +179,7 @@ After publishing, the extension can be installed from npm instead of the git sou
 **After** (add npm package alongside git source):
 ```json
 "packages": [
-  "npm:@gaodes/pi-<name>",
+  "npm:@gaodes/pi-pure-<name>",
   ...
 ]
 ```
@@ -187,7 +189,7 @@ Only do this if the user wants to switch from git to npm source. The git source 
 ### 3. Verify
 
 ```bash
-npm view @gaodes/pi-<name> version
+npm view @gaodes/pi-pure-<name> version
 ```
 
 ## Batch Publishing

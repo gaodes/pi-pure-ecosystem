@@ -1,8 +1,14 @@
 {
-  "name": "@gaodes/pi-sessions",
+  "name": "@gaodes/pi-pure-sessions",
   "version": "0.5.1",
   "description": "Auto-name, browse, and resume Pi coding agent sessions with emoji-prefixed names",
-  "keywords": ["pi-package", "pi-extension", "pi", "sessions", "resume"],
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "sessions",
+    "resume"
+  ],
   "license": "MIT",
   "author": "gaodes",
   "repository": {
@@ -11,7 +17,9 @@
     "directory": "extensions/pure-sessions"
   },
   "pi": {
-    "extensions": ["./index.ts"]
+    "extensions": [
+      "./index.ts"
+    ]
   },
   "peerDependencies": {
     "@mariozechner/pi-ai": "*",
@@ -20,9 +28,17 @@
     "@sinclair/typebox": "*"
   },
   "peerDependenciesMeta": {
-    "@mariozechner/pi-ai": { "optional": true },
-    "@mariozechner/pi-coding-agent": { "optional": true },
-    "@mariozechner/pi-tui": { "optional": true },
-    "@sinclair/typebox": { "optional": true }
+    "@mariozechner/pi-ai": {
+      "optional": true
+    },
+    "@mariozechner/pi-coding-agent": {
+      "optional": true
+    },
+    "@mariozechner/pi-tui": {
+      "optional": true
+    },
+    "@sinclair/typebox": {
+      "optional": true
+    }
   }
 }

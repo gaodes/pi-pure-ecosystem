@@ -1,8 +1,16 @@
 {
-  "name": "@gaodes/pi-github",
+  "name": "@gaodes/pi-pure-github",
   "version": "0.3.0",
-  "description": "GitHub integration for the Pi coding agent — repo, issue, PR, and workflow tools via gh CLI",
-  "keywords": ["pi-package", "pi-extension", "pi", "github", "gh", "issues", "pull-request"],
+  "description": "GitHub integration for the Pi coding agent \u2014 repo, issue, PR, and workflow tools via gh CLI",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "github",
+    "gh",
+    "issues",
+    "pull-request"
+  ],
   "license": "MIT",
   "author": "gaodes",
   "repository": {
@@ -11,7 +19,9 @@
     "directory": "extensions/pure-github"
   },
   "pi": {
-    "extensions": ["./index.ts"]
+    "extensions": [
+      "./index.ts"
+    ]
   },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*",
@@ -19,8 +29,14 @@
     "@sinclair/typebox": "*"
   },
   "peerDependenciesMeta": {
-    "@mariozechner/pi-coding-agent": { "optional": true },
-    "@mariozechner/pi-tui": { "optional": true },
-    "@sinclair/typebox": { "optional": true }
+    "@mariozechner/pi-coding-agent": {
+      "optional": true
+    },
+    "@mariozechner/pi-tui": {
+      "optional": true
+    },
+    "@sinclair/typebox": {
+      "optional": true
+    }
   }
 }

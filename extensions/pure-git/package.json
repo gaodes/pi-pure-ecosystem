@@ -1,8 +1,14 @@
 {
-  "name": "@gaodes/pi-git",
+  "name": "@gaodes/pi-pure-git",
   "version": "0.1.0",
   "description": "Git worktree management for the Pi coding agent",
-  "keywords": ["pi-package", "pi-extension", "pi", "git", "worktree"],
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "git",
+    "worktree"
+  ],
   "license": "MIT",
   "author": "gaodes",
   "repository": {
@@ -11,7 +17,9 @@
     "directory": "extensions/pure-git"
   },
   "pi": {
-    "extensions": ["./index.ts"]
+    "extensions": [
+      "./index.ts"
+    ]
   },
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*",
@@ -19,8 +27,14 @@
     "@sinclair/typebox": "*"
   },
   "peerDependenciesMeta": {
-    "@mariozechner/pi-coding-agent": { "optional": true },
-    "@mariozechner/pi-tui": { "optional": true },
-    "@sinclair/typebox": { "optional": true }
+    "@mariozechner/pi-coding-agent": {
+      "optional": true
+    },
+    "@mariozechner/pi-tui": {
+      "optional": true
+    },
+    "@sinclair/typebox": {
+      "optional": true
+    }
   }
 }

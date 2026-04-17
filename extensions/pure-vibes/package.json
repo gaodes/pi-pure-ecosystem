@@ -1,8 +1,14 @@
 {
-  "name": "@gaodes/pi-vibes",
+  "name": "@gaodes/pi-pure-vibes",
   "version": "0.1.0",
   "description": "AI-generated themed working messages for the Pi coding agent",
-  "keywords": ["pi-package", "pi-extension", "pi", "vibes", "fun"],
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pi",
+    "vibes",
+    "fun"
+  ],
   "license": "MIT",
   "author": "gaodes",
   "repository": {
@@ -11,7 +17,9 @@
     "directory": "extensions/pure-vibes"
   },
   "pi": {
-    "extensions": ["./index.ts"]
+    "extensions": [
+      "./index.ts"
+    ]
   },
   "peerDependencies": {
     "@mariozechner/pi-ai": "*",
@@ -19,8 +27,14 @@
     "@sinclair/typebox": "*"
   },
   "peerDependenciesMeta": {
-    "@mariozechner/pi-ai": { "optional": true },
-    "@mariozechner/pi-coding-agent": { "optional": true },
-    "@sinclair/typebox": { "optional": true }
+    "@mariozechner/pi-ai": {
+      "optional": true
+    },
+    "@mariozechner/pi-coding-agent": {
+      "optional": true
+    },
+    "@sinclair/typebox": {
+      "optional": true
+    }
   }
 }
