@@ -7,7 +7,9 @@ description: Import an existing Pi extension into the pi-pure-ecosystem by forki
 
 Follow the project `AGENTS.md` design philosophy while using this skill.
 
-This skill imports an existing extension into the pure-ecosystem by analyzing one or more source repos, planning the adaptation, and implementing it.
+This skill imports an existing **Pi extension** into the pure-ecosystem by analyzing one or more source repos, planning the adaptation, and implementing it.
+
+**Scope**: the source must be a Pi extension (using `@mariozechner/pi-*` APIs). For importing general npm packages or scripts, use `create-pure-extension` and build from scratch instead.
 
 ## When to Use This Skill
 
@@ -32,23 +34,16 @@ For each source:
 - Understand what it does, its structure, and quality
 - Check if the source itself credits inspirations (other repos it forked/derived from) — trace the full lineage
 
-### 2. Select primary source
+### 2. Analyze and decide
 
-If multiple sources are provided:
-- Analyze all repos together with the user's request
-- **Decide on one primary repo** to base the extension on
+Analyze all sources together with the user's request and decide on:
+
+**Primary source** (if multiple):
+- Pick one repo to base the extension on
 - Note improvements from other sources for future implementation
+- If only one source: it becomes the primary by default
 
-If only one source: it becomes the primary by default.
-
-Present the decision to the user:
-- Which repo is primary and why
-- What features to implement now vs. later
-- Any inspirations/upstream-of-upstream found
-
-### 3. Assess approach
-
-Decide whether to:
+**Approach:**
 
 | Approach | When to use |
 |----------|------------|
@@ -60,11 +55,8 @@ Factors:
 - How much needs to change (rename, deps, patterns)
 - Whether the source uses deprecated APIs or anti-patterns
 
-Present the recommendation to the user with rationale.
-
-### 4. Name the extension
-
-Choose a name following the `pure-<name>` convention:
+**Name:**
+- Follow the `pure-<name>` convention
 - Short, descriptive, memorable
 - Should reflect what the extension does, not where it came from
 - Avoid names that conflict with existing extensions
@@ -75,13 +67,21 @@ ls extensions/pure-<name>/ 2>/dev/null && echo "EXISTS" || echo "OK"
 ```
 If the directory already exists, either pick a different name or use `enhance-pure-extension` instead.
 
-Ask the user to confirm the name.
+### 3. Present analysis for approval
+
+Present everything to the user in one consolidated summary:
+- Primary source (why chosen) + upstream lineage found
+- Approach (clone-adapt or write-from-scratch) with rationale
+- Proposed name
+- Features to implement now vs. later
+
+Get user approval before proceeding to planning.
 
 ---
 
 ## Phase 2: Planning
 
-### 5. Create a plan file
+### 4. Create a plan file
 
 Create a worktree for the import (see AGENTS.md "Worktree Lifecycle"):
 
@@ -133,7 +133,7 @@ Create `extensions/pure-<name>/PLAN.md` with:
 - <secondary-repo-url> (for feature X, Y)
 ```
 
-### 6. User reviews plan
+### 5. User reviews plan
 
 Present the plan to the user. Iterate together until satisfied.
 
@@ -143,7 +143,7 @@ Present the plan to the user. Iterate together until satisfied.
 
 ## Phase 3: Implementation
 
-### 7. Implement the extension
+### 6. Implement the extension
 
 Based on the plan:
 
@@ -155,13 +155,16 @@ Based on the plan:
 
 **If writing from scratch:**
 1. Create directory structure following pure-* conventions
-2. Implement features from the plan, using the source as reference
+2. Implement each feature from the "Features to implement now" section of PLAN.md, using the source as reference
 
 **Then for both approaches:**
 5. Check the source license — preserve it in a `LICENSE` file and note it in README
 6. Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
 7. Add `pure-utils` dependency if config/cache storage is needed (import from `@gaodes/pi-pure-utils`)
-8. Create minimal `package.json` (name + version only — full manifest at publish time)
+8. Create minimal `package.json` — name and version only (full manifest at publish time):
+   ```json
+   { "name": "@gaodes/pi-pure-<name>", "version": "0.1.0" }
+   ```
 9. Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
 10. Create `CHANGELOG.md` with initial entry
 11. Create `.upstream` file for automation
@@ -219,7 +222,7 @@ Machine-readable file for future sync automation:
 }
 ```
 
-### 8. Check, lint, test
+### 7. Check, lint, test
 
 ```bash
 biome check --write --unsafe extensions/pure-<name>/
@@ -244,7 +247,7 @@ Ask user to add to `.pi/settings.json` locally and `/reload` for functional test
 
 ## Phase 4: Commit
 
-### 9. Commit and push
+### 8. Commit and push
 
 Delete `PLAN.md` — the planning history is preserved in git, but it shouldn't ship with the extension:
 
@@ -252,10 +255,13 @@ Delete `PLAN.md` — the planning history is preserved in git, but it shouldn't 
 rm extensions/pure-<name>/PLAN.md
 git add extensions/pure-<name>/
 git commit -m "pure-<name>: initial import from <source>"
-git push
 ```
 
-If in a worktree, merge first: `/worktrees clean <branch-name>`
+If in a worktree, `/worktrees clean <branch-name>` merges to main and pushes. Otherwise:
+
+```bash
+git push
+```
 
 **This completes the import.** Publishing to npm and global activation are separate steps — use the `publish-pure-extension` skill when the user is ready.
 
