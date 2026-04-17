@@ -18,7 +18,7 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 │   └── <feature>/          # Each worktree has the full mono repo
 ├── extensions/              # all extensions here
 │   └── pure-<name>/        # one directory per extension
-├── themes/                  # Theme JSON files (Catppuccin)
+├── themes/                  # Theme JSON files
 ├── package.json             # Pi package manifest (extensions + themes)
 ├── biome.json
 ├── .gitignore
@@ -33,27 +33,27 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 - **Flat layout** — all extensions in `extensions/`. Nest only when a feature's complexity calls for it.
 - **Lint** — [Biome](https://biomejs.dev/) (`biome check --write --unsafe extensions/`), zero errors.
 - **Commits** — conventional style (`feat:`, `fix:`, `refactor:`, `todo:`).
-- **Manifest** — root `package.json` lists all extensions in `pi.extensions` and themes in `pi.themes`; this is what the git package exposes to Pi.
+- **Manifest** — root `package.json` lists available extensions in `pi.extensions` and themes in `pi.themes`. Global settings filters what actually loads — not everything in the manifest is active.
 - **Changelogs** — no root `CHANGELOG.md`. Per-extension changelogs are updated on significant changes.
 
 ## Activation tiers (current state)
 
 **Globally active** — loaded from the git package in `~/.pi/agent/settings.json`:
+
 - `pure-cron`, `pure-github`, `pure-git`, `pure-model-switch`, `pure-sessions`, `pure-statusline`, `pure-theme`, `pure-updater`
 
 **Locally active** — excluded from the git package for safe local testing:
+
 - `pure-vibes`
 
 Extensions under active development are loaded locally for safe testing. Move to local when working on an extension, restore to global when done.
 
 > **Planned**: extensions will be published to npm and installed globally from there instead of the git package.
 
-
-
-## How to develop extensions
+## Development workflow
 
 - **Building, enhancing, importing, or publishing extensions** → use the `pure-extensions-dev` skill (sub-skills: `create.md`, `enhance.md`, `import.md`, `publish.md`).
 - **Looking up Pi APIs, hooks, tool patterns** → use the skill's `references/` directory.
 - **Git worktrees for feature branches** → use the `pure-git` extension (`switch_worktree` tool).
 
-When implementing new extensions or major changes, read the `pure-extensions-dev` skill first.
+Before implementing new extensions or major changes, read the `pure-extensions-dev` skill first.
