@@ -6,7 +6,7 @@ Personal Pi extensions, themes, and configuration. Named with the `pure-` prefix
 >
 > This is a guiding preference, not a constraint. Embrace complexity when the feature demands it — split files, add dependencies, or build custom UI as needed. Justify the departure, don't avoid it.
 
-This is the **development repo**. Remote: `github.com/gaodes/pi-pure-ecosystem`, branch `main`. Extensions are sourced as a git package in global settings — Pi clones the repo and loads them from there.
+This is the **development repo**. Remote: `github.com/gaodes/pi-pure-ecosystem`, branch `main`. Extensions are declared as a git package in global settings — Pi clones the repo and loads them from there.
 
 ## Project structure
 
@@ -33,7 +33,7 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 - **Flat layout, prefer simple** — all extensions in `extensions/`. Prefer a flat structure; nest or restructure when complexity requires it.
 - **Lint** — [Biome](https://biomejs.dev/) (`biome check --write --unsafe extensions/`), zero errors.
 - **Commits** — conventional style (`feat:`, `fix:`, `refactor:`, `todo:`).
-- **Manifest** — root `package.json` lists available extensions in `pi.extensions` and themes in `pi.themes`. Global settings filters what actually loads — not everything in the manifest is active.
+- **Manifest** — root `package.json` lists available extensions in `pi.extensions` and themes in `pi.themes`. Global settings can specify its own extension list, which replaces the manifest's — they are separate declarations, not a subset filter.
 - **Changelogs** — no root `CHANGELOG.md`. Every change to an extension must be recorded in its per-extension `CHANGELOG.md`.
 
 ## Activation tiers
@@ -43,7 +43,7 @@ Extensions load from two sources — check them at runtime to see what's active:
 1. **Global** — the git package filter in `~/.pi/agent/settings.json` (`pi list` to inspect)
 2. **Local** — project-level overrides in `.pi/settings.json`
 
-Local overrides take precedence. Move extensions to local when working on them, restore to global when done.
+Local overrides take precedence. To work on an extension, add it to `.pi/settings.json` packages and remove it from the global git package filter. Restore when done.
 
 > **Planned**: extensions will be published to npm and installed globally from there instead of the git package.
 
