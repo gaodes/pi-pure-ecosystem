@@ -36,15 +36,14 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 - **Manifest** — root `package.json` lists available extensions in `pi.extensions` and themes in `pi.themes`. Global settings filters what actually loads — not everything in the manifest is active.
 - **Changelogs** — no root `CHANGELOG.md`. Per-extension changelogs are updated on significant changes.
 
-## Activation tiers (current state)
+## Activation tiers
 
-**Globally active** — loaded from the git package in `~/.pi/agent/settings.json`:
+Extensions load from two sources — check them at runtime to see what's active:
 
-- `pure-cron`, `pure-github`, `pure-git`, `pure-model-switch`, `pure-sessions`, `pure-statusline`, `pure-theme`, `pure-updater`
+1. **Global** — the git package filter in `~/.pi/agent/settings.json` (`pi list` to inspect)
+2. **Local** — project-level overrides in `.pi/settings.json`
 
-**Locally active** — for extensions under active development, loaded from `.pi/settings.json` to avoid conflicting with the global git package:
-
-- `pure-vibes`
+Local overrides take precedence. Move extensions to local when working on them, restore to global when done.
 
 > **Planned**: extensions will be published to npm and installed globally from there instead of the git package.
 
