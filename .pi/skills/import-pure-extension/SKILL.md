@@ -84,7 +84,7 @@ If the directory already exists, either pick a different name or use `enhance-pu
 **Check for integration opportunities:**
 
 Scan existing extensions in `extensions/` for:
-- Shared utility patterns (config/cache helpers — currently inlined, e.g. `getPurePath()` in `pure-cron`)
+- Shared utility patterns (config/cache helpers → `@gaodes/pi-pure-utils`)
 - Overlapping tool registrations or commands that could conflict
 - Opportunities to reuse code from existing extensions instead of duplicating
 
@@ -221,7 +221,7 @@ Based on the plan:
 **Then for both approaches:**
 - Check the source license — preserve it in a `LICENSE` file and note it in README
 - Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
-- If the extension needs config/cache storage, inline the `getPurePath()` helper (copy the pattern from `pure-cron` or `pure-sessions`). A shared `pure-utils` package is planned but not yet available.
+- If the extension needs config/cache storage, import the helpers from `@gaodes/pi-pure-utils` (a shared utility package — not yet created, but extensions should reference it). Until it exists, inline the `getPurePath()` pattern from `pure-cron` or `pure-sessions` as a temporary measure.
 - If the source imports from `@aliou/*` packages (e.g. `@aliou/pi-utils-ui`, `@aliou/pi-utils-settings`), these are third-party packages not bundled by Pi. Replace with inline implementations or equivalents from `@mariozechner/pi-tui` and `@mariozechner/pi-coding-agent`.
 - Create `package.json` with name, version, and any runtime dependencies from the source. The publish skill will expand the manifest later.
   ```json
@@ -252,7 +252,7 @@ For each third-party import in the source, check if Pi provides an equivalent (s
 |----------|--------|----------|
 | `child_process.exec/spawn` | `pi.exec()` | Yes — unless extension needs streaming/pty |
 | `os.homedir()` | `getAgentDir()` | Yes — always |
-| `fs.*Sync` for JSON config | Inline `getPurePath()` pattern | Yes — copy from `pure-cron` or `pure-sessions` |
+| `fs.*Sync` for JSON config | `@gaodes/pi-pure-utils` helpers | Yes — shared config/cache helpers. Inline `getPurePath()` from existing extensions as fallback if the package is unavailable. |
 | `fetch` | Keep — built-in | No change needed |
 | `@sinclair/typebox` | Keep — Pi bundles it | Import in code, not in package.json |
 | `@aliou/*` packages | Replace with inline code or `@mariozechner/*` | Yes — third-party, not bundled by Pi |
@@ -414,7 +414,7 @@ Two complementary reference sources are available:
 These rules are specific to the import workflow. For general Pi extension rules (execute order, signal forwarding, no child_process, etc.), see `AGENTS.md`.
 
 1. **Dependency audit**: flag every Pi API replacement to the user — only replace if functionality is preserved. User makes the final call.
-2. **Config/cache helpers**: if the extension needs config/cache storage, inline the `getPurePath()` helper from existing extensions (e.g. `pure-cron`). A shared `pure-utils` package is planned but not yet available.
+2. **Config/cache helpers**: if the extension needs config/cache storage, import from `@gaodes/pi-pure-utils`. If the package is unavailable, inline the `getPurePath()` helper from existing extensions (e.g. `pure-cron`) as a temporary measure. Do not crash Pi if the dependency is missing — provide a graceful fallback.
 3. **License preservation**: check source license, preserve in `LICENSE` file, note in README.
 4. **Full source lineage**: trace upstream-of-upstream. README Sources / Inspiration must show the complete derivation chain.
 5. **`.upstream` file**: always create for future sync automation — primary URL + SHA + date, plus secondary sources.
@@ -445,7 +445,7 @@ These rules are specific to the import workflow. For general Pi extension rules 
 - [ ] Entry point is `index.ts` at extension root
 - [ ] Dependencies audited — Pi API replacements flagged and confirmed
 - [ ] `@aliou/*` packages replaced with inline or `@mariozechner/*` equivalents
-- [ ] Config/cache helpers inlined (from `pure-cron`/`pure-sessions` pattern) if needed
+- [ ] Config/cache helpers: `@gaodes/pi-pure-utils` imported (or inlined as fallback)
 - [ ] `package.json` created (name + version + runtime deps, no Pi packages)
 - [ ] Dependencies installed (`npm install` if needed)
 - [ ] `.npmignore` created
