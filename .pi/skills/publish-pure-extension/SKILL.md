@@ -90,6 +90,37 @@ Update **both** files:
 - `extensions/<name>/package.json` — `version` field
 - `extensions/<name>/CHANGELOG.md` — add new version header (if not already present)
 
+### 4. Expand the Manifest
+
+If the `package.json` is minimal (only `name` + `version` from import), expand it to a full publishable manifest:
+
+```json
+{
+  "name": "@gaodes/pi-pure-<name>",
+  "version": "X.Y.Z",
+  "description": "<one-line description>",
+  "keywords": ["pi-package", "pi-extension", "pi"],
+  "license": "<license-type>",
+  "author": "gaodes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaodes/pi-pure-ecosystem.git",
+    "directory": "extensions/<name>"
+  },
+  "pi": { "extensions": ["./index.ts"] },
+  "peerDependencies": { ... },
+  "peerDependenciesMeta": { ... }
+}
+```
+
+- `description` — from README first line
+- `keywords` — always include `pi-package` and `pi-extension`
+- `license` — from the `LICENSE` file
+- `pi.extensions` — point to entry file (`./index.ts` or `./extensions` for multi-file)
+- `peerDependencies` — Pi packages used by the extension, all optional
+- `peerDependenciesMeta` — all peer deps marked `"optional": true`
+- `dependencies` — only runtime deps (e.g. `croner`), NOT Pi packages
+
 Use `edit` to make precise changes. Example version bump from `0.3.2` to `0.3.3`:
 
 In `package.json`:

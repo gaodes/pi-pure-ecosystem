@@ -87,18 +87,10 @@ Get user approval before proceeding to planning.
 
 ### 4. Create a plan file
 
-Create a worktree for the import:
+Create a branch and the extension directory:
 
 ```bash
-git worktree add .worktrees/<name>-import -b <name>-import
-cd .worktrees/<name>-import
-```
-
-> **Note**: After `cd`, all subsequent commands run from the worktree root. Verify with `pwd` if unsure.
-
-Then create the extension directory:
-
-```bash
+git checkout -b <name>-import
 mkdir -p extensions/pure-<name>
 ```
 
@@ -135,6 +127,8 @@ Create `extensions/pure-<name>/PLAN.md` with:
 ## License
 <original license type> — preserved from <primary-source>
 
+> If the source has no license or is proprietary, **stop and inform the user** before proceeding. Importing proprietary code may violate the source's terms.
+
 ## Sources for future updates
 - <primary-repo-url>
 - <secondary-repo-url> (for feature X, Y)
@@ -146,16 +140,38 @@ Present the plan to the user. Iterate together until satisfied.
 
 **Do not proceed to implementation until the user explicitly says to start.**
 
+### 6. Set up development environment
+
+After plan approval, create a worktree for the implementation:
+
+```bash
+git worktree add .worktrees/<name>-import <name>-import
+cd .worktrees/<name>-import
+```
+
+If the branch doesn't exist (wasn't created in step 4), create it:
+```bash
+git worktree add .worktrees/<name>-import -b <name>-import
+cd .worktrees/<name>-import
+```
+
+> **Note**: After `cd`, all subsequent commands run from the worktree root. Verify with `pwd` if unsure.
+
+For **development on main (no worktree)**:
+```bash
+git checkout <name>-import
+```
+
 ---
 
 ## Phase 3: Implementation
 
-### 6. Implement the extension
+### 7. Implement the extension
 
 Based on the plan:
 
 **If cloning and adapting:**
-1. Copy source files into `extensions/pure-<name>/` (alongside the existing PLAN.md)
+1. Copy source files into `extensions/pure-<name>/` (alongside the existing PLAN.md — exclude any source `PLAN.md` from the copy)
 2. Strip: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
 3. Flatten `src/` to root when the extension is small (≤5 files). Keep subdirectories when justified by size or logical separation (e.g. `services/`, `tools/`). Don't force flat structure if it hurts readability.
 4. Rename to pure-* conventions (tool names, commands, storage paths)
@@ -236,7 +252,7 @@ Machine-readable file for future sync automation:
 }
 ```
 
-### 7. Check, lint, test
+### 8. Check, lint, test
 
 Run from the **repo root** (or worktree root if in a worktree):
 
@@ -261,7 +277,7 @@ For **worktree** development:
 2. Smoke test (from worktree root): `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok"`
 3. Functional test: call `switch_worktree` tool to switch session, user tests, switch back.
 
-For **main worktree** development:
+For **development on main** (no worktree):
 1. Add `"./extensions/pure-<name>"` to `.pi/settings.json` packages
 2. Ask user to `/reload` and test
 
@@ -270,14 +286,14 @@ For **main worktree** development:
 
 ## Phase 4: Commit
 
-### 8. Commit and push
+### 9. Commit and push
 
 Delete `PLAN.md` — the planning history is preserved in git, but it shouldn't ship with the extension:
 
 ```bash
 rm extensions/pure-<name>/PLAN.md
 git add extensions/pure-<name>/
-git commit -m "pure-<name>: initial import from <source>"
+git commit -m "pure-<name>: initial import from <primary-source-repo-name>"
 ```
 
 If in a worktree, clean up from the **main repo root**:
@@ -346,6 +362,7 @@ These rules are specific to the import workflow. For general Pi extension rules 
 - [ ] Approach decided (clone-adapt or scratch)
 - [ ] Extension named and confirmed by user
 - [ ] Plan created on a branch, reviewed and approved
+- [ ] Development environment set up (worktree or branch)
 - [ ] Full source lineage traced (upstream of upstream)
 - [ ] Dependencies audited — Pi API replacements flagged and confirmed
 - [ ] `pure-utils` imported if config/cache needed
@@ -359,7 +376,6 @@ These rules are specific to the import workflow. For general Pi extension rules 
 - [ ] Smoke test passed
 - [ ] User confirmed functional test
 - [ ] Source license checked and preserved in `LICENSE` file
-- [ ] `.npmignore` created
 - [ ] PLAN.md deleted after implementation
 - [ ] Committed and pushed
 
