@@ -49,7 +49,7 @@ Local overrides take precedence. Move extensions to local when working on them, 
 
 ## Development workflow
 
-- **Building, enhancing, importing, or publishing extensions** → use the `pure-extensions-dev` skill (sub-skills: `create.md`, `enhance.md`, `import.md`, `publish.md`).
+- **Building, enhancing, importing, or publishing extensions** → use the `pure-extensions-dev` skill (its dispatch table maps tasks to the right sub-skill).
 - **Looking up Pi APIs, hooks, tool patterns** → use the skill's `references/` directory.
 - **Git worktrees for feature branches** → use the `pure-git` extension (`switch_worktree` tool).
 
