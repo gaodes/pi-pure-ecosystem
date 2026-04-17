@@ -5,8 +5,6 @@ description: Create, import, enhance, update, or publish pure-* extensions for t
 
 # Pure Extension Development
 
-Follow the project `AGENTS.md` design philosophy while using this skill.
-
 ## Dispatch
 
 Read the sub-skill file that matches the task:
@@ -23,6 +21,27 @@ Read the sub-skill file that matches the task:
 If the request doesn't clearly match one, ask before proceeding.
 
 ---
+
+## Design Philosophy
+
+**Simplicity, functionality, aesthetics** — in that order.
+
+### Simplicity
+- A 300-line `index.ts` beats a 10-file module split.
+- No build step — Pi loads `.ts` via Jiti at runtime.
+- No cross-extension dependencies. Each extension is self-contained.
+- Only add npm packages when Pi genuinely lacks the capability.
+
+### Functionality
+- Pi APIs before everything else — use `pi.exec()`, `getAgentDir()`, `ctx.ui.notify()`, `@sinclair/typebox`, `@mariozechner/pi-tui`, and `complete()` before reaching for external packages or raw Node APIs.
+- Project-level configs override global ones: `<project>/.pi/pure/` takes precedence over `~/.pi/agent/pure/`.
+- Design for all three Pi modes: Interactive, RPC, and Print.
+
+### Aesthetics
+- Use theme tokens and `ctx.ui.theme.fg()` for colored text — never hardcode colors.
+- Prefer built-in Pi TUI components (`SettingsList`, `SelectList`, `Container`) over custom rendering.
+- Test UI in both light and dark themes. Test in Ghostty.
+- Keep output concise and scannable. The terminal is a small canvas.
 
 ## Extension Conventions
 

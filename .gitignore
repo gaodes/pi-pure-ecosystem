@@ -8,4 +8,7 @@ node_modules/
 # Git worktrees (managed by pure-git)
 .worktrees/
 
+# Archive (local reference, not tracked)
+AGENTS-old.md
+
 # All extensions are tracked in this repo.

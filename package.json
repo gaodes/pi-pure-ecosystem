@@ -2,7 +2,9 @@
   "name": "pi-pure-ecosystem",
   "version": "0.1.0",
   "description": "Personal extensions, themes, and configuration for the Pi coding agent",
-  "keywords": ["pi-package"],
+  "keywords": [
+    "pi-package"
+  ],
   "license": "MIT",
   "dependencies": {
     "croner": "^8.1.2",
@@ -24,10 +26,10 @@
       "./extensions/pure-statusline/index.ts",
       "./extensions/pure-theme/index.ts",
       "./extensions/pure-updater/index.ts",
-      "./extensions/pure-vibes/index.ts",
-      "./extensions/pure-git/index.ts",
-      "./extensions/pi-devkit/index.ts"
+      "./extensions/pure-git/index.ts"
     ],
-    "themes": ["./themes"]
+    "themes": [
+      "./themes"
+    ]
   }
 }
