@@ -129,8 +129,8 @@ Template:
 ## Dependency replacements
 | Original | Replacement | Reason |
 |----------|------------|--------|
-| `child_process.exec` | `pi.exec()` | Pi API convention |
-| `os.homedir()` | `getAgentDir()` | Pi API convention |
+| _example: `child_process.exec` | `pi.exec()` | Pi API convention_ |
+| _example: `os.homedir()` | `getAgentDir()` | Pi API convention_ |
 
 ## License
 <original license type> — preserved from <primary-source>
@@ -150,9 +150,10 @@ Present the plan to the user. Iterate together until satisfied.
 
 ### 6. Set up development environment
 
-After plan approval, create a worktree for the implementation:
+After plan approval, return to main and create a worktree for the implementation:
 
 ```bash
+git checkout main
 git worktree add .worktrees/<name>-import <name>-import
 cd .worktrees/<name>-import
 ```
@@ -196,6 +197,7 @@ Based on the plan:
    ```
    Omit `dependencies` if the source has no runtime deps.
 9. Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
+    > **Note**: `node_modules/` is typically covered by the root `.gitignore`. If not, create a `.gitignore` in the extension directory with `node_modules/`.
 10. Install dependencies if `package.json` has any: `(cd extensions/pure-<name> && npm install)`
 11. Create `CHANGELOG.md` with initial entry:
     ```markdown
@@ -310,7 +312,7 @@ git worktree remove .worktrees/<name>-import
 git branch -d <name>-import
 ```
 
-Or use the user-facing command: `/worktrees clean <name>-import`. Then push:
+Or use the user-facing command: `/worktrees clean <name>-import`. If the merge has conflicts, resolve them before continuing. Then push:
 
 ```bash
 git push
@@ -358,7 +360,7 @@ The `references/` directory contains detailed Pi API reference material for tool
 These rules are specific to the import workflow. For general Pi extension rules (execute order, signal forwarding, no child_process, etc.), see `AGENTS.md`.
 
 1. **Dependency audit**: flag every Pi API replacement to the user — only replace if functionality is preserved. User makes the final call.
-2. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. If the package is unavailable, state the dependency gracefully — provide install instructions, don't crash Pi.
+2. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. If the package is unavailable, state the dependency gracefully — provide install instructions, don't crash Pi. (See also: step 7 implementation.)
 3. **License preservation**: check source license, preserve in `LICENSE` file, note in README.
 4. **Full source lineage**: trace upstream-of-upstream. README Sources / Inspiration must show the complete derivation chain.
 5. **`.upstream` file**: always create for future sync automation — primary URL + SHA + date, plus secondary sources.
@@ -379,7 +381,7 @@ These rules are specific to the import workflow. For general Pi extension rules 
 - [ ] README.md with Sources / Inspiration (full chain)
 - [ ] CHANGELOG.md with initial entry + import SHA
 - [ ] `.upstream` file created
-- [ ] Minimal `package.json` (name + version + source deps)
+- [ ] `package.json` created (name + version + runtime deps)
 - [ ] Dependencies installed (`npm install` if needed)
 - [ ] `.npmignore` created
 - [ ] `biome check` passes zero errors
