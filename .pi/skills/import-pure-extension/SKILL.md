@@ -1,6 +1,6 @@
 ---
 name: import-pure-extension
-description: Import an existing Pi extension into the pi-pure-ecosystem by forking from an external source. Use when the user asks to import, fork, or adapt an external extension.
+description: Analyze external Pi extensions, plan adaptation, and implement as a pure-ecosystem extension. Use when the user asks to import, fork, or adapt an external extension.
 ---
 
 # Import a Pure Extension
@@ -28,8 +28,12 @@ This skill analyzes one or more external Pi extension source repos, plans the ad
 
 The user provides **at least one link** to a repo or extension to import. They may provide multiple.
 
+For each source, clone into a temporary directory:
+```bash
+git clone --depth 1 <repo-url> /tmp/<source-name>
+```
+
 For each source:
-- Clone or browse the repo
 - Read README, package.json, source files
 - Understand what it does, its structure, and quality
 - Check if the source itself credits inspirations (other repos it forked/derived from) — trace the full lineage
@@ -37,6 +41,8 @@ For each source:
 Then read the project conventions:
 - Read `AGENTS.md` at the repo root — this defines naming, structure, API usage, and workflow rules
 - Consult `references/api-reference.md` for the full Pi API surface (packages, tools, hooks, commands, components)
+
+> **Cleanup**: delete temporary clones (`rm -rf /tmp/<source-name>`) after Phase 2 planning is complete and you no longer need to reference the raw source.
 
 ### 2. Analyze and decide
 
@@ -59,6 +65,10 @@ Factors:
 - How much needs to change (rename, deps, patterns)
 - Whether the source uses deprecated APIs or anti-patterns
 
+**Dependency pre-audit:**
+
+Before deciding the approach, scan the source for third-party imports that will need replacement. This informs the clone-adapt vs scratch decision — heavy dependency replacement favors scratch. See the Dependency Audit table in step 7 for the full replacement map.
+
 **Name:**
 - Follow the `pure-<name>` convention
 - Short, descriptive, memorable
@@ -74,17 +84,19 @@ If the directory already exists, either pick a different name or use `enhance-pu
 **Check for integration opportunities:**
 
 Scan existing extensions in `extensions/` for:
-- Shared utility patterns (config/cache helpers → `@gaodes/pi-pure-utils`)
+- Shared utility patterns (config/cache helpers — currently inlined, e.g. `getPurePath()` in `pure-cron`)
 - Overlapping tool registrations or commands that could conflict
 - Opportunities to reuse code from existing extensions instead of duplicating
 
-Note findings in the analysis for the user to review.
+Record findings in the PLAN.md (see "Integration notes" section in the template).
 
 ### 3. Present analysis for approval
 
 Present everything to the user in one consolidated summary:
 - Primary source (why chosen) + upstream lineage found
 - Approach (clone-adapt or write-from-scratch) with rationale
+- Dependency pre-audit results — imports that will need replacement
+- Integration findings — shared patterns or conflicts with existing extensions
 - Proposed name
 - Features to implement now vs. later
 
@@ -145,6 +157,11 @@ Template:
 | _example: `child_process.exec` | `pi.exec()` | Pi API convention_ |
 | _example: `os.homedir()` | `getAgentDir()` | Pi API convention_ |
 
+## Integration notes
+- Shared patterns with existing extensions: <e.g. "needs getPurePath() — copy from pure-cron">
+- Potential conflicts: <e.g. "tool name overlaps with pure-xyz">
+- Reuse opportunities: <e.g. "pure-abc already has similar client logic">
+
 ## License
 <original license type> — preserved from <primary-source>
 
@@ -163,7 +180,7 @@ Present the plan to the user. Iterate together until satisfied.
 
 ### 6. Set up development environment
 
-After plan approval, return to main and create a worktree for the implementation:
+After plan approval, create a worktree for the implementation:
 
 ```bash
 git checkout main
@@ -171,7 +188,7 @@ git worktree add .worktrees/<name>-import <name>-import
 cd .worktrees/<name>-import
 ```
 
-> **Note**: After `cd`, all subsequent commands run from the worktree root. Verify with `pwd` if unsure.
+> **CWD tracking**: after `cd`, all subsequent commands run from the worktree root (`<main-repo-root>/.worktrees/<name>-import/`). Verify with `pwd` if unsure. When step 9 says `cd <main-repo-root>`, use the original main repo path (e.g. `cd ~/Agents/workspaces/pilab/projects/pi-pure-ecosystem`).
 
 For **development on main** (no worktree) — stay on `<name>-import` from step 4:
 ```bash
@@ -187,42 +204,45 @@ For **development on main** (no worktree) — stay on `<name>-import` from step 
 Based on the plan:
 
 **If cloning and adapting:**
-1. Copy source files into `extensions/pure-<name>/` (alongside the existing PLAN.md — exclude any source `PLAN.md` from the copy):
-   ```bash
-   rsync -av --exclude='PLAN.md' <source-dir>/ extensions/pure-<name>/
-   ```
-2. Strip: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
-3. Flatten `src/` to root when the extension is small (≤5 files). Keep subdirectories when justified by size or logical separation (e.g. `services/`, `tools/`). Don't force flat structure if it hurts readability.
-4. Rename to pure-* conventions (tool names, commands, storage paths)
+- Copy source files into `extensions/pure-<name>/` (alongside the existing PLAN.md — exclude any source `PLAN.md` from the copy):
+  ```bash
+  rsync -av --exclude='PLAN.md' /tmp/<source-name>/ extensions/pure-<name>/
+  ```
+- Strip: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
+- Flatten `src/` to root when the extension is small (≤5 files). Keep subdirectories when justified by size or logical separation (e.g. `services/`, `tools/`). Don't force flat structure if it hurts readability.
+- Rename to pure-* conventions (tool names, commands, storage paths)
+- Ensure the entry point is `index.ts` at the extension root (rename if source uses `main.ts`, `src/index.ts`, etc.)
 
 **If writing from scratch:**
-1. Create directory structure following pure-* conventions
-2. Implement each feature from the "Features to implement now" section of PLAN.md, using the source as reference. Start with core functionality, then add secondary features.
+- Create directory structure following pure-* conventions
+- Ensure the entry point is `index.ts` at the extension root
+- Implement each feature from the "Features to implement now" section of PLAN.md, using the source as reference. Start with core functionality, then add secondary features.
 
 **Then for both approaches:**
-5. Check the source license — preserve it in a `LICENSE` file and note it in README
-6. Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
-7. Add `pure-utils` dependency if config/cache storage is needed (import from `@gaodes/pi-pure-utils`)
-8. Create `package.json` with name, version, and any runtime dependencies from the source. The publish skill will expand the manifest later.
-   ```json
-   {
-     "name": "@gaodes/pi-pure-<name>",
-     "version": "0.1.0",
-     "dependencies": { "<runtime-dep>": "<version>" }
-   }
-   ```
-   Omit `dependencies` if the source has no runtime deps. **Never put `@mariozechner/pi-*` packages in `dependencies`** — they're peer dependencies and will be added at publish time.
-9. Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
-    > **Note**: `node_modules/` is typically covered by the root `.gitignore`. If not, create a `.gitignore` in the extension directory with `node_modules/`.
-10. Install dependencies if `package.json` has any: `(cd extensions/pure-<name> && npm install)`
-11. Create `CHANGELOG.md` with initial entry:
-    ```markdown
-    ## [0.1.0] - YYYY-MM-DD
-    ### Added
-    - Initial import from [<primary-source-repo-name>](<repo-url>)
-    ```
-12. Create `.upstream` file for automation
-13. Create `README.md` with full Sources / Inspiration lineage
+- Check the source license — preserve it in a `LICENSE` file and note it in README
+- Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
+- If the extension needs config/cache storage, inline the `getPurePath()` helper (copy the pattern from `pure-cron` or `pure-sessions`). A shared `pure-utils` package is planned but not yet available.
+- If the source imports from `@aliou/*` packages (e.g. `@aliou/pi-utils-ui`, `@aliou/pi-utils-settings`), these are third-party packages not bundled by Pi. Replace with inline implementations or equivalents from `@mariozechner/pi-tui` and `@mariozechner/pi-coding-agent`.
+- Create `package.json` with name, version, and any runtime dependencies from the source. The publish skill will expand the manifest later.
+  ```json
+  {
+    "name": "@gaodes/pi-pure-<name>",
+    "version": "0.1.0",
+    "dependencies": { "<runtime-dep>": "<version>" }
+  }
+  ```
+  Omit `dependencies` if the source has no runtime deps. **Never put `@mariozechner/pi-*` packages in `dependencies`** — they're peer dependencies and will be added at publish time.
+- Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
+  > **Note**: `node_modules/` is typically covered by the root `.gitignore`. If not, create a `.gitignore` in the extension directory with `node_modules/`.
+- Install dependencies if `package.json` has any: `(cd extensions/pure-<name> && npm install)`
+- Create `CHANGELOG.md` with initial entry:
+  ```markdown
+  ## [0.1.0] - YYYY-MM-DD
+  ### Added
+  - Initial import from [<primary-source-repo-name>](<repo-url>)
+  ```
+- Create `.upstream` file for automation
+- Create `README.md` with full Sources / Inspiration lineage
 
 #### Dependency Audit
 
@@ -232,9 +252,10 @@ For each third-party import in the source, check if Pi provides an equivalent (s
 |----------|--------|----------|
 | `child_process.exec/spawn` | `pi.exec()` | Yes — unless extension needs streaming/pty |
 | `os.homedir()` | `getAgentDir()` | Yes — always |
-| `fs.*Sync` for JSON config | `pure-utils` helpers | Yes — if using config/cache pattern. Requires `@gaodes/pi-pure-utils` as a dependency. |
+| `fs.*Sync` for JSON config | Inline `getPurePath()` pattern | Yes — copy from `pure-cron` or `pure-sessions` |
 | `fetch` | Keep — built-in | No change needed |
-| `@sinclair/typebox` | Keep — Pi bundles it | Peer dep, not direct dep |
+| `@sinclair/typebox` | Keep — Pi bundles it | Import in code, not in package.json |
+| `@aliou/*` packages | Replace with inline code or `@mariozechner/*` | Yes — third-party, not bundled by Pi |
 | Any other third-party import | Check if Pi provides equivalent | Keep if no Pi equivalent |
 
 **Flag each replacement to the user. Only replace if functionality is preserved.** Let the user make the final call.
@@ -304,6 +325,7 @@ For **development on main** (no worktree):
 1. Add `"./extensions/pure-<name>"` to `.pi/settings.json` packages
 2. Ask user to `/reload` and test
 
+**Do not proceed to commit (step 9) until the user confirms the functional test passes.**
 
 ---
 
@@ -323,6 +345,7 @@ If in a worktree, clean up from the **main repo root**:
 
 ```bash
 cd <main-repo-root>
+git checkout main
 git merge <name>-import
 git worktree remove .worktrees/<name>-import
 git branch -d <name>-import
@@ -341,6 +364,11 @@ git checkout main
 git merge <name>-import
 git branch -d <name>-import
 git push
+```
+
+**Cleanup temporary clones:**
+```bash
+rm -rf /tmp/<source-name>
 ```
 
 **This completes the import.** The extension is now on `main` and pushed to GitHub.
@@ -386,32 +414,38 @@ Two complementary reference sources are available:
 These rules are specific to the import workflow. For general Pi extension rules (execute order, signal forwarding, no child_process, etc.), see `AGENTS.md`.
 
 1. **Dependency audit**: flag every Pi API replacement to the user — only replace if functionality is preserved. User makes the final call.
-2. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. If the package is unavailable, state the dependency gracefully — provide install instructions, don't crash Pi. (See also: step 7 implementation.)
+2. **Config/cache helpers**: if the extension needs config/cache storage, inline the `getPurePath()` helper from existing extensions (e.g. `pure-cron`). A shared `pure-utils` package is planned but not yet available.
 3. **License preservation**: check source license, preserve in `LICENSE` file, note in README.
 4. **Full source lineage**: trace upstream-of-upstream. README Sources / Inspiration must show the complete derivation chain.
 5. **`.upstream` file**: always create for future sync automation — primary URL + SHA + date, plus secondary sources.
 6. **PLAN.md gate**: never proceed to implementation until the user explicitly approves the plan.
+7. **Entry point**: the extension must have `index.ts` at its root. Rename if the source uses a different entry point.
+8. **`@aliou/*` packages**: these are third-party packages the source author used, not bundled by Pi. Replace with inline implementations or `@mariozechner/*` equivalents.
 
 ---
 
 ## Checklist
 
 **Phase 1 — Analysis:**
-- [ ] All sources analyzed, primary selected
+- [ ] All sources cloned to `/tmp/`, analyzed, primary selected
 - [ ] AGENTS.md conventions reviewed
 - [ ] Pi API reference reviewed (`references/api-reference.md`)
+- [ ] Dependency pre-audit completed — imports needing replacement identified
 - [ ] Existing extensions scanned for integration opportunities
 - [ ] Approach decided (clone-adapt or scratch)
 - [ ] Extension named and confirmed by user
 
 **Phase 2 — Planning:**
 - [ ] Plan created on a branch, reviewed and approved
+- [ ] Integration notes recorded in PLAN.md
 - [ ] Development environment set up (worktree or branch)
 - [ ] Full source lineage traced (upstream of upstream)
 
 **Phase 3 — Implementation:**
+- [ ] Entry point is `index.ts` at extension root
 - [ ] Dependencies audited — Pi API replacements flagged and confirmed
-- [ ] `pure-utils` imported if config/cache needed
+- [ ] `@aliou/*` packages replaced with inline or `@mariozechner/*` equivalents
+- [ ] Config/cache helpers inlined (from `pure-cron`/`pure-sessions` pattern) if needed
 - [ ] `package.json` created (name + version + runtime deps, no Pi packages)
 - [ ] Dependencies installed (`npm install` if needed)
 - [ ] `.npmignore` created
@@ -425,6 +459,7 @@ These rules are specific to the import workflow. For general Pi extension rules 
 
 **Phase 4 — Commit:**
 - [ ] PLAN.md deleted after implementation
+- [ ] Temporary clones cleaned up (`/tmp/<source-name>`)
 - [ ] Committed and pushed
 - [ ] `.pi/settings.json` cleaned up (removed local test entry)
 
