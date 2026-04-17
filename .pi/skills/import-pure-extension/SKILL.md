@@ -87,9 +87,10 @@ Get user approval before proceeding to planning.
 
 ### 4. Create a plan file
 
-Create a branch and the extension directory:
+Create a branch from main and the extension directory:
 
 ```bash
+git checkout main
 git checkout -b <name>-import
 mkdir -p extensions/pure-<name>
 ```
@@ -185,18 +186,22 @@ Based on the plan:
 5. Check the source license — preserve it in a `LICENSE` file and note it in README
 6. Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
 7. Add `pure-utils` dependency if config/cache storage is needed (import from `@gaodes/pi-pure-utils`)
-8. Create minimal `package.json` — name and version only (full manifest at publish time):
+8. Create `package.json` with name, version, and any runtime dependencies from the source. The publish skill will expand the manifest later.
    ```json
-   { "name": "@gaodes/pi-pure-<name>", "version": "0.1.0" }
+   {
+     "name": "@gaodes/pi-pure-<name>",
+     "version": "0.1.0",
+     "dependencies": { "<runtime-dep>": "<version>" }
+   }
    ```
-   If the source has runtime dependencies (e.g. `croner`), preserve them in this `package.json` for testing. The publish skill will expand the manifest later.
+   Omit `dependencies` if the source has no runtime deps.
 9. Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
 10. Install dependencies if `package.json` has any: `(cd extensions/pure-<name> && npm install)`
 11. Create `CHANGELOG.md` with initial entry:
     ```markdown
     ## [0.1.0] - YYYY-MM-DD
     ### Added
-    - Initial import from [<source>](<repo-url>)
+    - Initial import from [<primary-source-repo-name>](<repo-url>)
     ```
 12. Create `.upstream` file for automation
 13. Create `README.md` with full Sources / Inspiration lineage
@@ -209,7 +214,7 @@ For each third-party import in the source, check if Pi provides an equivalent:
 |----------|--------|----------|
 | `child_process.exec/spawn` | `pi.exec()` | Yes — unless extension needs streaming/pty |
 | `os.homedir()` | `getAgentDir()` | Yes — always |
-| `fs.*Sync` for JSON config | `pure-utils` helpers | Yes — if using config/cache pattern. Note: `@gaodes/pi-pure-utils` is planned but not yet created. |
+| `fs.*Sync` for JSON config | `pure-utils` helpers | Yes — if using config/cache pattern. Requires `@gaodes/pi-pure-utils` as a dependency. |
 | `fetch` | Keep — built-in | No change needed |
 | `@sinclair/typebox` | Keep — Pi bundles it | Peer dep, not direct dep |
 | Any other third-party import | Check if Pi provides equivalent | Keep if no Pi equivalent |
@@ -275,8 +280,7 @@ For **worktree** development:
    ```json
    { "packages": ["./extensions/pure-<name>"] }
    ```
-2. Smoke test (from worktree root): `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok"`
-3. Functional test: call `switch_worktree` tool to switch session, user tests, switch back.
+2. Functional test: call `switch_worktree` tool to switch session, user tests, switch back.
 
 For **development on main** (no worktree):
 1. Add `"./extensions/pure-<name>"` to `.pi/settings.json` packages
@@ -354,7 +358,7 @@ The `references/` directory contains detailed Pi API reference material for tool
 These rules are specific to the import workflow. For general Pi extension rules (execute order, signal forwarding, no child_process, etc.), see `AGENTS.md`.
 
 1. **Dependency audit**: flag every Pi API replacement to the user — only replace if functionality is preserved. User makes the final call.
-2. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. State dependency gracefully — provide install instructions if missing, don't crash Pi.
+2. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. If the package is unavailable, state the dependency gracefully — provide install instructions, don't crash Pi.
 3. **License preservation**: check source license, preserve in `LICENSE` file, note in README.
 4. **Full source lineage**: trace upstream-of-upstream. README Sources / Inspiration must show the complete derivation chain.
 5. **`.upstream` file**: always create for future sync automation — primary URL + SHA + date, plus secondary sources.
@@ -384,6 +388,7 @@ These rules are specific to the import workflow. For general Pi extension rules 
 - [ ] Source license checked and preserved in `LICENSE` file
 - [ ] PLAN.md deleted after implementation
 - [ ] Committed and pushed
+- [ ] `.pi/settings.json` cleaned up (removed local test entry)
 
 ---
 
