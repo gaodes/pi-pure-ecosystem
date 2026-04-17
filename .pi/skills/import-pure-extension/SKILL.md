@@ -69,6 +69,12 @@ Choose a name following the `pure-<name>` convention:
 - Should reflect what the extension does, not where it came from
 - Avoid names that conflict with existing extensions
 
+**Check for conflicts:**
+```bash
+ls extensions/pure-<name>/ 2>/dev/null && echo "EXISTS" || echo "OK"
+```
+If the directory already exists, either pick a different name or use `enhance-pure-extension` instead.
+
 Ask the user to confirm the name.
 
 ---
@@ -77,7 +83,13 @@ Ask the user to confirm the name.
 
 ### 5. Create a plan file
 
-On a **new branch** (use worktree if parallel development is needed):
+Create a worktree for the import (see AGENTS.md "Worktree Lifecycle"):
+
+```bash
+/worktrees create <name>-import
+```
+
+Then create the extension directory:
 
 ```bash
 mkdir -p extensions/pure-<name>
@@ -140,6 +152,12 @@ Based on the plan:
 2. Strip: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
 3. Flatten `src/` to root when the extension is small (≤5 files). Keep subdirectories when justified by size or logical separation (e.g. `services/`, `tools/`). Don't force flat structure if it hurts readability.
 4. Rename to pure-* conventions (tool names, commands, storage paths)
+
+**If writing from scratch:**
+1. Create directory structure following pure-* conventions
+2. Implement features from the plan, using the source as reference
+
+**Then for both approaches:**
 5. Check the source license — preserve it in a `LICENSE` file and note it in README
 6. Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
 7. Add `pure-utils` dependency if config/cache storage is needed (import from `@gaodes/pi-pure-utils`)
@@ -148,12 +166,6 @@ Based on the plan:
 10. Create `CHANGELOG.md` with initial entry
 11. Create `.upstream` file for automation
 12. Create `README.md` with full Sources / Inspiration lineage
-
-**If writing from scratch:**
-1. Create directory structure following pure-* conventions
-2. Implement features from the plan, using the source as reference
-3. Check the source license — preserve it in a `LICENSE` file and note it in README
-4. Follow all the same steps 6-12 above
 
 #### Dependency Audit
 
@@ -166,6 +178,7 @@ For each third-party import in the source, check if Pi provides an equivalent:
 | `fs.*Sync` for JSON config | `pure-utils` helpers | Yes — if using config/cache pattern |
 | `fetch` | Keep — built-in | No change needed |
 | `@sinclair/typebox` | Keep — Pi bundles it | Peer dep, not direct dep |
+| Any other third-party import | Check if Pi provides equivalent | Keep if no Pi equivalent |
 
 **Flag each replacement to the user. Only replace if functionality is preserved.** Let the user make the final call.
 
@@ -220,8 +233,12 @@ pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5
 Ask user to add to `.pi/settings.json` locally and `/reload` for functional test.
 
 **If developing in a worktree:**
-1. Smoke test: `pi -e "$PWD/.worktrees/<branch>/extensions/pure-<name>" -ne -p "reply of just ok"`
-2. Functional test: call `switch_worktree` tool to switch session, user tests, switch back.
+1. Create `.pi/settings.json` in the worktree root (see AGENTS.md "Worktree `.pi/settings.json` setup"):
+   ```json
+   { "packages": ["./extensions/pure-<name>"] }
+   ```
+2. Smoke test: `pi -e "$PWD/.worktrees/<branch>/extensions/pure-<name>" -ne -p "reply of just ok"`
+3. Functional test: call `switch_worktree` tool to switch session, user tests, switch back.
 
 ---
 
@@ -229,7 +246,10 @@ Ask user to add to `.pi/settings.json` locally and `/reload` for functional test
 
 ### 9. Commit and push
 
+Delete `PLAN.md` — the planning history is preserved in git, but it shouldn't ship with the extension:
+
 ```bash
+rm extensions/pure-<name>/PLAN.md
 git add extensions/pure-<name>/
 git commit -m "pure-<name>: initial import from <source>"
 git push
@@ -260,21 +280,16 @@ The `references/` directory contains detailed Pi API reference material for tool
 
 ---
 
-## Critical Rules
+## Critical Rules (Import-Specific)
 
-1. **Execute order**: `(toolCallId, params, signal, onUpdate, ctx)`
-2. **Always `onUpdate?.()`** — optional chaining
-3. **No `.js` in imports**
-4. **Mode awareness**: `ctx.ui.custom()` needs RPC fallback
-5. **Signal forwarding**: pass to all async operations
-6. **Never `child_process`**: use `pi.exec()`
-7. **Never `homedir()`**: use `getAgentDir()`
-8. **Typed param alias**: `type MyParams = Static<typeof parameters>`
-9. **Entry point pattern**: load config → check enabled → register
-10. **API key gating**: check before registering tools — notify if missing
-11. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. State dependency gracefully — provide install instructions if missing, don't crash Pi.
-12. **Check existing components**: before creating custom TUI, check `pi-tui` or `pi-coding-agent`
-13. **License preservation**: check source license, preserve in `LICENSE` file, note in README
+These rules are specific to the import workflow. For general Pi extension rules (execute order, signal forwarding, no child_process, etc.), see `AGENTS.md`.
+
+1. **Dependency audit**: flag every Pi API replacement to the user — only replace if functionality is preserved. User makes the final call.
+2. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. State dependency gracefully — provide install instructions if missing, don't crash Pi.
+3. **License preservation**: check source license, preserve in `LICENSE` file, note in README.
+4. **Full source lineage**: trace upstream-of-upstream. README Sources / Inspiration must show the complete derivation chain.
+5. **`.upstream` file**: always create for future sync automation — primary URL + SHA + date, plus secondary sources.
+6. **PLAN.md gate**: never proceed to implementation until the user explicitly approves the plan.
 
 ---
 
@@ -296,6 +311,7 @@ The `references/` directory contains detailed Pi API reference material for tool
 - [ ] User confirmed functional test
 - [ ] Source license checked and preserved in `LICENSE` file
 - [ ] `.npmignore` created
+- [ ] PLAN.md deleted after implementation
 - [ ] Committed and pushed
 
 ---
