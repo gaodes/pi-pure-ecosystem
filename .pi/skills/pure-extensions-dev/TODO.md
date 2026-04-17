@@ -36,4 +36,5 @@ Things to tackle for the pure-extensions-dev skill and project AGENTS.md.
 
 ## Missing features
 
+- [ ] **Create a pure-utils extension** — Shared utilities (path helpers, config patterns, common types) used across multiple extensions. Currently each extension inlines these. Extract to a dedicated `pure-utils` package to reduce duplication while keeping extensions self-contained
 - [ ] **Import the themes** — The mono repo has a `themes/` directory but no theme is defined there yet. The skill should cover theme creation/import workflow
