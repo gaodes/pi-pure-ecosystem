@@ -94,7 +94,14 @@ git checkout -b <name>-import
 mkdir -p extensions/pure-<name>
 ```
 
-Create `extensions/pure-<name>/PLAN.md` with:
+Create `extensions/pure-<name>/PLAN.md` with the template below, then commit it:
+
+```bash
+git add extensions/pure-<name>/PLAN.md
+git commit -m "pure-<name>: plan for import from <primary-source-repo-name>"
+```
+
+Template:
 
 ```markdown
 # pure-<name>
@@ -149,17 +156,11 @@ git worktree add .worktrees/<name>-import <name>-import
 cd .worktrees/<name>-import
 ```
 
-If the branch doesn't exist (wasn't created in step 4), create it:
-```bash
-git worktree add .worktrees/<name>-import -b <name>-import
-cd .worktrees/<name>-import
-```
-
 > **Note**: After `cd`, all subsequent commands run from the worktree root. Verify with `pwd` if unsure.
 
-For **development on main (no worktree)**:
+For **development on main** (no worktree) — you're already on `<name>-import` from step 4:
 ```bash
-git checkout <name>-import
+# Already on the right branch, nothing to do
 ```
 
 ---
@@ -190,7 +191,7 @@ Based on the plan:
    ```
    If the source has runtime dependencies (e.g. `croner`), preserve them in this `package.json` for testing. The publish skill will expand the manifest later.
 9. Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
-10. Install dependencies if `package.json` has any: `cd extensions/pure-<name> && npm install`
+10. Install dependencies if `package.json` has any: `(cd extensions/pure-<name> && npm install)`
 11. Create `CHANGELOG.md` with initial entry:
     ```markdown
     ## [0.1.0] - YYYY-MM-DD
@@ -311,13 +312,18 @@ Or use the user-facing command: `/worktrees clean <name>-import`. Then push:
 git push
 ```
 
-Otherwise (no worktree):
+Otherwise (no worktree), merge to main and push:
 
 ```bash
+git checkout main
+git merge <name>-import
+git branch -d <name>-import
 git push
 ```
 
 **This completes the import.** Publishing to npm and global activation are separate steps — use the `publish-pure-extension` skill when the user is ready.
+
+> **Cleanup**: if you added the extension to `.pi/settings.json` for testing, remove it after the import is committed — it will be loaded from the global settings after publishing.
 
 ---
 
