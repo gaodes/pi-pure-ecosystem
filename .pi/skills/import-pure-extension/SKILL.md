@@ -36,7 +36,7 @@ For each source:
 
 Then read the project conventions:
 - Read `AGENTS.md` at the repo root — this defines naming, structure, API usage, and workflow rules
-- Consult `extensions/pi-devkit/docs/api-reference.md` for the full Pi API surface (packages, tools, hooks, commands, components)
+- Consult `references/api-reference.md` for the full Pi API surface (packages, tools, hooks, commands, components)
 
 ### 2. Analyze and decide
 
@@ -226,7 +226,7 @@ Based on the plan:
 
 #### Dependency Audit
 
-For each third-party import in the source, check if Pi provides an equivalent (see `extensions/pi-devkit/docs/api-reference.md` for the full API surface):
+For each third-party import in the source, check if Pi provides an equivalent (see `references/api-reference.md` for the full API surface):
 
 | Original | Pi API | Replace? |
 |----------|--------|----------|
@@ -358,12 +358,13 @@ git push
 
 Two complementary reference sources are available:
 
-**API catalog** — `extensions/pi-devkit/docs/api-reference.md`: the canonical Pi v0.67.4 API reference listing all available packages, tools, hooks, commands, TUI components, events, utility functions, and type signatures. Use this to discover *what APIs exist*.
+**API catalog** — `references/api-reference.md`: the canonical Pi v0.67.4 API reference listing all available packages, tools, hooks, commands, TUI components, events, utility functions, and type signatures. Use this to discover *what APIs exist*.
 
 **Usage patterns** — `references/` directory: topic-specific deep guides on *how to use APIs correctly* in pure-ecosystem context, with conventions, design patterns, full working examples, and anti-patterns to avoid.
 
 | File | Content |
 |------|---------|
+| `references/api-reference.md` | Full Pi v0.67.4 API catalog — packages, tools, hooks, commands, TUI, events |
 | `references/tools.md` | Tool registration, execute signature, rendering patterns, error handling |
 | `references/modes.md` | Mode awareness (Interactive/RPC/Print) |
 | `references/commands.md` | Command registration |
@@ -398,7 +399,7 @@ These rules are specific to the import workflow. For general Pi extension rules 
 **Phase 1 — Analysis:**
 - [ ] All sources analyzed, primary selected
 - [ ] AGENTS.md conventions reviewed
-- [ ] Pi API reference reviewed (`extensions/pi-devkit/docs/api-reference.md`)
+- [ ] Pi API reference reviewed (`references/api-reference.md`)
 - [ ] Existing extensions scanned for integration opportunities
 - [ ] Approach decided (clone-adapt or scratch)
 - [ ] Extension named and confirmed by user
