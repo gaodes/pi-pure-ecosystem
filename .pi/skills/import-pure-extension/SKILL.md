@@ -77,16 +77,21 @@ Present everything to the user in one consolidated summary:
 
 Get user approval before proceeding to planning.
 
+**Heuristic for "now" vs. "later" features:**
+- **Now**: core functionality the extension needs to be useful, features the user specifically requested
+- **Later**: nice-to-haves, features that need additional deps or significant refactoring, things from secondary sources
+
 ---
 
 ## Phase 2: Planning
 
 ### 4. Create a plan file
 
-Create a worktree for the import (see AGENTS.md "Worktree Lifecycle"):
+Create a worktree for the import:
 
 ```bash
-/worktrees create <name>-import
+git worktree add .worktrees/<name>-import -b <name>-import
+cd .worktrees/<name>-import
 ```
 
 Then create the extension directory:
@@ -155,7 +160,7 @@ Based on the plan:
 
 **If writing from scratch:**
 1. Create directory structure following pure-* conventions
-2. Implement each feature from the "Features to implement now" section of PLAN.md, using the source as reference
+2. Implement each feature from the "Features to implement now" section of PLAN.md, using the source as reference. Start with core functionality, then add secondary features.
 
 **Then for both approaches:**
 5. Check the source license — preserve it in a `LICENSE` file and note it in README
@@ -178,7 +183,7 @@ For each third-party import in the source, check if Pi provides an equivalent:
 |----------|--------|----------|
 | `child_process.exec/spawn` | `pi.exec()` | Yes — unless extension needs streaming/pty |
 | `os.homedir()` | `getAgentDir()` | Yes — always |
-| `fs.*Sync` for JSON config | `pure-utils` helpers | Yes — if using config/cache pattern |
+| `fs.*Sync` for JSON config | `pure-utils` helpers | Yes — if using config/cache pattern. Note: `@gaodes/pi-pure-utils` is planned but not yet created. |
 | `fetch` | Keep — built-in | No change needed |
 | `@sinclair/typebox` | Keep — Pi bundles it | Peer dep, not direct dep |
 | Any other third-party import | Check if Pi provides equivalent | Keep if no Pi equivalent |
@@ -224,6 +229,8 @@ Machine-readable file for future sync automation:
 
 ### 7. Check, lint, test
 
+Run from the **repo root** (or worktree root if in a worktree):
+
 ```bash
 biome check --write --unsafe extensions/pure-<name>/
 ```
@@ -233,6 +240,8 @@ biome check --write --unsafe extensions/pure-<name>/
 pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5
 ```
 
+If either fails, fix the issues and re-run until both pass.
+
 Ask user to add to `.pi/settings.json` locally and `/reload` for functional test.
 
 **If developing in a worktree:**
@@ -240,7 +249,7 @@ Ask user to add to `.pi/settings.json` locally and `/reload` for functional test
    ```json
    { "packages": ["./extensions/pure-<name>"] }
    ```
-2. Smoke test: `pi -e "$PWD/.worktrees/<branch>/extensions/pure-<name>" -ne -p "reply of just ok"`
+2. Smoke test (from worktree root): `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok"`
 3. Functional test: call `switch_worktree` tool to switch session, user tests, switch back.
 
 ---
@@ -257,7 +266,23 @@ git add extensions/pure-<name>/
 git commit -m "pure-<name>: initial import from <source>"
 ```
 
-If in a worktree, `/worktrees clean <branch-name>` merges to main and pushes. Otherwise:
+If in a worktree, clean up the worktree from the **main repo root**:
+
+```bash
+cd <main-repo-root>
+git worktree remove .worktrees/<name>-import
+git checkout main
+git merge <name>-import
+git branch -d <name>-import
+```
+
+Or use the user-facing command: `/worktrees clean <name>-import`. Then push:
+
+```bash
+git push
+```
+
+Otherwise (no worktree):
 
 ```bash
 git push
