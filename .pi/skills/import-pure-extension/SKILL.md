@@ -160,9 +160,9 @@ cd .worktrees/<name>-import
 
 > **Note**: After `cd`, all subsequent commands run from the worktree root. Verify with `pwd` if unsure.
 
-For **development on main** (no worktree) — you're already on `<name>-import` from step 4:
+For **development on main** (no worktree) — stay on `<name>-import` from step 4:
 ```bash
-# Already on the right branch, nothing to do
+# Already on <name>-import, ready to implement
 ```
 
 ---
@@ -174,7 +174,10 @@ For **development on main** (no worktree) — you're already on `<name>-import` 
 Based on the plan:
 
 **If cloning and adapting:**
-1. Copy source files into `extensions/pure-<name>/` (alongside the existing PLAN.md — exclude any source `PLAN.md` from the copy)
+1. Copy source files into `extensions/pure-<name>/` (alongside the existing PLAN.md — exclude any source `PLAN.md` from the copy):
+   ```bash
+   rsync -av --exclude='PLAN.md' <source-dir>/ extensions/pure-<name>/
+   ```
 2. Strip: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
 3. Flatten `src/` to root when the extension is small (≤5 files). Keep subdirectories when justified by size or logical separation (e.g. `services/`, `tools/`). Don't force flat structure if it hurts readability.
 4. Rename to pure-* conventions (tool names, commands, storage paths)
@@ -195,7 +198,7 @@ Based on the plan:
      "dependencies": { "<runtime-dep>": "<version>" }
    }
    ```
-   Omit `dependencies` if the source has no runtime deps.
+   Omit `dependencies` if the source has no runtime deps. **Never put `@mariozechner/pi-*` packages in `dependencies`** — they're peer dependencies and will be added at publish time.
 9. Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
     > **Note**: `node_modules/` is typically covered by the root `.gitignore`. If not, create a `.gitignore` in the extension directory with `node_modules/`.
 10. Install dependencies if `package.json` has any: `(cd extensions/pure-<name> && npm install)`
@@ -273,7 +276,7 @@ biome check --write --unsafe extensions/pure-<name>/
 pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5
 ```
 
-If either fails, fix the issues and re-run until both pass.
+If either fails, fix the issues and re-run. If issues persist after 3 attempts, stop and consult the user — the extension may need fundamental changes.
 
 **Functional test — choose one based on your setup:**
 
@@ -370,24 +373,31 @@ These rules are specific to the import workflow. For general Pi extension rules 
 
 ## Checklist
 
+**Phase 1 — Analysis:**
 - [ ] All sources analyzed, primary selected
 - [ ] Approach decided (clone-adapt or scratch)
 - [ ] Extension named and confirmed by user
+
+**Phase 2 — Planning:**
 - [ ] Plan created on a branch, reviewed and approved
 - [ ] Development environment set up (worktree or branch)
 - [ ] Full source lineage traced (upstream of upstream)
+
+**Phase 3 — Implementation:**
 - [ ] Dependencies audited — Pi API replacements flagged and confirmed
 - [ ] `pure-utils` imported if config/cache needed
-- [ ] README.md with Sources / Inspiration (full chain)
-- [ ] CHANGELOG.md with initial entry + import SHA
-- [ ] `.upstream` file created
-- [ ] `package.json` created (name + version + runtime deps)
+- [ ] `package.json` created (name + version + runtime deps, no Pi packages)
 - [ ] Dependencies installed (`npm install` if needed)
 - [ ] `.npmignore` created
+- [ ] `README.md` with Sources / Inspiration (full chain)
+- [ ] `CHANGELOG.md` with initial entry + import SHA
+- [ ] `.upstream` file created
+- [ ] Source license checked and preserved in `LICENSE` file
 - [ ] `biome check` passes zero errors
 - [ ] Smoke test passed
 - [ ] User confirmed functional test
-- [ ] Source license checked and preserved in `LICENSE` file
+
+**Phase 4 — Commit:**
 - [ ] PLAN.md deleted after implementation
 - [ ] Committed and pushed
 - [ ] `.pi/settings.json` cleaned up (removed local test entry)
