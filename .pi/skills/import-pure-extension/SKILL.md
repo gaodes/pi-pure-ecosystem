@@ -7,7 +7,7 @@ description: Import an existing Pi extension into the pi-pure-ecosystem by forki
 
 Follow the project `AGENTS.md` design philosophy while using this skill.
 
-This skill imports an existing **Pi extension** into the pure-ecosystem by analyzing one or more source repos, planning the adaptation, and implementing it.
+This skill analyzes one or more external Pi extension source repos, plans the adaptation and implementation, and produces a pure-ecosystem extension adapted to the project's conventions and the user's requirements.
 
 **Scope**: the source must be a Pi extension (using `@mariozechner/pi-*` APIs). For importing general npm packages or scripts, use `create-pure-extension` and build from scratch instead.
 
@@ -33,6 +33,10 @@ For each source:
 - Read README, package.json, source files
 - Understand what it does, its structure, and quality
 - Check if the source itself credits inspirations (other repos it forked/derived from) — trace the full lineage
+
+Then read the project conventions:
+- Read `AGENTS.md` at the repo root — this defines naming, structure, API usage, and workflow rules
+- Read `extensions/pi-devkit/docs/api-reference.md` — the canonical Pi API reference with all available packages, tools, hooks, commands, and components
 
 ### 2. Analyze and decide
 
@@ -66,6 +70,15 @@ Factors:
 ls extensions/pure-<name>/ 2>/dev/null && echo "EXISTS" || echo "OK"
 ```
 If the directory already exists, either pick a different name or use `enhance-pure-extension` instead.
+
+**Check for integration opportunities:**
+
+Scan existing extensions in `extensions/` for:
+- Shared utility patterns (config/cache helpers → `@gaodes/pi-pure-utils`)
+- Overlapping tool registrations or commands that could conflict
+- Opportunities to reuse code from existing extensions instead of duplicating
+
+Note findings in the analysis for the user to review.
 
 ### 3. Present analysis for approval
 
@@ -213,7 +226,7 @@ Based on the plan:
 
 #### Dependency Audit
 
-For each third-party import in the source, check if Pi provides an equivalent:
+For each third-party import in the source, check if Pi provides an equivalent (see `extensions/pi-devkit/docs/api-reference.md` for the full API surface):
 
 | Original | Pi API | Replace? |
 |----------|--------|----------|
@@ -330,7 +343,12 @@ git branch -d <name>-import
 git push
 ```
 
-**This completes the import.** Publishing to npm and global activation are separate steps — use the `publish-pure-extension` skill when the user is ready.
+**This completes the import.** The extension is now on `main` and pushed to GitHub.
+
+**What happens next (separate skills):**
+- Publishing to npm → use the `publish-pure-extension` skill
+- Global activation → handled during publish
+- Do NOT publish to npm as part of this skill.
 
 > **Cleanup**: if you added the extension to `.pi/settings.json` for testing, remove it after the import is committed — it will be loaded from the global settings after publishing.
 
@@ -338,7 +356,9 @@ git push
 
 ## Reference Files
 
-The `references/` directory contains detailed Pi API reference material for tool authoring, rendering, commands, hooks, modes, and more. Consult these when implementing extension features during import.
+The primary API reference is `extensions/pi-devkit/docs/api-reference.md` — a comprehensive guide to all Pi packages, tools, hooks, commands, TUI components, events, and utility functions. Consult this when implementing extension features during import.
+
+The `references/` directory contains supplementary topic-specific reference material:
 
 | File | Content |
 |------|---------|
@@ -375,6 +395,9 @@ These rules are specific to the import workflow. For general Pi extension rules 
 
 **Phase 1 — Analysis:**
 - [ ] All sources analyzed, primary selected
+- [ ] AGENTS.md conventions reviewed
+- [ ] Pi API reference reviewed (`extensions/pi-devkit/docs/api-reference.md`)
+- [ ] Existing extensions scanned for integration opportunities
 - [ ] Approach decided (clone-adapt or scratch)
 - [ ] Extension named and confirmed by user
 
@@ -404,4 +427,4 @@ These rules are specific to the import workflow. For general Pi extension rules 
 
 ---
 
-**After import**: use the `publish-pure-extension` skill to publish to npm and activate globally.
+**After import**: the extension is on GitHub. To publish to npm and activate globally, use the `publish-pure-extension` skill.
