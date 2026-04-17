@@ -1,4 +1,4 @@
-// Ported from extensions/pi-devkit/tools/utils.ts
+// Ported from @aliou/pi-dev-kit via extensions/pi-devkit/tools/utils.ts
 import * as child_process from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";

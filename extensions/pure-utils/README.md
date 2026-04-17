@@ -2,12 +2,12 @@
 
 Shared utilities and reference tools for Pi extension development. Replaces the deprecated `pi-devkit` extension.
 
-## Sources
+## Sources / Inspiration
 
-All tools and utilities are ported from the deprecated `pi-devkit` extension:
-- Original: `extensions/pi-devkit/tools/{package-manager,version,docs,changelog}.ts`
-- Original: `extensions/pi-devkit/tools/utils.ts`
-- Original: `extensions/pi-devkit/tools/ui.ts`
+All tools and utilities are ported from the deprecated `pi-devkit` extension, which was forked from:
+
+- [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) v0.6.1 — Primary source. Licensed MIT.
+- `pi-devkit` local fork: `extensions/pi-devkit/tools/{package-manager,version,docs,changelog}.ts`, `utils.ts`, `ui.ts`
 
 ## Tools
 
