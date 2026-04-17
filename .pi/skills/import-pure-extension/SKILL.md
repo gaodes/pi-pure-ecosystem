@@ -94,6 +94,8 @@ git worktree add .worktrees/<name>-import -b <name>-import
 cd .worktrees/<name>-import
 ```
 
+> **Note**: After `cd`, all subsequent commands run from the worktree root. Verify with `pwd` if unsure.
+
 Then create the extension directory:
 
 ```bash
@@ -153,7 +155,7 @@ Present the plan to the user. Iterate together until satisfied.
 Based on the plan:
 
 **If cloning and adapting:**
-1. Copy source files into `extensions/pure-<name>/`
+1. Copy source files into `extensions/pure-<name>/` (alongside the existing PLAN.md)
 2. Strip: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
 3. Flatten `src/` to root when the extension is small (≤5 files). Keep subdirectories when justified by size or logical separation (e.g. `services/`, `tools/`). Don't force flat structure if it hurts readability.
 4. Rename to pure-* conventions (tool names, commands, storage paths)
@@ -170,10 +172,17 @@ Based on the plan:
    ```json
    { "name": "@gaodes/pi-pure-<name>", "version": "0.1.0" }
    ```
+   If the source has runtime dependencies (e.g. `croner`), preserve them in this `package.json` for testing. The publish skill will expand the manifest later.
 9. Create `.npmignore` (standard template: `node_modules/`, `CHANGELOG.md`, `.DS_Store`, `*.tmp`)
-10. Create `CHANGELOG.md` with initial entry
-11. Create `.upstream` file for automation
-12. Create `README.md` with full Sources / Inspiration lineage
+10. Install dependencies if `package.json` has any: `cd extensions/pure-<name> && npm install`
+11. Create `CHANGELOG.md` with initial entry:
+    ```markdown
+    ## [0.1.0] - YYYY-MM-DD
+    ### Added
+    - Initial import from [<source>](<repo-url>)
+    ```
+12. Create `.upstream` file for automation
+13. Create `README.md` with full Sources / Inspiration lineage
 
 #### Dependency Audit
 
@@ -242,15 +251,20 @@ pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5
 
 If either fails, fix the issues and re-run until both pass.
 
-Ask user to add to `.pi/settings.json` locally and `/reload` for functional test.
+**Functional test — choose one based on your setup:**
 
-**If developing in a worktree:**
+For **worktree** development:
 1. Create `.pi/settings.json` in the worktree root (see AGENTS.md "Worktree `.pi/settings.json` setup"):
    ```json
    { "packages": ["./extensions/pure-<name>"] }
    ```
 2. Smoke test (from worktree root): `pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok"`
 3. Functional test: call `switch_worktree` tool to switch session, user tests, switch back.
+
+For **main worktree** development:
+1. Add `"./extensions/pure-<name>"` to `.pi/settings.json` packages
+2. Ask user to `/reload` and test
+
 
 ---
 
@@ -266,13 +280,12 @@ git add extensions/pure-<name>/
 git commit -m "pure-<name>: initial import from <source>"
 ```
 
-If in a worktree, clean up the worktree from the **main repo root**:
+If in a worktree, clean up from the **main repo root**:
 
 ```bash
 cd <main-repo-root>
-git worktree remove .worktrees/<name>-import
-git checkout main
 git merge <name>-import
+git worktree remove .worktrees/<name>-import
 git branch -d <name>-import
 ```
 
@@ -308,6 +321,9 @@ The `references/` directory contains detailed Pi API reference material for tool
 | `references/testing.md` | Testing patterns |
 | `references/state.md` | State management |
 | `references/publish.md` | Publishing workflow details |
+| `references/additional-apis.md` | Additional Pi API references |
+| `references/documentation.md` | Documentation patterns |
+| `references/providers.md` | Provider configuration |
 
 ---
 
@@ -336,7 +352,9 @@ These rules are specific to the import workflow. For general Pi extension rules 
 - [ ] README.md with Sources / Inspiration (full chain)
 - [ ] CHANGELOG.md with initial entry + import SHA
 - [ ] `.upstream` file created
-- [ ] Minimal `package.json` (name + version)
+- [ ] Minimal `package.json` (name + version + source deps)
+- [ ] Dependencies installed (`npm install` if needed)
+- [ ] `.npmignore` created
 - [ ] `biome check` passes zero errors
 - [ ] Smoke test passed
 - [ ] User confirmed functional test
