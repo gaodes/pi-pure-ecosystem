@@ -14,7 +14,7 @@ This is the **development repo**. Remote: `github.com/gaodes/pi-pure-ecosystem`,
 pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 ├── .pi/
 │   └── settings.json       # Local package overrides and settings
-├── .worktrees/              # Feature worktrees (pure-git, skill, or bash)
+├── .worktrees/              # Feature worktrees (prefer pure-git or pure-extensions-dev workflow; fall back to bash)
 │   └── <feature>/          # Each worktree has the full mono repo
 ├── extensions/              # All extensions here
 │   └── pure-<name>/        # one directory per extension
@@ -40,15 +40,16 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 
 Extensions load from two sources — check them at runtime to see what's active:
 
-1. **Global** — the git package filter in `~/.pi/agent/settings.json` (`pi list` to inspect)
+1. **Global** — the git package filter in `~/.pi/agent/settings.json` (read the file to inspect the active filter)
 2. **Local** — project-level overrides in `.pi/settings.json`
 
-Local overrides take precedence. To work on an extension, add its path to `.pi/settings.json` under `packages` and remove it from the global git package filter. Restore when done.
+To work on an extension, add its path to `.pi/settings.json` under `packages` and remove the same extension from the global git package filter to avoid double-loading. Restore when done.
 
 > **Planned**: all production-ready extensions, extension skills, and themes will be published to npm for global installation, replacing the git package.
 
 ## Development workflow
 
+- **Tooling preference** — prefer relevant internal Pi tools, extensions, and skills first; fall back to bash only when nothing suitable exists.
 - **Building, enhancing, importing, or publishing extensions** → use the `pure-extensions-dev` skill (it maps tasks to specialized workflows).
 - **Looking up Pi APIs, hooks, tool patterns** → use the skill's `references/` directory.
 - **Git worktrees for feature branches** → use the `pure-git` extension (`switch_worktree` tool).
