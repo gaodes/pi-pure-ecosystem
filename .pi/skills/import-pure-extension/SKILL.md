@@ -7,7 +7,7 @@ description: Import an existing Pi extension into the pi-pure-ecosystem by forki
 
 Follow the project `AGENTS.md` design philosophy while using this skill.
 
-This skill imports an existing extension into the pure-ecosystem by forking it and adapting to pure-* conventions.
+This skill imports an existing extension into the pure-ecosystem by analyzing one or more source repos, planning the adaptation, and implementing it.
 
 ## When to Use This Skill
 
@@ -18,114 +18,236 @@ This skill imports an existing extension into the pure-ecosystem by forking it a
 | Sync an extension with upstream | `update-pure-extension` |
 | Add features to an extension we own | `enhance-pure-extension` |
 
-## Workflow: Import Extension
+---
 
-### 1. Identify sources
+## Phase 1: Analysis
 
-Ask the user:
-- **Primary source**: which extension to fork (repo URL)?
-- **What to keep, add, or change**?
+### 1. Gather sources
 
-> **Tip**: If the primary source repo credits its own inspirations (e.g. another repo it was forked from or derived from), note those too. The README's **Sources / Inspiration** section should trace the full lineage — not just the immediate upstream, but where that upstream originally came from. This helps understand the extension's heritage and avoids losing attribution.
+The user provides **at least one link** to a repo or extension to import. They may provide multiple.
 
-### 2. Clone and verify
+For each source:
+- Clone or browse the repo
+- Read README, package.json, source files
+- Understand what it does, its structure, and quality
+- Check if the source itself credits inspirations (other repos it forked/derived from) — trace the full lineage
+
+### 2. Select primary source
+
+If multiple sources are provided:
+- Analyze all repos together with the user's request
+- **Decide on one primary repo** to base the extension on
+- Note improvements from other sources for future implementation
+
+If only one source: it becomes the primary by default.
+
+Present the decision to the user:
+- Which repo is primary and why
+- What features to implement now vs. later
+- Any inspirations/upstream-of-upstream found
+
+### 3. Assess approach
+
+Decide whether to:
+
+| Approach | When to use |
+|----------|------------|
+| **Clone and adapt** | The source is a well-structured Pi extension that mostly works. Copy it, rename, strip, adapt. |
+| **Write from scratch** | The source is messy, uses wrong patterns, or the user wants significant changes. Use it as a reference but implement clean. |
+
+Factors:
+- Code quality and compatibility with Pi APIs
+- How much needs to change (rename, deps, patterns)
+- Whether the source uses deprecated APIs or anti-patterns
+
+Present the recommendation to the user with rationale.
+
+### 4. Name the extension
+
+Choose a name following the `pure-<name>` convention:
+- Short, descriptive, memorable
+- Should reflect what the extension does, not where it came from
+- Avoid names that conflict with existing extensions
+
+Ask the user to confirm the name.
+
+---
+
+## Phase 2: Planning
+
+### 5. Create a plan file
+
+On a **new branch** (use worktree if parallel development is needed):
 
 ```bash
-git clone <repo-url> /tmp/<source-name>
-cp -R /tmp/<source-name> extensions/pure-<name>
+mkdir -p extensions/pure-<name>
 ```
 
-**Test as-is before modifying:**
-1. Add to `package.json`: `"./extensions/pure-<name>/index.ts"`
-2. Add local path in `.pi/settings.json`: `{"packages": ["../extensions/pure-<name>"]}`
-3. Run smoke test and ask user to `/reload` for functional test.
+Create `extensions/pure-<name>/PLAN.md` with:
 
-Wait for user confirmation before proceeding.
+```markdown
+# pure-<name>
 
-### 3. Rename to pure-* conventions
+## Source
+- **Primary**: <repo-url> @ <commit-sha>
+- **Inspirations**: <upstream-of-upstream if any>
 
-- **Directory**: `pure-<name>/`
-- **Tool/command names**: prefer short, fall back to `pure_<name>` or `/pure-<name>`
-- **Storage paths**: inline helpers using `~/.pi/agent/pure/{config,cache}/pure-<name>.json`
+## Approach
+<clone-and-adapt or write-from-scratch>
 
-### 4. Strip unnecessary files
+## Features to implement now
+- [ ] Feature 1
+- [ ] Feature 2
 
-Delete: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
+## Features for later
+- Feature 3 (from <source-repo>)
+- Feature 4 (from <source-repo>)
 
-Keep: essential source files (ideally single `index.ts`)
+## Breaking changes from source
+- Rename X to Y
+- Removed Z because...
 
-### 5. Add path helpers (inline)
+## Dependency replacements
+| Original | Replacement | Reason |
+|----------|------------|--------|
+| `child_process.exec` | `pi.exec()` | Pi API convention |
+| `os.homedir()` | `getAgentDir()` | Pi API convention |
 
-```typescript
-function getPurePath(filename: string, category: "config" | "cache", scope: "global" | "project", cwd?: string) {
-    const root = scope === "project" ? join(cwd ?? process.cwd(), ".pi", "pure") : join(getAgentDir(), "pure");
-    const dir = join(root, category);
-    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-    return { dir, file: join(dir, filename) };
-}
-
-function readPureJson<T = unknown>(filename: string, category: "config" | "cache", scope: "global" | "project" = "global", cwd?: string): T | undefined {
-    const { file } = getPurePath(filename, category, scope, cwd);
-    try { return JSON.parse(readFileSync(file, "utf-8")); }
-    catch { return undefined; }
-}
-
-function loadConfig<T>(filename: string, category: "config" | "cache", cwd?: string): T | undefined {
-    const project = readPureJson<T>(filename, category, "project", cwd);
-    if (project !== undefined) return project;
-    return readPureJson<T>(filename, category, "global");
-}
+## Sources for future updates
+- <primary-repo-url>
+- <secondary-repo-url> (for feature X, Y)
 ```
 
-### 6. Create README.md and CHANGELOG.md
+### 6. User reviews plan
 
-README must include **Sources / Inspiration** section linking to upstream.
+Present the plan to the user. Iterate together until satisfied.
 
-Include the full derivation chain:
+**Do not proceed to implementation until the user explicitly says to start.**
+
+---
+
+## Phase 3: Implementation
+
+### 7. Implement the extension
+
+Based on the plan:
+
+**If cloning and adapting:**
+1. Copy source files into `extensions/pure-<name>/`
+2. Strip: `.git/`, `node_modules/`, lockfiles, CI configs, `.github/`, test fixtures
+3. Flatten `src/` to root — pure-* convention is flat structure
+4. Rename to pure-* conventions (tool names, commands, storage paths)
+5. Replace deps with Pi APIs where functionality is preserved (see Dependency Audit below)
+6. Add `pure-utils` dependency if config/cache storage is needed (import from `@gaodes/pi-pure-utils`)
+7. Create minimal `package.json` (name + version only — full manifest at publish time)
+8. Create `CHANGELOG.md` with initial entry
+9. Create `.upstream` file for automation
+10. Create `README.md` with full Sources / Inspiration lineage
+
+**If writing from scratch:**
+1. Create directory structure following pure-* conventions
+2. Implement features from the plan, using the source as reference
+3. Follow all the same steps 6-10 above
+
+#### Dependency Audit
+
+For each third-party import in the source, check if Pi provides an equivalent:
+
+| Original | Pi API | Replace? |
+|----------|--------|----------|
+| `child_process.exec/spawn` | `pi.exec()` | Yes — unless extension needs streaming/pty |
+| `os.homedir()` | `getAgentDir()` | Yes — always |
+| `fs.*Sync` for JSON config | `pure-utils` helpers | Yes — if using config/cache pattern |
+| `fetch` | Keep — built-in | No change needed |
+| `@sinclair/typebox` | Keep — Pi bundles it | Peer dep, not direct dep |
+
+**Flag each replacement to the user. Only replace if functionality is preserved.** Let the user make the final call.
+
+#### Sources / Inspiration
+
+README must include the full derivation chain:
 - **Primary source** — the repo you forked from
-- **Upstream of upstream** — if the primary source itself was derived from or inspired by another project, include that too (check the upstream's README, package.json credits, or git history)
+- **Upstream of upstream** — if the primary source itself was derived from another project
+- **Other sources** — repos that contributed ideas but aren't the primary
 
 Example:
 ```markdown
 ## Sources / Inspiration
 
 - [`@aliou/pi-dev-kit`](https://github.com/aliou/pi-dev-kit) — Primary source. Licensed MIT.
-- [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi) — Original decision guide that pi-dev-kit was derived from. Licensed MIT.
+- [`tmustier/pi-extensions/extending-pi`](https://github.com/tmustier/pi-extensions/tree/main/extending-pi) — Original decision guide. Licensed MIT.
 ```
 
-### 7. Check, lint, test
+#### `.upstream` file
+
+Machine-readable file for future sync automation:
+
+```json
+{
+  "primary": {
+    "url": "<repo-url>",
+    "sha": "<commit-sha-at-import>",
+    "importedAt": "YYYY-MM-DD"
+  },
+  "sources": [
+    { "url": "<secondary-repo>", "note": "Feature X, Y for future" }
+  ]
+}
+```
+
+### 8. Check, lint, test
 
 ```bash
 biome check --write --unsafe extensions/pure-<name>/
 ```
 
-**Smoke test:**
+**Smoke test (isolated subprocess — safe, no conflicts):**
 ```bash
-pi -e "$PWD/extensions/pure-<name>" -ne -p "reply of just ok" 2>&1 | tail -5
+pi -e "$PWD/extensions/pure-<name>" -ne -p "reply with just ok" 2>&1 | tail -5
 ```
 
-**Functional test:** Add to `.pi/settings.json`, `/reload`, test.
+Ask user to add to `.pi/settings.json` locally and `/reload` for functional test.
 
 **If developing in a worktree:**
 1. Smoke test: `pi -e "$PWD/.worktrees/<branch>/extensions/pure-<name>" -ne -p "reply of just ok"`
-2. Functional test: call `switch_worktree` tool to switch session to worktree, user tests, switch back.
+2. Functional test: call `switch_worktree` tool to switch session, user tests, switch back.
 
-### 8. Commit and promote
+---
+
+## Phase 4: Ship
+
+### 9. Commit
 
 ```bash
-git add . && git commit -m "pure-<name>: initial import from <source>"
+git add extensions/pure-<name>/
+git commit -m "pure-<name>: initial import from <source>"
+```
+
+### 10. Publish and activate
+
+1. **Publish to npm** using the `publish-pure-extension` skill:
+   - Bump version in `package.json` and `CHANGELOG.md` if needed
+   - Full manifest gets created at this point
+   - Publish: `npm publish --access public`
+
+2. **Activate globally** — add to `~/.pi/agent/settings.json` as an npm package:
+   ```json
+   "npm:@gaodes/pi-pure-<name>"
+   ```
+
+3. **Remove from local `.pi/settings.json`** if it was there for testing
+
+4. **Verify**: `pi list` should show the new extension
+
+**Exception**: If the user asks to test from GitHub before npm, add to the git package entry temporarily. Remove once published to npm.
+
+### 11. Push
+
+```bash
 git push
 ```
 
-**If in a worktree**, merge first:
-```bash
-/worktrees clean <branch-name>
-```
-
-**Promote:**
-1. Remove from `.pi/settings.json`
-2. Add to `~/.pi/agent/settings.json`
-3. `/reload` to verify global load
+If in a worktree, merge first: `/worktrees clean <branch-name>`
 
 ---
 
@@ -146,31 +268,36 @@ git push
 1. **Execute order**: `(toolCallId, params, signal, onUpdate, ctx)`
 2. **Always `onUpdate?.()`** — optional chaining
 3. **No `.js` in imports**
-4. **Mode awareness**: `ctx.ui.custom()` needs RPC fallback — use explicit sentinels for close/cancel
-5. **Error detection**: check for missing `details` fields (framework sets `{}` on throw)
-6. **Signal forwarding**: pass to all async operations
-7. **Never `child_process`**: use `pi.exec()`
-8. **Never `homedir()`**: use `getAgentDir()`
-9. **Typed param alias**: `type MyParams = Static<typeof parameters>`
-10. **Entry point pattern**: load config → check enabled → register
-11. **API key gating**: check before registering tools — notify if missing
-12. **Fire-and-forget methods**: `notify`, `setStatus`, etc. don't need `hasUI` check
-13. **No unused `_signal`**: forward or remove — never prefix with `_` if actually used
-14. **Check existing components**: before creating custom TUI, check `pi-tui` or `pi-coding-agent`
-15. **Settings UI**: use `registerSettingsCommand` from `@aliou/pi-utils-settings` when configurable
+4. **Mode awareness**: `ctx.ui.custom()` needs RPC fallback
+5. **Signal forwarding**: pass to all async operations
+6. **Never `child_process`**: use `pi.exec()`
+7. **Never `homedir()`**: use `getAgentDir()`
+8. **Typed param alias**: `type MyParams = Static<typeof parameters>`
+9. **Entry point pattern**: load config → check enabled → register
+10. **API key gating**: check before registering tools — notify if missing
+11. **Depends on `pure-utils`**: if using config/cache, import from `@gaodes/pi-pure-utils`. State dependency gracefully — provide install instructions if missing, don't crash Pi.
+12. **Check existing components**: before creating custom TUI, check `pi-tui` or `pi-coding-agent`
+13. **Settings UI**: use `registerSettingsCommand` from `@aliou/pi-utils-settings` when configurable
 
 ---
 
 ## Checklist
 
-- [ ] Cloned and verified primary source works
-- [ ] Renamed to pure-* conventions
-- [ ] Stripped unnecessary files
-- [ ] Added inline path helpers
-- [ ] Traced full source lineage (upstream of upstream, if any)
-- [ ] Created README.md with Sources / Inspiration (full derivation chain)
-- [ ] Created CHANGELOG.md
+- [ ] All sources analyzed, primary selected
+- [ ] Approach decided (clone-adapt or scratch)
+- [ ] Extension named and confirmed by user
+- [ ] Plan created on a branch, reviewed and approved
+- [ ] Full source lineage traced (upstream of upstream)
+- [ ] Dependencies audited — Pi API replacements flagged and confirmed
+- [ ] `pure-utils` imported if config/cache needed
+- [ ] README.md with Sources / Inspiration (full chain)
+- [ ] CHANGELOG.md with initial entry + import SHA
+- [ ] `.upstream` file created
+- [ ] Minimal `package.json` (name + version)
 - [ ] `biome check` passes zero errors
 - [ ] Smoke test passed
 - [ ] User confirmed functional test
-- [ ] Committed and promoted to global
+- [ ] Committed
+- [ ] Published to npm via `publish-pure-extension` skill
+- [ ] Activated globally as npm package
+- [ ] Pushed to remote
