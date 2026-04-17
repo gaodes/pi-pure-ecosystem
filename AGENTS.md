@@ -6,7 +6,7 @@ Personal Pi extensions, themes, and configuration. Named with the `pure-` prefix
 >
 > This is a guiding preference, not a constraint. Embrace complexity when the feature demands it — split files, add dependencies, or build custom UI as needed. Justify the departure, don't avoid it.
 
-This is the **development workspace**. Remote: `github.com/gaodes/pi-pure-ecosystem`, branch `main`. Extensions are sourced as a git package in global settings — Pi clones the repo and loads them from there.
+This is the **development repo**. Remote: `github.com/gaodes/pi-pure-ecosystem`, branch `main`. Extensions are sourced as a git package in global settings — Pi clones the repo and loads them from there.
 
 ## Project structure
 
@@ -16,7 +16,7 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 │   └── settings.json       # Local source-path overrides
 ├── .worktrees/              # Feature worktrees (managed via pure-git)
 │   └── <feature>/          # Each worktree has the full mono repo
-├── extensions/              # all extensions here
+├── extensions/              # All extensions here
 │   └── pure-<name>/        # one directory per extension
 ├── themes/                  # Theme JSON files
 ├── package.json             # Pi package manifest (extensions + themes)
@@ -30,7 +30,7 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 
 - **No build step** — Pi loads `.ts` via Jiti at runtime.
 - **Self-contained extensions** — one directory each, no cross-extension dependencies by default. Extract shared code when duplication justifies it.
-- **Flat layout** — all extensions in `extensions/`. Nest only when a feature's complexity calls for it.
+- **Flat layout, prefer simple** — all extensions in `extensions/`. Prefer a flat structure; nest or restructure when complexity requires it.
 - **Lint** — [Biome](https://biomejs.dev/) (`biome check --write --unsafe extensions/`), zero errors.
 - **Commits** — conventional style (`feat:`, `fix:`, `refactor:`, `todo:`).
 - **Manifest** — root `package.json` lists available extensions in `pi.extensions` and themes in `pi.themes`. Global settings filters what actually loads — not everything in the manifest is active.
@@ -42,11 +42,9 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 
 - `pure-cron`, `pure-github`, `pure-git`, `pure-model-switch`, `pure-sessions`, `pure-statusline`, `pure-theme`, `pure-updater`
 
-**Locally active** — excluded from the git package for safe local testing:
+**Locally active** — for extensions under active development, loaded from `.pi/settings.json` to avoid conflicting with the global git package:
 
 - `pure-vibes`
-
-Extensions under active development are loaded locally for safe testing. Move to local when working on an extension, restore to global when done.
 
 > **Planned**: extensions will be published to npm and installed globally from there instead of the git package.
 
