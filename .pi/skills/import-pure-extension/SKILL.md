@@ -36,7 +36,7 @@ For each source:
 
 Then read the project conventions:
 - Read `AGENTS.md` at the repo root — this defines naming, structure, API usage, and workflow rules
-- Read `extensions/pi-devkit/docs/api-reference.md` — the canonical Pi API reference with all available packages, tools, hooks, commands, and components
+- Consult `extensions/pi-devkit/docs/api-reference.md` for the full Pi API surface (packages, tools, hooks, commands, components)
 
 ### 2. Analyze and decide
 
@@ -356,9 +356,11 @@ git push
 
 ## Reference Files
 
-The primary API reference is `extensions/pi-devkit/docs/api-reference.md` — a comprehensive guide to all Pi packages, tools, hooks, commands, TUI components, events, and utility functions. Consult this when implementing extension features during import.
+Two complementary reference sources are available:
 
-The `references/` directory contains supplementary topic-specific reference material:
+**API catalog** — `extensions/pi-devkit/docs/api-reference.md`: the canonical Pi v0.67.4 API reference listing all available packages, tools, hooks, commands, TUI components, events, utility functions, and type signatures. Use this to discover *what APIs exist*.
+
+**Usage patterns** — `references/` directory: topic-specific deep guides on *how to use APIs correctly* in pure-ecosystem context, with conventions, design patterns, full working examples, and anti-patterns to avoid.
 
 | File | Content |
 |------|---------|
