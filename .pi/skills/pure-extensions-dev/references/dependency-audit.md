@@ -14,6 +14,7 @@ For each third-party import, check if Pi provides an equivalent. Flag every repl
 | `fs.*Sync` for JSON config | Inline `getPurePath()` helpers | Yes | See `references/path-helpers.md` |
 | `@sinclair/typebox` | Keep — Pi bundles it | No | Import in code, not in package.json |
 | `fetch` | Keep — built-in | No | No change needed |
+| `@aliou/pi-utils-ui` | `pure-utils/ui/components.ts` | Yes | ToolCallHeader, ToolBody, ToolFooter. Inline or import from sibling extension. |
 
 ## Peer Dependencies (never in `dependencies`)
 

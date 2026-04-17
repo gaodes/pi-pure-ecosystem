@@ -605,15 +605,15 @@ All built-in examples live in the Pi package at `examples/extensions/`.
 
 ---
 
-## Changelog Notes for v0.67.4
+## Version Discovery
 
-- **`after_provider_response`** hook added — inspect HTTP status/headers immediately after provider response, before stream consumption.
-- **`loadProjectContextFiles()`** exported standalone utility.
-- **`--no-context-files` / `-nc`** CLI flag to disable `AGENTS.md` discovery.
-- **Detached bash child cleanup** on shutdown.
-- Default `kimi-coding` model fixed to `kimi-for-coding`.
-- `claude-opus-4-7` model added.
+For the latest Pi version and changelog, use the `pure-utils` tools:
+- `pi_version` — get the installed Pi version
+- `pi_changelog` — get changelog entry for a specific version
+- `pi_changelog_versions` — list all available versions
+
+For Pi documentation files (README, docs/, examples/), use `pi_docs`.
 
 ---
 
-*Generated for pi-devkit. Last updated: 2026-04-16*
+*Last updated: 2026-04-16*

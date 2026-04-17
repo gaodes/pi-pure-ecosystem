@@ -27,7 +27,7 @@ Things to tackle for the pure-extensions-dev skill and project AGENTS.md.
 - [ ] **Track all hooks/events in Pure Extensions Catalog** — Currently lists some hooks but should be exhaustive: every `pi.on()` event used, with handler signatures, so new extensions know what's taken and what's available
 - [ ] **Track everything that could conflict** — Tool names, command names, keybindings, hook events, config file names, widget slots, settings keys — anything that would cause an error or collision when creating a new extension
 
-- [ ] **Implement/use the pi-devkit tools** — The skill should leverage pi-devkit tools (`pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`) where applicable instead of manual bash equivalents
+- [x] **Implement/use the pure-utils tools** — The skill leverages `pure-utils` tools (`pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`) instead of manual bash equivalents. Reference files now point to these tools instead of duplicating static info.
 
 ## Missing skills to create
 
@@ -36,6 +36,6 @@ Things to tackle for the pure-extensions-dev skill and project AGENTS.md.
 
 ## Missing features
 
-- [ ] **Create a pure-utils extension** — Shared utilities (path helpers, config patterns, common types) used across multiple extensions. Currently each extension inlines these. Extract to a dedicated `pure-utils` package to reduce duplication while keeping extensions self-contained
+- [x] **Create a pure-utils extension** — Done. `pure-utils` provides `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` tools plus shared UI components (`ToolCallHeader`, `ToolBody`, `ToolFooter`) and `findPiInstallation()` utility.
 - [ ] **Audit existing extensions for overlapping functionality** — Check all extensions for duplicated logic, conflicting tool/command names, and redundant patterns. Propose fixes: extract shared code to pure-utils, resolve conflicts, standardize patterns
 - [ ] **Import the themes** — The mono repo has a `themes/` directory but no theme is defined there yet. The skill should cover theme creation/import workflow

@@ -3,12 +3,14 @@
 > Pi version: 0.67.4 | Last updated: 2026-04-17
 >
 > Living reference of all extensions in the mono repo. Update when extensions are added or modified.
+>
+> Use `pi_version` to check the currently installed Pi version. Use `pi_changelog` to see what changed since this file was last updated.
 
 ## Overview
 
 | Extension | Tool | Command | Activation | Lines | .ts Files | Runtime Deps |
 |-----------|------|---------|------------|-------|-----------|-------------|
-| `pi-devkit` | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | `/devkit` | Global (git pkg) | 9 files | 9 | `@sinclair/typebox` |
+| `pure-utils` | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | — | Global (git pkg) | ~700 | 7 | `@sinclair/typebox` |
 | `pure-cron` | `pure_cron` | `/cron` | Global (git pkg) | 1300 | 1 | `croner`, `nanoid` |
 | `pure-git` | `switch_worktree` | `/worktrees` | Global (git pkg) | 53 (main) | 6 | — |
 | `pure-github` | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | `/gh-status` (planned) | Global (git pkg) | 970 | 13 | — |
@@ -25,11 +27,11 @@ Tools registered across extensions (avoid name collisions):
 
 | Tool Name | Extension | Purpose |
 |-----------|-----------|---------|
-| `pi_docs` | `pi-devkit` | Read Pi documentation |
-| `pi_version` | `pi-devkit` | Get Pi version info |
-| `pi_changelog` | `pi-devkit` | Read Pi changelog |
-| `pi_changelog_versions` | `pi-devkit` | List changelog versions |
-| `detect_package_manager` | `pi-devkit` | Detect project package manager |
+| `pi_docs` | `pure-utils` | Read Pi documentation |
+| `pi_version` | `pure-utils` | Get Pi version info |
+| `pi_changelog` | `pure-utils` | Read Pi changelog |
+| `pi_changelog_versions` | `pure-utils` | List changelog versions |
+| `detect_package_manager` | `pure-utils` | Detect project package manager |
 | `pure_cron` | `pure-cron` | Schedule recurring/one-shot prompts |
 | `switch_worktree` | `pure-git` | Git worktree management |
 | `github_repo` | `pure-github` | GitHub repo operations |
@@ -129,7 +131,7 @@ Split when justified by size or logical separation:
 
 | Extension | Structure | Reason |
 |-----------|-----------|--------|
-| `pi-devkit` | 9 files (tools, skills, utils) | Multiple independent tools |
+| `pure-utils` | 7 files (tools, utils, ui) | Multiple independent tools + shared utilities |
 | `pure-git` | 6 files (commands, services) | Separation of git ops from UI |
 | `pure-github` | 13 files (browse-tools, commands, config, error-handler) | Large surface area (5 tools + browse) |
 | `pure-vibes` | 4 files (config, messages separate) | Clean config/message separation |
