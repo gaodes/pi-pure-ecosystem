@@ -1,12 +1,12 @@
 # Pi Pure Ecosystem
 
-Personal Pi extensions, themes, and configuration. Extensions, skills, and themes follow the `pure-` naming convention. Developed for local use — published only if broadly useful.
+Personal Pi extensions, themes, and configuration. Extensions, skills, and themes use the `pure-` prefix. Developed for local use — published only if broadly useful.
 
 > **Simplicity, functionality, aesthetics** — start with a single file, split when justified. No build step. Use Pi APIs first. Respect the terminal canvas.
 >
 > This is a guiding preference, not a constraint. Embrace complexity when the feature demands it — add dependencies, or build custom UI as needed. Justify the departure, don't avoid it.
 
-This is the **development repo**. Remote: `github.com/gaodes/pi-pure-ecosystem`, branch `main`. Extensions ship as a git package filtered by global settings — Pi clones the repo and loads them from there.
+This is the **development repo**. Remote: `github.com/gaodes/pi-pure-ecosystem`, branch `main`. This repo ships as a git package filtered by global settings — Pi clones it and loads resources from there.
 
 ## Project structure
 
