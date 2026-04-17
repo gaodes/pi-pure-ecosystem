@@ -34,7 +34,7 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 - **Lint** — [Biome](https://biomejs.dev/) (`biome check --write --unsafe extensions/`), zero errors.
 - **Commits** — conventional style (`feat:`, `fix:`, `refactor:`, `todo:`).
 - **Manifest** — root `package.json` lists available extensions in `pi.extensions` and themes in `pi.themes`. Global settings filters what actually loads — not everything in the manifest is active.
-- **Changelogs** — no root `CHANGELOG.md`. Per-extension changelogs are updated on significant changes.
+- **Changelogs** — no root `CHANGELOG.md`. Every change to an extension must be recorded in its per-extension `CHANGELOG.md`.
 
 ## Activation tiers
 
