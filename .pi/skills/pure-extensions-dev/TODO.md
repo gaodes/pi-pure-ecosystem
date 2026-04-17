@@ -21,6 +21,8 @@ Things to tackle for the pure-extensions-dev skill and project AGENTS.md.
 - [ ] **Track all hooks/events in Pure Extensions Catalog** — Currently lists some hooks but should be exhaustive: every `pi.on()` event used, with handler signatures, so new extensions know what's taken and what's available
 - [ ] **Track everything that could conflict** — Tool names, command names, keybindings, hook events, config file names, widget slots, settings keys — anything that would cause an error or collision when creating a new extension
 
+- [ ] **Implement/use the pi-devkit tools** — The skill should leverage pi-devkit tools (`pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`) where applicable instead of manual bash equivalents
+
 ## Missing features
 
 - [ ] **Import the themes** — The mono repo has a `themes/` directory but no theme is defined there yet. The skill should cover theme creation/import workflow
