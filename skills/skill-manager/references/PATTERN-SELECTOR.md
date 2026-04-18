@@ -45,7 +45,7 @@ If `bash` + instructions can do it → **Skill**. Need hooks, typed tools, or UI
 - Failures cluster in one phase, suggesting a clean boundary.
 - The phases have distinct trigger conditions.
 
-**How to split**: keep a thin dispatcher SKILL.md that routes to sub-skill files. Each sub-skill is a markdown file in `references/` or a sibling directory with its own `SKILL.md`.
+**How to split**: keep a thin dispatcher SKILL.md that routes to sub-skills. Each sub-skill is a sibling directory with its own `SKILL.md` and frontmatter — the dispatcher loads the right one based on the task. Do not put sub-skill instructions in `references/` files — references are supporting docs, not independent skills.
 
 ## When NOT to make a skill
 
@@ -55,13 +55,10 @@ If `bash` + instructions can do it → **Skill**. Need hooks, typed tools, or UI
 
 ## Naming rules
 
-- Concrete and task-focused: `git-helpers`, `cron-sync`, `statusline-tweaks`.
-- Avoid generic names: `helper`, `manager`, `utils`.
-- Match the directory name exactly.
+Per Pi's skill spec (`docs/skills.md`): kebab-case, 1-64 chars, lowercase letters + numbers + hyphens only, no leading/trailing/consecutive hyphens. Name must match the parent directory exactly.
+
+Pick concrete, task-focused names: `git-helpers`, `cron-sync`, `statusline-tweaks`. Avoid generic names: `helper`, `manager`, `utils`.
 
 ## Where to put skills
 
-| Scope | Location |
-|-------|----------|
-| Project | `.pi/skills/<skill-name>/SKILL.md` |
-| Global | `~/.pi/agent/skills/<skill-name>/SKILL.md` |
+Per `references/LIFECYCLE.md` → Locations.
