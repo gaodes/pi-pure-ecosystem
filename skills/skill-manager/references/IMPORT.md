@@ -41,9 +41,11 @@ Clean up after planning: `rm -rf /tmp/<source-name>`
 | **Rewrite** | Source is messy or user wants significant changes |
 | **Extract** | Useful knowledge is buried in a larger document |
 
-**Name**: reflect what the skill does, not where it came from. Avoid conflicts:
+**Name**: reflect what the skill does, not where it came from. Check all Pi skill locations for conflicts:
 ```bash
-ls skills/<skill-name>/ 2>/dev/null && echo "EXISTS" || echo "OK"
+for dir in ~/.pi/agent/skills ~/.agents/skills .pi/skills .agents/skills skills; do
+  test -d "$dir/<skill-name>" && echo "EXISTS in $dir" || true
+done
 ```
 
 ### 3. Present analysis for approval
@@ -52,7 +54,39 @@ Present: primary source + lineage · format + conversion · approach + rationale
 
 ### 4. Search for existing skills (automatic)
 
-Per `references/SEARCH.md`: extract 3 keywords, run local check + remote search, deduplicate by installs, stop on duplicate. If tools fail, report and continue.
+**Extract 3 keywords**: skill name (always) + primary action/domain + secondary term if broad.
+
+**Run both tools per keyword:**
+```bash
+npx -y skill-search-cli --remote "<keyword>" --json   # up to 10 results, JSON
+npx skills find "<keyword>"                           # up to 6 results, text
+```
+If either tool fails, try the other. If both fail, skip this keyword.
+
+**Parse and sort:**
+- Tool A: extract `name`, `source`, `installs` from JSON. Sort by installs descending.
+- Tool B: parse lines `<owner>/<repo>@<name> <count> installs`. Expand abbreviated counts (K=×1000, M=×1e6).
+
+**Deduplicate across tools:**
+
+| Match | Action |
+|-------|--------|
+| Same name + same owner/repo | Keep one, note both sources |
+| Same name, different owner | Keep both, flag for manual review |
+| Within-tool duplicate | Remove |
+
+**After each keyword, check for blocking duplicate:** Search all Pi skill locations (`~/.pi/agent/skills/`, `~/.agents/skills/`, `.pi/skills/`, `.agents/skills/`, `skills/`) for a skill with the same name + overlapping purpose → stop and report.
+
+**Analyze every unique skill:** Use github_browse to read SKILL.md frontmatter. Classify:
+
+| Verdict | Meaning |
+|---------|---------|
+| **Inspiration** | Relevant — note features to adopt |
+| **Overlap** | Similar territory — note differentiators |
+| **Duplicate** | Same purpose — stop and report |
+| **Ignore** | Not relevant — drop |
+
+**Report:** keywords searched · total found · relevant count · top 1-3 with adopt/avoid notes · gap confirmation
 
 ## Phase 2: Planning
 
