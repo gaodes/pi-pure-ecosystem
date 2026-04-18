@@ -1,0 +1,123 @@
+{
+  "version": 1,
+  "extension": {
+    "name": "pure-skills",
+    "path": "extensions/pure-skills",
+    "lastReviewed": "2026-04-18",
+    "notes": "Extension-level inspiration and upstream review registry. One primary upstream per extension, plus secondary inspiration sources."
+  },
+  "upstream": {
+    "id": "anthropic-skill-creator",
+    "name": "Anthropic Skill Creator",
+    "kind": "upstream",
+    "url": "https://github.com/anthropics/skills/tree/main/skills/skill-creator",
+    "areas": [
+      "skills/create-skill/SKILL.md",
+      "references/AUTHORING.md",
+      "planned-skills/evaluate-skill",
+      "planned-skills/improve-skill",
+      "planned-skills/optimize-skill-description",
+      "planned-skills/validate-skill"
+    ],
+    "lastReviewed": "2026-04-18",
+    "lastSeenRevision": {
+      "type": "branch",
+      "value": "main"
+    },
+    "reviewStatus": "active",
+    "adopted": [
+      "conversation-first intake",
+      "success criteria and dependency capture",
+      "resource-first planning before finalizing SKILL.md",
+      "description as the primary trigger surface",
+      "slightly proactive but honest trigger wording",
+      "match jargon to user familiarity",
+      "explain-the-why writing guidance",
+      "fresh-eyes revision pass",
+      "lack-of-surprise principle",
+      "planned lightweight validator concept",
+      "planned eval-quality critique concept",
+      "planned description-optimization holdout concept"
+    ],
+    "intentionallyNotAdopted": [
+      "full benchmark loop",
+      "blind comparator workflow",
+      "review viewer server and browser-heavy eval flow",
+      "full grading and timing pipeline",
+      "packaging as a core part of create-skill"
+    ],
+    "notes": "Primary upstream inspiration for the pure-skills extension. Borrowed selectively and adapted to Pi conventions rather than mirrored."
+  },
+  "sources": [
+    {
+      "id": "0xkobold-skill-creator",
+      "name": "0xKobold skill-creator",
+      "kind": "inspiration",
+      "url": null,
+      "areas": [
+        "scripts/init_skill.py"
+      ],
+      "lastReviewed": "2026-04-18",
+      "lastSeenRevision": null,
+      "reviewStatus": "unresolved",
+      "adopted": [
+        "basic scaffold-script lineage"
+      ],
+      "intentionallyNotAdopted": [],
+      "notes": "`init_skill.py` is annotated as adapted from 0xKobold's skill-creator (MIT License), but the exact source URL was not recorded and should be filled in later if recovered."
+    }
+  ],
+  "reviewLog": [
+    {
+      "date": "2026-04-18",
+      "sourceId": "anthropic-skill-creator",
+      "summary": "Reviewed the full skill-creator package and imported the main create-time ideas into create-skill and AUTHORING.md.",
+      "findings": [
+        "Useful create-time heuristics were adopted.",
+        "Heavy benchmark/eval machinery was intentionally left out."
+      ]
+    },
+    {
+      "date": "2026-04-18",
+      "sourceId": "anthropic-skill-creator",
+      "summary": "Reviewed the full package again and documented worthwhile future imports in planned skill scaffolds.",
+      "findings": [
+        "evaluate-skill should critique weak evals, not just outputs.",
+        "optimize-skill-description should use substantive trigger evals and a holdout split.",
+        "validate-skill should stay tiny and schema-focused."
+      ]
+    }
+  ],
+  "changeCandidates": [
+    {
+      "id": "candidate-2026-04-18-validate-skill",
+      "sourceId": "anthropic-skill-creator",
+      "detectedAt": "2026-04-18",
+      "status": "documented",
+      "targets": [
+        "planned-skills/validate-skill/PLAN.md"
+      ],
+      "summary": "Carry over the lightweight quick-validate pattern as a future small validator companion."
+    },
+    {
+      "id": "candidate-2026-04-18-optimize-description",
+      "sourceId": "anthropic-skill-creator",
+      "detectedAt": "2026-04-18",
+      "status": "documented",
+      "targets": [
+        "planned-skills/optimize-skill-description/PLAN.md"
+      ],
+      "summary": "Carry over substantive trigger evals, user-intent framing, and holdout-based optimization ideas."
+    },
+    {
+      "id": "candidate-2026-04-18-evaluate-skill",
+      "sourceId": "anthropic-skill-creator",
+      "detectedAt": "2026-04-18",
+      "status": "documented",
+      "targets": [
+        "planned-skills/evaluate-skill/PLAN.md"
+      ],
+      "summary": "Carry over eval-quality critique so evaluation judges the test itself, not just the output."
+    }
+  ]
+}
