@@ -6,10 +6,12 @@ Choose the smallest architecture that solves the request.
 
 | # | Shape | Use when |
 |---|-------|----------|
-| 1 | Plain prompt or bash script | One-off, not reusable, no special context needed |
-| 2 | Single skill | One stable job with repeated value |
-| 3 | Skill bundle (sub-skills) | Work separates into distinct phases with different instructions |
-| 4 | Extension | Needs hooks, typed tools, UI components, commands, or persistent state |
+| 1 | Plain prompt | Reusable text prompt, no workflow or scripts → defer to the prompt manager extension |
+| 2 | Bash script or alias | One-off file manipulation, not agent behavior |
+| 3 | Single skill | One stable job with repeated value |
+| 4 | Skill bundle (sub-skills) | Same domain, multiple phases with different instructions |
+| 5 | Separate skill | Unrelated job — different triggers, different purpose |
+| 6 | Extension | Needs hooks, typed tools, UI components, commands, or persistent state |
 
 Default to #2. Escalate only with reason.
 
@@ -31,25 +33,24 @@ When the user asks for a new capability, decide early:
 
 If `bash` + instructions can do it → **Skill**. Need hooks, typed tools, or UI → **Extension**.
 
-## When to pick a single skill
+## Sub-skills vs. separate skills
 
-- One dominant job.
-- Stable context across invocations.
-- Instructions fit under 300 lines with references absorbing the rest.
-- The agent uses the same tools throughout.
+When a skill outgrows 300 lines or mixes concerns, decide: **split into sub-skills** or **create a separate skill**?
 
-## When to split into sub-skills
+| Signal | Sub-skill (same parent) | Separate skill |
+|--------|------------------------|---------------|
+| Triggers | Same domain, different phases | Completely different trigger conditions |
+| Context | Shares references, scripts, or state | No shared context |
+| User perception | "Part of the same thing" | "A different thing entirely" |
+| Example | `git-workflow` → commit, rebase, sync sub-skills | `git-workflow` and `docker-manage` are separate skills |
 
-- SKILL.md grows past 300 lines because multiple jobs are mixed in.
-- Different steps need different reference files loaded.
-- Failures cluster in one phase, suggesting a clean boundary.
-- The phases have distinct trigger conditions.
+**Sub-skills**: thin dispatcher SKILL.md routes to sibling directories, each with its own `SKILL.md` and frontmatter. Do not put sub-skill instructions in `references/` — references are supporting docs, not independent skills.
 
-**How to split**: keep a thin dispatcher SKILL.md that routes to sub-skills. Each sub-skill is a sibling directory with its own `SKILL.md` and frontmatter — the dispatcher loads the right one based on the task. Do not put sub-skill instructions in `references/` files — references are supporting docs, not independent skills.
+**Separate skills**: independent SKILL.md, independent triggers, independent lifecycle. No dispatcher needed.
 
 ## When NOT to make a skill
 
-- The task is a one-off — just instruct the agent directly.
+- The request is a reusable prompt template — defer to the prompt manager extension.
 - A bash script or shell alias does the job — skills are for agent behavior, not file manipulation.
 - The capability is better served by an extension — if it needs hooks, typed tools, or UI components, it's extension territory.
 

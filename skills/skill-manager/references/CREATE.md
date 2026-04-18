@@ -62,7 +62,7 @@ Run both tools per keyword. Tool A returns up to 10 results; Tool B returns up t
 
 Read `references/PATTERN-SELECTOR.md` and pick the smallest architecture that fits.
 
-If the answer is "plain prompt" or "bash script" — say so. Explain why this doesn't need a skill and suggest what to do instead. If a reusable prompt template or prompt-engineering guidance would help, read the `meta-prompt` skill. Then stop — do not proceed to scaffolding.
+If the answer is "plain prompt" — stop. Explain why this is a prompt, not a skill, and defer to the prompt manager extension. If the answer is "bash script" — stop. Explain why a script or alias suffices. Then stop — do not proceed to scaffolding.
 
 ### 4. Propose the plan
 
