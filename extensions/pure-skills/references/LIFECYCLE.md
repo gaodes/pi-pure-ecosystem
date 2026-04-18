@@ -4,14 +4,15 @@ Skills are not static. Manage them through states.
 
 ## Locations
 
-Skills live in one of two scopes — per `references/PATTERN-SELECTOR.md`:
+Skills live in three scopes — per `PATTERN-SELECTOR.md`:
 
 | Scope | Locations |
 |-------|-----------|
 | Global | `~/.pi/agent/skills/`, `~/.agents/skills/` |
 | Project | `.pi/skills/`, `.agents/skills/` (cwd + ancestors up to git root) |
+| Extension-bundled | `extensions/<name>/skills/` — discovered via `resources_discover` hook |
 
-Scope is assessed during planning, before scaffolding. Skills are created directly in their target location — see `references/CREATE.md` or `references/IMPORT.md`.
+Scope is assessed during planning, before scaffolding. Skills are created directly in their target location — use the `create-skill` or `import-skill` skills.
 
 Lifecycle rules apply regardless of scope.
 
@@ -35,11 +36,11 @@ A skill that accumulates enough complexity can graduate to an extension. Signals
 - Slash commands with typed arguments would improve the workflow.
 - Scripts in `scripts/` have grown complex enough to warrant proper tool registration.
 
-**How to promote**: see `references/IMPROVE.md` → "Promote to extension" mode.
+**How to promote**: rebuild as an extension. Move the skill's logic into hooks, typed tools, or TUI components. Keep the skill's `references/` and `assets/` if they remain useful.
 
 ## Refactor when
 
-See `references/IMPROVE.md` → diagnosis table for symptoms and mode selection. Triggers include:
+Triggers include:
 - Instructions sprawl past 300 lines in SKILL.md.
 - Multiple jobs are mixed together.
 - Failures repeat in one narrow area.
@@ -52,20 +53,16 @@ See `references/IMPROVE.md` → diagnosis table for symptoms and mode selection.
 - The capability is now built into Pi natively.
 - Nobody has used it in recent sessions.
 
-To deprecate: note it in the skill's `description` and `AGENTS.md`, then follow `references/RETIRE.md` when ready to remove.
+To deprecate: note it in the skill's `description` and `AGENTS.md`. Remove the directory when no references point to it.
 
 ## Remove when
 
 - Deprecated and no references point to it.
 - The directory can be safely deleted.
 
-Follow `references/RETIRE.md`.
+Delete the directory. Update any `AGENTS.md` or project docs that referenced it.
 
 ## Maintenance
-
-For periodic reviews, use one of:
-- **Portfolio audit** → `references/SELF-AUDIT.md` — structured review across all managed skills.
-- **Targeted improvement** → `references/SELF-EVOLVE.md` (Improve mode) — single skill review based on git history and usage patterns.
 
 General hygiene:
 - Review active skills when Pi updates — new APIs or tool changes may simplify or break them.
