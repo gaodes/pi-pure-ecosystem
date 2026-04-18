@@ -1,3 +1,10 @@
+---
+name: retire
+description: >
+  Remove a skill that is obsolete, replaced, or no longer used.
+disable-model-invocation: true
+---
+
 # Retire a Skill
 
 Remove a skill that is obsolete, replaced, or no longer used.

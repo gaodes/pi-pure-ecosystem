@@ -1,3 +1,10 @@
+---
+name: import
+description: >
+  Import or adapt an external skill from another repo or agent into a Pi skill following project conventions.
+disable-model-invocation: true
+---
+
 # Import a Skill
 
 Analyze one or more external skill sources, plan the adaptation, and produce a skill that follows project conventions. Sources: Pi agent skills, Codex/OpenAI skills, Claude skills, `.skill` archives, or any agent skill format.
@@ -54,7 +61,7 @@ Present: primary source + lineage · format + conversion · approach + rationale
 
 ### 4. Search for existing skills (automatic)
 
-Summary of `references/SEARCH.md` — consult it for full procedure.
+Summary of `../references/SEARCH.md` — consult it for full procedure.
 
 **Extract 3 keywords**: skill name (always) + primary action/domain + secondary term if broad.
 
@@ -102,7 +109,7 @@ Search findings from step 4 feed into the plan. Step 5 is the single approval ga
 
 Include: **Source** (URL + commit SHA + license) · **Approach** · **Conversion steps** · **Keep / Strip / Rewrite** · **Name** · **Resources needed** · **Target path** (see below)
 
-**Target path** — where the imported skill will be created. Per `references/PATTERN-SELECTOR.md`:
+**Target path** — where the imported skill will be created. Per `../references/PATTERN-SELECTOR.md`:
 
 | If the skill is... | Use `<target-path>` |
 |---------------------|---------------------|
@@ -116,7 +123,7 @@ If unsure, default to `~/.pi/agent/skills` and let the user decide during approv
 ### 6. Scaffold
 
 ```bash
-scripts/init_skill.py <skill-name> --path <target-path> [--resources scripts,references,assets]
+../scripts/init_skill.py <skill-name> --path <target-path> [--resources scripts,references,assets]
 ```
 
 Or create manually. Only add directories the skill actually needs. `<target-path>` is set in the approved plan (step 5).
@@ -125,14 +132,14 @@ Or create manually. Only add directories the skill actually needs. `<target-path
 
 ### 7. Adapt the content
 
-**If adapting:** copy source SKILL.md, rewrite frontmatter (`name` + fresh `description` per `references/DESCRIPTION-OPTIMIZATION.md`), restructure to required template, move detail into `references/`, keep SKILL.md under 300 lines, convert scripts (no interactive prompts, structured output).
+**If adapting:** copy source SKILL.md, rewrite frontmatter (`name` + fresh `description` per `../optimize-description/SKILL.md`), restructure to required template, move detail into `references/`, keep SKILL.md under 300 lines, convert scripts (no interactive prompts, structured output).
 
 **If rewriting:** use source as reference only. Write SKILL.md from scratch per scaffold template. Implement only approved features.
 
 **If extracting:** identify relevant sections, create focused SKILL.md, link source in `## References`.
 
 **For all approaches:**
-- Apply `references/AUTHORING.md` patterns
+- Apply `../references/AUTHORING.md` patterns
 - Calibrate degrees of freedom (imported skills are often too rigid or too vague)
 - Add gotchas for Pi-specific differences from the source agent
 - Preserve license attribution in `## Sources`:
@@ -143,14 +150,14 @@ Or create manually. Only add directories the skill actually needs. `<target-path
 - **Inspirations**: [<upstream>](<url>) — <license>
 ```
 
-- Create `.upstream.json` from `assets/templates/.upstream.template.json` with primary URL, SHA, `lastReviewed`, and secondary sources if any
+- Create `.upstream.json` from `../assets/templates/.upstream.template.json` with primary URL, SHA, `lastReviewed`, and secondary sources if any
 - Document CLI tools in `compatibility` frontmatter: `compatibility: "CLI: git>=2.40, python3>=3.10"`
 - Record versions in `.upstream.json` under `cliTools`
 
 ### 8. Validate
 
 ```bash
-scripts/validate_skill.py <target-path>/<skill-name>
+../scripts/validate_skill.py <target-path>/<skill-name>
 ```
 
 Fix violations. Common issues: name/directory mismatch, vague description, missing `## References` table, interactive scripts, extraneous files (README.md, .github/, CI configs).
@@ -159,9 +166,9 @@ Fix violations. Common issues: name/directory mismatch, vague description, missi
 
 **Quick evaluation** — write 5-10 prompts that should trigger + 5 that should not. Verify the `description` triggers correctly.
 
-For high-stakes skills, run structured eval per `references/EVALUATION.md`.
+For high-stakes skills, run structured eval per `../evaluate/SKILL.md`.
 
-If triggering is off: see `references/DESCRIPTION-OPTIMIZATION.md`.
+If triggering is off: see `../optimize-description/SKILL.md`.
 
 ### 10. Commit and register
 

@@ -1,3 +1,10 @@
+---
+name: sync-upstream
+description: >
+  Review an inspiration source for new ideas that might improve an imported skill.
+disable-model-invocation: true
+---
+
 # Sync Upstream
 
 Review an inspiration source for new ideas that might improve an imported skill.
@@ -21,7 +28,7 @@ The imported skill has been renamed, restructured, and adapted — it is not a f
 6. Apply approved changes to the skill (adapt, don't copy — maintain our conventions). Re-validate:
 
 ```bash
-scripts/validate_skill.py <skill-path>
+../scripts/validate_skill.py <skill-path>
 ```
 
 7. Update `.upstream.json` with the latest reviewed SHA and date, even if no changes were adopted.

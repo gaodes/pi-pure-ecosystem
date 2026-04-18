@@ -1,10 +1,17 @@
+---
+name: self-evolve
+description: >
+  Review and improve managed skills through portfolio audit or targeted improvement.
+disable-model-invocation: true
+---
+
 # Self-Evolve
 
 Review and improve managed skills using one of two modes.
 
 ## Modes
 
-- **Audit** — portfolio review across managed skills. Read `references/SELF-AUDIT.md` and follow it.
+- **Audit** — portfolio review across managed skills. Read `../references/SELF-AUDIT.md` and follow it.
 - **Improve** — targeted improvement of one specific skill.
 
 If the user asks for self-evolve without naming a mode, ask whether they want **audit** or **improve**.

@@ -1,3 +1,10 @@
+---
+name: improve
+description: >
+  Improve, refactor, harden, split, merge, or promote an existing skill.
+disable-model-invocation: true
+---
+
 # Improve an Existing Skill
 
 Improve, refactor, harden, split, merge, or promote an existing skill.
@@ -29,7 +36,7 @@ Read the skill's SKILL.md and all references. Diagnose from symptoms:
 
 ### 2. Select improvement mode
 
-Read `references/LIFECYCLE.md` for promote/refactor/deprecate triggers.
+Read `../references/LIFECYCLE.md` for promote/refactor/deprecate triggers.
 
 | Mode | When to use |
 |------|------------|
@@ -37,7 +44,7 @@ Read `references/LIFECYCLE.md` for promote/refactor/deprecate triggers.
 | **Split** | Triggers and instructions diverge — the skill does two unrelated things. Create two skills, divide triggers, update references in other skills/docs. |
 | **Merge** | Two skills share all triggers and context. Keep the stronger SKILL.md, absorb the other's unique content, then retire the other. |
 | **Harden** | Add failure cases, tighten outputs, clarify tool usage. No structural change. |
-| **Promote to extension** | Skill needs hooks, typed tools, UI, or persistent state. See `references/LIFECYCLE.md` → "Promote to Extension" for signals. Use the skill directory as the extension's foundation. |
+| **Promote to extension** | Skill needs hooks, typed tools, UI, or persistent state. See `../references/LIFECYCLE.md` → "Promote to Extension" for signals. Use the skill directory as the extension's foundation. |
 
 ### 3. Present plan for approval
 
@@ -51,7 +58,7 @@ Do not proceed until the user approves.
 
 ### 4. Apply the improvement
 
-Read `references/AUTHORING.md` for content patterns when rewriting instructions.
+Read `../references/AUTHORING.md` for content patterns when rewriting instructions.
 
 For **Split**: create the new skill via the Create workflow, then update the original skill to remove the split-out concerns.
 
@@ -62,7 +69,7 @@ For **Promote**: use the skill directory as the extension's foundation. Move log
 ### 5. Re-validate and re-evaluate
 
 ```bash
-scripts/validate_skill.py <skill-path>
+../scripts/validate_skill.py <skill-path>
 ```
 
 Quick evaluation — write 5-10 prompts that should trigger + 5 that should not. For structural changes (Split, Merge), evaluate both skills.

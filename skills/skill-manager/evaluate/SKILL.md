@@ -1,3 +1,10 @@
+---
+name: evaluate
+description: >
+  Verify a skill works correctly through trigger validation, happy-path execution, and context economy checks.
+disable-model-invocation: true
+---
+
 # Evaluation
 
 Verify a skill works correctly. Three phases:
@@ -10,7 +17,7 @@ Execute each phase manually. This takes minutes, not hours, and costs nothing.
 
 ## Phase 1: trigger validation
 
-Test whether the description triggers on the right prompts and stays silent on the wrong ones. See [DESCRIPTION-OPTIMIZATION.md](DESCRIPTION-OPTIMIZATION.md) for the test-prompt generation method.
+Test whether the description triggers on the right prompts and stays silent on the wrong ones. See [../optimize-description/SKILL.md](../optimize-description/SKILL.md) for the test-prompt generation method.
 
 ### How to run it
 
@@ -21,7 +28,7 @@ Read the skill's `description` field from SKILL.md frontmatter. For each test pr
 
 A prompt passes if your classification matches `should_trigger`.
 
-Aim for 10–14 prompts total: 7–10 that should trigger, 3–4 that should not. See the DESCRIPTION-OPTIMIZATION.md for generation guidance.
+Aim for 10–14 prompts total: 7–10 that should trigger, 3–4 that should not. See the ../optimize-description/SKILL.md for generation guidance.
 
 **Example:**
 

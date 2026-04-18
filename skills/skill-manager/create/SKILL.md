@@ -1,3 +1,10 @@
+---
+name: create
+description: >
+  Create a new Pi skill from scratch with clear triggers, inputs/outputs, and only the resources it needs.
+disable-model-invocation: true
+---
+
 # Create a New Skill
 
 Create a new Pi skill from scratch.
@@ -46,7 +53,7 @@ npx skills find "<keyword>"
 npx -y skill-search-cli --remote "<keyword>" --json
 ```
 
-Run both tools per keyword. Tool A returns up to 10 results; Tool B returns up to 6. Sort both by install count descending, then deduplicate across tools per `references/SEARCH.md`.
+Run both tools per keyword. Tool A returns up to 10 results; Tool B returns up to 6. Sort both by install count descending, then deduplicate across tools per `../references/SEARCH.md`.
 
 **Stop early** — if a clear duplicate (same name + overlapping purpose found locally) is found, report it and stop all keyword searches.
 
@@ -60,9 +67,9 @@ Run both tools per keyword. Tool A returns up to 10 results; Tool B returns up t
 
 ### 3. Shape selection
 
-Read `references/PATTERN-SELECTOR.md` and pick the smallest architecture that fits.
+Read `../references/PATTERN-SELECTOR.md` and pick the smallest architecture that fits.
 
-If the answer is "plain prompt" — stop. Explain why this is a prompt, not a skill, and defer to the prompt manager extension. If the answer is "bash script" — stop. Explain why a script or alias suffices. Then stop — do not proceed to scaffolding.
+If the answer is "plain prompt" or "bash script" — say so. Explain why this doesn't need a skill and suggest what to do instead. If a reusable prompt template or prompt-engineering guidance would help, read the `meta-prompt` skill. Then stop — do not proceed to scaffolding.
 
 ### 4. Propose the plan
 
@@ -97,14 +104,14 @@ Create the directory and only the subdirectories the skill actually needs:
 For quick scaffolding from the project root, run:
 
 ```bash
-scripts/init_skill.py <skill-name> --path skills [--resources scripts,references,assets] [--examples]
+../scripts/init_skill.py <skill-name> --path skills [--resources scripts,references,assets] [--examples]
 ```
 
 If the skill belongs somewhere else, replace `skills` with the approved target directory.
 
 ### 7. Write SKILL.md
 
-Read `references/AUTHORING.md` before writing the skill instructions.
+Read `../references/AUTHORING.md` before writing the skill instructions.
 
 **SKILL.md must include:**
 - YAML frontmatter with `name` and `description` (required). Optional fields: `compatibility`, `allowed-tools`.
@@ -119,7 +126,7 @@ Read `references/AUTHORING.md` before writing the skill instructions.
   ```
   Keep it compact to stay under the 500-char limit. The agent extracts these during validation and tracks them in `.upstream.json`.
 
-For guidance on writing each section, see `references/AUTHORING.md`:
+For guidance on writing each section, see `../references/AUTHORING.md`:
 - `## How to use this skill` → "Writing `## How to use this skill`"
 - `## Inputs` / `## Outputs` → "Defining `## Inputs` and `## Outputs`"
 - `## Workflow` → "Degrees of freedom", "Provide defaults, not menus"
@@ -135,7 +142,7 @@ From the intake examples, build what the skill actually needs:
 - **References** — domain-specific docs the agent loads on demand.
 - **Assets** — templates, schemas, sample data used in output.
 
-Only create directories the skill actually needs. See `references/AUTHORING.md` → "What to include" and "Directory usage guide" for what belongs in each directory.
+Only create directories the skill actually needs. See `../references/AUTHORING.md` → "What to include" and "Directory usage guide" for what belongs in each directory.
 
 Delete placeholder files if `--examples` was used.
 
@@ -161,20 +168,20 @@ Check against Pi skill rules:
 For automated validation:
 
 ```bash
-scripts/validate_skill.py <skill-path>
+../scripts/validate_skill.py <skill-path>
 ```
 
 Fix any violations before proceeding.
 
 ### 10. Evaluate
 
-Read `references/EVALUATION.md`.
+Read `../evaluate/SKILL.md`.
 - For simple skills, quick checks (3 happy + 2 edge + 1 failure) are sufficient.
 - For skills for repeated team use, run structured eval with the `evals/evals.json` format.
 
 ### 11. Optimize description
 
-Read `references/DESCRIPTION-OPTIMIZATION.md`.
+Read `../optimize-description/SKILL.md`.
 - For most skills, a quick sanity check with 5-10 prompts is enough.
 - For skills with trigger problems, run the full optimization loop.
 

@@ -1,3 +1,10 @@
+---
+name: optimize-description
+description: >
+  Optimize a skill description field so it triggers on the right prompts and stays silent on the wrong ones.
+disable-model-invocation: true
+---
+
 # Description Optimization
 
 The `description` field carries the entire burden of triggering. A skill that triggers on relevant prompts is essential; one that triggers on irrelevant prompts wastes context. This reference guides the agent in rewriting and tuning descriptions.
