@@ -44,13 +44,13 @@ For each source, identify: **Format** (Pi, Codex, Claude, generic) · **Structur
 for dir in ~/.pi/agent/skills ~/.agents/skills .pi/skills .agents/skills skills; do
   test -d "$dir/<skill-name>" && echo "EXISTS in $dir" || true
 done
+# Note: .agents/skills is also discovered in ancestor dirs up to git root.
+# If the skill might exist in a parent project, search ancestors too.
 ```
 
 ### 3. Present analysis
 
 Present: primary source + lineage · format + conversion · approach + rationale · proposed name · features to keep/strip/rewrite · license status
-
-Search findings from step 4 feed into the plan (step 5). Step 5 is the single approval gate.
 
 ### 4. Search for existing skills (automatic)
 
@@ -77,9 +77,11 @@ If either tool fails, try the other. If both fail, skip this keyword.
 | Same name, different owner | Keep both, flag for manual review |
 | Within-tool duplicate | Remove |
 
-**Blocking duplicate check:** Search all Pi skill locations for a skill with the same name + overlapping purpose → stop and report.
+**Blocking duplicate check:** Search all Pi skill locations (including `.agents/skills/` ancestor directories up to git root) for a skill with the same name + overlapping purpose → stop and report.
 
-Locations: `~/.pi/agent/skills/` · `~/.agents/skills/` · `.pi/skills/` · `.agents/skills/` · `skills/`
+Locations: `~/.pi/agent/skills/` · `~/.agents/skills/` · `.pi/skills/` · `.agents/skills/` (cwd + ancestors) · `skills/`
+
+This is a deeper check than step 2 (name collision) — step 2 catches exact name matches; this catches purpose overlap from remote results.
 
 **Analyze every unique skill:** Use github_browse to read SKILL.md frontmatter. Classify:
 
@@ -91,6 +93,8 @@ Locations: `~/.pi/agent/skills/` · `~/.agents/skills/` · `.pi/skills/` · `.ag
 | **Ignore** | Not relevant — drop |
 
 **Report:** keywords searched · total found · relevant count · top 1-3 with adopt/avoid notes · gap confirmation
+
+Search findings from step 4 feed into the plan. Step 5 is the single approval gate.
 
 ## Phase 2: Planning
 
