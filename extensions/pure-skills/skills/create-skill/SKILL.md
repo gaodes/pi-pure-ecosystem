@@ -69,6 +69,18 @@ Read `../../references/SEARCH.md` and follow its workflow: extract up to 3 keywo
 
 If a duplicate exists locally, include a recommendation to improve the existing skill instead.
 
+If any remote skills are marked as **Inspiration** or **Overlap**, record them in `.upstream.json`:
+
+```json
+{
+  "inspired_by": [
+    { "name": "skill-name", "source": "owner/repo", "installs": 1200, "note": "adopted the retry pattern" }
+  ]
+}
+```
+
+Create `.upstream.json` in the new skill directory during scaffolding (step 6). If no remote skills matched, skip the file.
+
 ### 3. Shape selection
 
 Read `../../references/PATTERN-SELECTOR.md` and pick the smallest architecture that fits.
@@ -103,6 +115,7 @@ Create the directory with only the subdirectories the skill actually needs:
 ```text
 <skill-name>/
 ├── SKILL.md
+├── .upstream.json  # optional — created when research found inspiration sources
 ├── scripts/       # optional — agent would reinvent the same logic each run
 ├── references/    # optional — domain docs loaded on demand
 └── assets/        # optional — templates, schemas, sample data
