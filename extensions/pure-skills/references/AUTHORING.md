@@ -232,9 +232,19 @@ Join the `orders` table to `customers` on `customer_id`, filter where
 
 Specific details (output format templates, constraints, tool-specific instructions) are valuable — the *approach* should generalize even when individual details are specific.
 
+## Writing style
+
+Prefer imperative voice for instructions.
+
+Explain why important behaviors matter instead of stacking rigid MUST/NEVER commands. Strong constraints are fine when necessary, but models follow instructions more reliably when they understand the purpose behind them.
+
+Write a draft, then reread it with fresh eyes and tighten anything vague, repetitive, or overfit to one example.
+
 ## Description as primary trigger
 
 All "when to use" information belongs in the `description` field, not the body. The body is only loaded after the skill triggers — a "When to Use This Skill" section in the body is useless because the agent has already decided to load the skill by then.
+
+Models tend to undertrigger skills. To compensate, make descriptions slightly proactive: include adjacent phrases, near-synonyms, and common user framings the skill should catch. Be specific, not spammy, and never promise behavior the skill doesn't actually cover.
 
 ```yaml
 # Good — triggers are in the description
@@ -243,6 +253,12 @@ description: >
   and formatting preservation. Use when working with .docx files for creating,
   editing, or extracting text.
 ```
+
+## Principle of lack of surprise
+
+A skill should not surprise the user relative to its description. Do not hide destructive behavior, misleading routing, or side effects the description did not prepare the user for.
+
+If the description says the skill formats reports, the body should not quietly also delete files or make network calls unless that behavior is clearly part of the skill's stated purpose.
 
 ## Frontmatter fields
 
@@ -257,7 +273,7 @@ Beyond `name` and `description`, two optional fields are useful:
 compatibility: "CLI: git>=2.40, python3>=3.10, biome>=1.5"
 ```
 
-Format: `CLI: tool1>=version, tool2>=version, ...` — keep it under 500 chars total. If the skill has `.upstream.json`, record checked tool versions there under `cliTools` for later review.
+Format: `CLI: tool1>=version, tool2>=version, ...` — keep it under 500 chars total.
 
 Only add these when they prevent real failures. Empty or generic compatibility strings are noise.
 
@@ -318,7 +334,6 @@ A skill directory contains only what the agent needs:
 - `scripts/` — optional. Executable logic the agent would otherwise rewrite each run.
 - `references/` — optional. Domain-specific docs loaded on demand.
 - `assets/` — optional. Templates, schemas, sample data used in output.
-- `.upstream.json` — optional. Tracks inspiration sources or import origin. Create from `assets/templates/.upstream.template.json` when the skill was inspired by remote skills or imported from an external source. Use `primary` for the canonical upstream when one exists, `sources` for secondary inspirations, and `cliTools` for checked CLI tool versions.
 
 ## What not to include
 

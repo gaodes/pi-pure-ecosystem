@@ -1,14 +1,14 @@
 ---
 name: {{skill_name}}
 description: >
-  {{ONE_SENTENCE_PURPOSE_WITH_TRIGGER_CONDITION}}
+  {{WHAT_THIS_SKILL_DOES}} Use when {{TRIGGER_CONTEXTS}}, including adjacent phrasings and common user wording for the same need. Not applicable to {{OUT_OF_SCOPE_CASES}}.
 ---
 
 # {{skill_title}}
 
 ## How to use this skill
-- {{RUNTIME_INSTRUCTION_1}}
-- {{RUNTIME_INSTRUCTION_2}}
+1. {{RUNTIME_INSTRUCTION_1}}
+2. {{RUNTIME_INSTRUCTION_2}}
 
 ## Inputs
 - {{REQUIRED_INPUT}}
@@ -27,4 +27,4 @@ description: >
 - {{FAILURE_MODE}}
 
 ## References
-No additional references yet. Add a `## References` table when you create files in `references/`.
+No additional references yet. When you add files in `references/`, replace this with a table describing each file and when to load it.

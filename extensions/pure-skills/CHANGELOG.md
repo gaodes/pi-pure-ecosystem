@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.2 (2026-04-18)
+
+- Simplified `skills/create-skill` so it relies only on `references/AUTHORING.md` instead of the larger search/pattern/lifecycle reference set.
+- Inlined shape-selection and manual self-check guidance into `create-skill`.
+- Pulled additional create-only ideas from Anthropic's `skill-creator`: extract intent from the current conversation first, capture success criteria and dependencies explicitly, plan reusable resources before writing, and make description-writing guidance more explicit.
+- Removed bundled search and validation infrastructure from `pure-skills` in preparation for dedicated search and validate skills later.
+- Removed `references/SEARCH.md`, `references/PATTERN-SELECTOR.md`, `references/LIFECYCLE.md`, `scripts/validate_skill.py`, and `assets/templates/.upstream.template.json`.
+- Simplified `scripts/init_skill.py` to scaffold only the core skill structure and resource directories.
+- Added non-discoverable plan scaffolds for future `evaluate-skill`, `improve-skill`, and `optimize-description` companions under `planned-skills/`.
+- Tightened `create-skill`, `AUTHORING.md`, the SKILL template, and scaffold guidance using additional phrasing cues from Anthropic's `skill-creator`: concrete inputs, user-jargon matching, slightly more proactive description wording to reduce undertriggering, "explain the why" writing guidance, fresh-eyes revision, a clearer lack-of-surprise rule, and sharper trigger phrasing around adjacent user wording.
+
 ## 0.1.1 (2026-04-18)
 
 - Added `assets/templates/.upstream.template.json` for tracking inspiration sources and upstream metadata.
