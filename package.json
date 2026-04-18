@@ -1,7 +1,7 @@
 {
   "name": "pi-pure-ecosystem",
   "version": "0.1.0",
-  "description": "Personal extensions, themes, and configuration for the Pi coding agent",
+  "description": "Personal extensions and configuration for the Pi coding agent",
   "keywords": [
     "pi-package"
   ],
@@ -28,9 +28,6 @@
       "./extensions/pure-updater/index.ts",
       "./extensions/pure-git/index.ts",
       "./extensions/pure-utils/index.ts"
-    ],
-    "themes": [
-      "./themes"
     ]
   }
 }

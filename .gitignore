@@ -1,18 +1,19 @@
 node_modules/
- Disabled/
 *.tmp
-
-# Runtime state recreated by extensions
-.pi/pure/
+*.log
 
 # Git worktrees (managed by pure-git)
 .worktrees/
 
-# Archive (local reference, not tracked)
-AGENTS-old.md
-
-# Eval outputs (generated during testing)
-evals/outputs/
-
-# All extensions are tracked in this repo.
+# macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+
+# Thumbnail cache files
+._*
+.Trashes

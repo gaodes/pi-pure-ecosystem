@@ -1,6 +1,6 @@
 # Pi Pure Ecosystem
 
-Personal extensions, themes, and configuration for the [Pi coding agent](https://github.com/badlogic/pi-mono). Named with the `pure-` prefix convention. Developed for local use — published only if broadly useful.
+Personal extensions and configuration for the [Pi coding agent](https://github.com/badlogic/pi-mono). Named with the `pure-` prefix convention. Developed for local use — published only if broadly useful.
 
 ## Extensions
 
@@ -14,14 +14,8 @@ Personal extensions, themes, and configuration for the [Pi coding agent](https:/
 | [pure-statusline](extensions/pure-statusline/) | — | `/statusline` | Configurable multi-line status footer with segments, tool counters |
 | [pure-theme](extensions/pure-theme/) | — | `/theme` | Sync theme with system dark/light mode |
 | [pure-updater](extensions/pure-updater/) | — | `/update` | Check for Pi updates, prompt on new versions, install and restart |
+| [pure-utils](extensions/pure-utils/) | — | — | Shared utilities for other extensions |
 | [pure-vibes](extensions/pure-vibes/) | — | `/vibe` | AI-generated themed working messages |
-
-## Themes
-
-| Theme | Description |
-|-------|-------------|
-| [catppuccin-frappe](themes/catppuccin-frappe.json) | Catppuccin Frappé — dark, warm tones |
-| [catppuccin-latte](themes/catppuccin-latte.json) | Catppuccin Latte — light, warm tones |
 
 ## Installation
 
