@@ -1,0 +1,13 @@
+{
+  "primary": {
+    "url": "{{PRIMARY_REPO_URL}}",
+    "sha": "{{COMMIT_SHA_AT_IMPORT}}",
+    "lastReviewed": "{{YYYY-MM-DD}}"
+  },
+  "sources": [
+    { "url": "{{SECONDARY_REPO_URL}}", "note": "{{WHAT_IT_CONTRIBUTED}}" }
+  ],
+  "cliTools": [
+    { "name": "{{TOOL_NAME}}", "version": "{{VERSION_AT_IMPORT}}", "checkedAt": "{{YYYY-MM-DD}}" }
+  ]
+}

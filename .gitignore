@@ -15,3 +15,4 @@ AGENTS-old.md
 evals/outputs/
 
 # All extensions are tracked in this repo.
+.DS_Store
