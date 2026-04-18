@@ -96,7 +96,17 @@ Locations: `~/.pi/agent/skills/` · `~/.agents/skills/` · `.pi/skills/` · `.ag
 
 ### 5. Create a plan
 
-Include: **Source** (URL + commit SHA + license) · **Approach** · **Conversion steps** · **Keep / Strip / Rewrite** · **Name** · **Resources needed** · **Target path** (`<target-path>` — where the skill will be created)
+Include: **Source** (URL + commit SHA + license) · **Approach** · **Conversion steps** · **Keep / Strip / Rewrite** · **Name** · **Resources needed** · **Target path** (see below)
+
+**Target path** — where the imported skill will be created. Per `references/PATTERN-SELECTOR.md`:
+
+| If the skill is... | Use `<target-path>` |
+|---------------------|---------------------|
+| Specific to this project | `.pi/skills` |
+| Reusable across projects | `~/.pi/agent/skills` |
+| Part of a distributable package | `skills` (with `pi.skills` in `package.json`) |
+
+If unsure, default to `skills` and let the user decide during approval.
 
 **Do not proceed until user approves the plan.**
 
