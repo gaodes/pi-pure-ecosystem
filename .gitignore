@@ -17,3 +17,7 @@ node_modules/
 # Thumbnail cache files
 ._*
 .Trashes
+
+# Python bytecode
+__pycache__/
+*.pyc
