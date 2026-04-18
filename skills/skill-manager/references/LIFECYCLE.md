@@ -11,27 +11,19 @@ Skills live in one of two scopes — per `references/PATTERN-SELECTOR.md`:
 | Global | `~/.pi/agent/skills/`, `~/.agents/skills/` |
 | Project | `.pi/skills/`, `.agents/skills/` (cwd + ancestors up to git root) |
 
+Scope is assessed during planning, before scaffolding. Skills are created directly in their target location — see `references/CREATE.md` or `references/IMPORT.md`.
+
 Lifecycle rules apply regardless of scope.
 
 ## States
 
 | State | Meaning |
 |-------|---------|
-| Draft | Scaffolded, not yet validated or evaluated |
 | Active | Validated, evaluated, in use |
 | Deprecated | Replaced or no longer recommended |
 | Removed | Directory deleted, references cleaned up |
 
 There is no formal state field. Track lifecycle through documentation — if a skill is deprecated, note it in its description and `AGENTS.md`.
-
-## Promote to Active when
-
-A Draft becomes Active through the Create or Import workflows — see `references/CREATE.md` or `references/IMPORT.md`. A skill is Active when:
-
-- Purpose is clear and scoped.
-- Passes validation (`scripts/validate_skill.py`).
-- Eval cases pass (happy paths succeed, failure modes behave correctly).
-- Referenced in the project's `AGENTS.md` or skill index.
 
 ## Promote to Extension when
 
