@@ -12,17 +12,16 @@ Turn a recurring agent task into a focused, well-structured Pi skill.
 
 ## How to use this skill
 
-1. Gather concrete usage examples from the user (step 1).
-2. Search for existing skills that overlap or inspire (step 2).
-3. Pick the smallest architecture that fits (step 3).
-4. Decide scope: project or global (step 4).
-5. Get approval for the plan, then scaffold, write, validate, and commit.
+1. **Intake** — gather examples and scope from the user. This is the only interactive step until the approval gate.
+2. **Autonomous phase** — research, shape selection, plan formulation. No user interaction needed.
+3. **Approval gate** — present the plan and wait for explicit go/no-go.
+4. **Autonomous phase** — scaffold, write, validate, evaluate, commit. No user interaction needed.
 
 ## Inputs
 
 - **User request** — what capability to package as a skill.
 - **Usage examples** — at least one concrete scenario (ask if not provided).
-- **Target directory** — where the skill lives. Defaults: `.pi/skills/` (project-scoped) or `~/.pi/agent/skills/` (global).
+- **Scope** — project or global (ask if not provided).
 
 ## Outputs
 
@@ -30,13 +29,14 @@ Turn a recurring agent task into a focused, well-structured Pi skill.
 
 ## Workflow
 
-### 1. Intake
+### 1. Intake (interactive)
 
-Understand how the skill will be used before writing specs. Ask:
+Gather everything needed to proceed autonomously. Ask:
 
 - "Can you give examples of how this skill would be used?"
 - "What would a user say that should trigger this skill?"
 - "Are there edge cases where the agent would get this wrong without guidance?"
+- "Should this skill live in this project only, or be available globally?"
 
 Extract from the examples:
 
@@ -46,54 +46,57 @@ Extract from the examples:
 - **Inputs / Outputs** — what goes in, what comes out.
 - **Non-goals** — what is explicitly out of scope.
 - **Resources** — scripts, references, or assets the skill needs.
+- **Scope** — project (`.pi/skills/`) or global (`~/.pi/agent/skills/`).
 
-Prioritize name + purpose + triggers. The rest can emerge during implementation.
-
-### 2. Research existing skills (automatic)
-
-Search for existing skills before proposing a design. This runs without asking the user.
-
-Read `../../references/SEARCH.md` and follow its workflow: extract up to 3 keywords from the intake, search local directories and remote registries, deduplicate, and report findings.
-
-Include the findings in the plan (step 4). If a duplicate exists locally, suggest improving it instead of creating a new one.
-
-### 3. Shape selection
-
-Read `../../references/PATTERN-SELECTOR.md` and pick the smallest architecture that fits.
-
-If the request is a **plain prompt** or **bash script** — stop. Explain why this doesn't need a skill and suggest what to do instead. Do not proceed to scaffolding.
-
-### 4. Select scope
-
-Decide where the skill lives:
+Default scope rules (use when the user doesn't specify):
 
 | Scope | Location | Use when |
 |-------|----------|----------|
 | Project | `.pi/skills/` | Tied to a specific repo, project workflow, or codebase convention |
 | Global | `~/.pi/agent/skills/` | Works across any project, general-purpose capability |
 
-Default to **project scope**. Escalate to global only when the skill has no project-specific logic and would be useful in every session.
+Default to **project scope**. Escalate to global only when the skill has no project-specific logic.
 
-If the user specified a target directory, respect it.
+Prioritize name + purpose + triggers + scope. The rest can emerge during implementation.
 
-### 5. Propose the plan
+---
 
-Summarize for the user:
+*Steps 2-5 are autonomous. Do not ask the user questions during this phase.*
+
+### 2. Research existing skills (automatic)
+
+Read `../../references/SEARCH.md` and follow its workflow: extract up to 3 keywords from the intake, search local directories and remote registries, deduplicate, and report findings.
+
+If a duplicate exists locally, include a recommendation to improve the existing skill instead.
+
+### 3. Shape selection
+
+Read `../../references/PATTERN-SELECTOR.md` and pick the smallest architecture that fits.
+
+If the request is a **plain prompt** or **bash script** — stop autonomous work and report back to the user. Explain why this doesn't need a skill and suggest what to do instead. Do not proceed to the approval gate.
+
+### 4. Formulate the plan
+
+Compose the proposal:
 
 - skill name and purpose
 - trigger examples
 - inputs and outputs
 - directories needed (`scripts/`, `references/`, `assets/`)
-- target location (see defaults in Inputs)
+- target location (from scope decided in step 1)
 - search findings: existing skills found, or "fills a gap"
 
-Ask if anything is unclear before proceeding.
+### 5. Approval gate (interactive)
 
-### 6. Get approval
+Present the plan. Wait for the user's explicit go/no-go.
 
-Confirm the name, scope, and resource layout. Concise confirmation for straightforward skills; explicit approval for high-stakes ones.
+On approval, proceed autonomously through the remaining steps.
 
-### 7. Scaffold
+---
+
+*Steps 6-11 are autonomous. Do not ask the user questions during this phase.*
+
+### 6. Scaffold
 
 Create the directory with only the subdirectories the skill actually needs:
 
@@ -111,7 +114,7 @@ For quick scaffolding:
 ../../scripts/init_skill.py <skill-name> --path <target-dir> [--resources scripts,references,assets] [--examples]
 ```
 
-### 8. Write SKILL.md
+### 7. Write SKILL.md
 
 Read `../../references/AUTHORING.md` before writing.
 
@@ -119,7 +122,7 @@ Follow the required structure from AUTHORING.md: frontmatter (`name`, `descripti
 
 Keep SKILL.md under 300 lines. Move detail into `references/`.
 
-### 9. Implement resources
+### 8. Implement resources
 
 Build what the skill needs:
 
@@ -129,7 +132,7 @@ Build what the skill needs:
 
 Only create directories the skill actually uses. Delete placeholder files if `--examples` was used.
 
-### 10. Validate
+### 9. Validate
 
 Run automated validation and fix any violations:
 
@@ -137,14 +140,14 @@ Run automated validation and fix any violations:
 ../../scripts/validate_skill.py <skill-path>
 ```
 
-### 11. Quick evaluation
+### 10. Quick evaluation
 
 Sanity-check the new skill:
 
 - 3 happy-path scenarios + 2 edge cases + 1 failure mode.
 - Verify the `description` triggers correctly with 5-10 test prompts.
 
-### 12. Register and commit
+### 11. Register and commit
 
 Update `AGENTS.md` or project docs if the skill changes how the project works. Pi discovers skills via directory scanning — no separate registry file.
 
