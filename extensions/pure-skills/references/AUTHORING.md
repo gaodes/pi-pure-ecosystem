@@ -12,11 +12,12 @@ Every SKILL.md must include these sections:
 - **`## How to use this skill`** — runtime instructions for the agent after it loads.
 - **`## Inputs`** — what the skill consumes (concrete types, not vague "user request").
 - **`## Outputs`** — what the skill produces.
-- **`## Workflow` or `## Dispatch`** — numbered steps the agent follows, or a dispatch table for meta-skills.
+- **`## Workflow` or `## Dispatch`** — numbered steps the agent follows, or a dispatch table for skills with multiple modes.
 - **`## Limits`** — known constraints, failure modes, and when to stop.
+- **`## Tools`** *(optional)* — table of bundled scripts with usage. Use when the skill includes executable scripts that don't fit the References "load when..." pattern.
 - **`## References`** — table of resource files with "load when..." guidance. State clearly if there are no additional resources yet.
 
-**Recommended order:** How to use → Inputs → Outputs → Workflow (or Dispatch) → Limits → References.
+**Recommended order:** How to use → Inputs → Outputs → Workflow (or Dispatch) → Limits → Tools (if needed) → References.
 
 Keep SKILL.md under 300 lines. Move detail into `references/`.
 
@@ -42,7 +43,7 @@ Two common patterns for `## How to use this skill`:
 4. Apply approved changes and re-validate.
 ```
 
-**Pattern B: Dispatch table** (meta-skills with multiple tasks)
+**Pattern B: Dispatch table** (skills with multiple modes)
 
 ```markdown
 ## How to use this skill
@@ -51,6 +52,19 @@ Two common patterns for `## How to use this skill`:
 2. Read the matched task reference before starting work.
 3. Follow the workflow. Ask before proceeding if the request doesn't match any row.
 ```
+
+**Pattern C: Two-phase autonomy** (skills with an approval gate)
+
+```markdown
+## How to use this skill
+
+1. **Intake** — gather requirements from the user. This is the only interactive step until the approval gate.
+2. **Autonomous phase** — research, analyze, formulate a plan. No user interaction needed.
+3. **Approval gate** — present the plan and wait for explicit go/no-go.
+4. **Autonomous phase** — execute the approved plan, validate, commit. No user interaction needed.
+```
+
+Mark the boundaries clearly in the workflow with `---` dividers so the agent knows when it may and may not interact with the user.
 
 ## Defining `## Inputs` and `## Outputs`
 
@@ -102,7 +116,7 @@ The highest-value skills are grounded in real tasks, not generic knowledge. Extr
 
 Don't ask an LLM to generate a skill from scratch without domain-specific context — you'll get vague procedures, not the specific patterns that make a skill valuable.
 
-**Greenfield skills:** When no prior art exists, start from the user's concrete examples. Extract patterns from 3-5 real prompts or tasks, then generalize. If you have no examples, you don't have a skill yet — you have an idea. Load `references/CREATE.md` from the `skill-manager` for the intake procedure.
+**Greenfield skills:** When no prior art exists, start from the user's concrete examples. Extract patterns from 3-5 real prompts or tasks, then generalize. If you have no examples, you don't have a skill yet — you have an idea. Use the `create-skill` skill for the full intake procedure.
 
 ## Spending context wisely
 
