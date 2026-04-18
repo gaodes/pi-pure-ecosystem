@@ -15,7 +15,8 @@ Turn a recurring agent task into a focused, well-structured Pi skill.
 1. Gather concrete usage examples from the user (step 1).
 2. Search for existing skills that overlap or inspire (step 2).
 3. Pick the smallest architecture that fits (step 3).
-4. Get approval for the plan, then scaffold, write, validate, and commit.
+4. Decide scope: project or global (step 4).
+5. Get approval for the plan, then scaffold, write, validate, and commit.
 
 ## Inputs
 
@@ -62,7 +63,20 @@ Read `../../references/PATTERN-SELECTOR.md` and pick the smallest architecture t
 
 If the request is a **plain prompt** or **bash script** — stop. Explain why this doesn't need a skill and suggest what to do instead. Do not proceed to scaffolding.
 
-### 4. Propose the plan
+### 4. Select scope
+
+Decide where the skill lives:
+
+| Scope | Location | Use when |
+|-------|----------|----------|
+| Project | `.pi/skills/` | Tied to a specific repo, project workflow, or codebase convention |
+| Global | `~/.pi/agent/skills/` | Works across any project, general-purpose capability |
+
+Default to **project scope**. Escalate to global only when the skill has no project-specific logic and would be useful in every session.
+
+If the user specified a target directory, respect it.
+
+### 5. Propose the plan
 
 Summarize for the user:
 
@@ -75,11 +89,11 @@ Summarize for the user:
 
 Ask if anything is unclear before proceeding.
 
-### 5. Get approval
+### 6. Get approval
 
 Confirm the name, scope, and resource layout. Concise confirmation for straightforward skills; explicit approval for high-stakes ones.
 
-### 6. Scaffold
+### 7. Scaffold
 
 Create the directory with only the subdirectories the skill actually needs:
 
@@ -97,7 +111,7 @@ For quick scaffolding:
 ../../scripts/init_skill.py <skill-name> --path <target-dir> [--resources scripts,references,assets] [--examples]
 ```
 
-### 7. Write SKILL.md
+### 8. Write SKILL.md
 
 Read `../../references/AUTHORING.md` before writing.
 
@@ -105,7 +119,7 @@ Follow the required structure from AUTHORING.md: frontmatter (`name`, `descripti
 
 Keep SKILL.md under 300 lines. Move detail into `references/`.
 
-### 8. Implement resources
+### 9. Implement resources
 
 Build what the skill needs:
 
@@ -115,7 +129,7 @@ Build what the skill needs:
 
 Only create directories the skill actually uses. Delete placeholder files if `--examples` was used.
 
-### 9. Validate
+### 10. Validate
 
 Run automated validation and fix any violations:
 
@@ -123,14 +137,14 @@ Run automated validation and fix any violations:
 ../../scripts/validate_skill.py <skill-path>
 ```
 
-### 10. Quick evaluation
+### 11. Quick evaluation
 
 Sanity-check the new skill:
 
 - 3 happy-path scenarios + 2 edge cases + 1 failure mode.
 - Verify the `description` triggers correctly with 5-10 test prompts.
 
-### 11. Register and commit
+### 12. Register and commit
 
 Update `AGENTS.md` or project docs if the skill changes how the project works. Pi discovers skills via directory scanning — no separate registry file.
 
