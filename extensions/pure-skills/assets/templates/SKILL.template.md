@@ -27,7 +27,4 @@ description: >
 - {{FAILURE_MODE}}
 
 ## References
-
-| File | Load when... |
-|------|-------------|
-| `references/{{TOPIC}}.md` | {{WHEN_TO_LOAD}} |
+No additional references yet. Add a `## References` table when you create files in `references/`.

@@ -3,12 +3,13 @@
 Skill Initializer - Creates a new skill from template
 
 Usage:
-    init_skill.py <skill-name> --path <path> [--resources scripts,references,assets] [--examples]
+    init_skill.py <skill-name> --path <path> [--resources scripts,references,assets] [--examples] [--upstream]
 
 Examples:
     init_skill.py my-new-skill --path skills
     init_skill.py my-new-skill --path skills --resources scripts,references
     init_skill.py my-api-helper --path skills --resources scripts --examples
+    init_skill.py imported-skill --path skills --resources references --upstream
 
 Adapted from 0xKobold's skill-creator (MIT License).
 """
@@ -21,17 +22,28 @@ from pathlib import Path
 MAX_SKILL_NAME_LENGTH = 64
 ALLOWED_RESOURCES = {"scripts", "references", "assets"}
 
-# Resolve the template file relative to this script's location
-TEMPLATE_PATH = Path(__file__).resolve().parent.parent / "assets" / "templates" / "SKILL.template.md"
+# Resolve template files relative to this script's location
+TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "assets" / "templates"
+SKILL_TEMPLATE_PATH = TEMPLATE_DIR / "SKILL.template.md"
+UPSTREAM_TEMPLATE_PATH = TEMPLATE_DIR / ".upstream.template.json"
 
 
 def load_template():
     """Load SKILL.template.md and return its content."""
-    if not TEMPLATE_PATH.exists():
-        print(f"[ERROR] Template not found: {TEMPLATE_PATH}")
+    if not SKILL_TEMPLATE_PATH.exists():
+        print(f"[ERROR] Template not found: {SKILL_TEMPLATE_PATH}")
         print("   Expected assets/templates/SKILL.template.md relative to the skill root.")
         sys.exit(1)
-    return TEMPLATE_PATH.read_text()
+    return SKILL_TEMPLATE_PATH.read_text()
+
+
+def load_upstream_template():
+    """Load .upstream.template.json and return its content."""
+    if not UPSTREAM_TEMPLATE_PATH.exists():
+        print(f"[ERROR] Template not found: {UPSTREAM_TEMPLATE_PATH}")
+        print("   Expected assets/templates/.upstream.template.json relative to the skill root.")
+        sys.exit(1)
+    return UPSTREAM_TEMPLATE_PATH.read_text()
 
 
 def render_template(template_text, skill_name, skill_title):
@@ -140,7 +152,7 @@ def create_resource_dirs(skill_dir, skill_name, skill_title, resources, include_
                 print("[OK] Created assets/")
 
 
-def init_skill(skill_name, path, resources, include_examples):
+def init_skill(skill_name, path, resources, include_examples, include_upstream):
     skill_dir = Path(path).resolve() / skill_name
 
     if skill_dir.exists():
@@ -167,6 +179,16 @@ def init_skill(skill_name, path, resources, include_examples):
         print(f"[ERROR] Error creating SKILL.md: {e}")
         return None
 
+    if include_upstream:
+        upstream_template = load_upstream_template()
+        upstream_path = skill_dir / ".upstream.json"
+        try:
+            upstream_path.write_text(upstream_template)
+            print("[OK] Created .upstream.json (from template)")
+        except Exception as e:
+            print(f"[ERROR] Error creating .upstream.json: {e}")
+            return None
+
     if resources:
         try:
             create_resource_dirs(
@@ -186,7 +208,11 @@ def init_skill(skill_name, path, resources, include_examples):
             print("2. Add resources as needed")
     else:
         print("2. Create resource directories only if needed")
-    print("3. Run validate_skill.py when ready to check the skill structure")
+    if include_upstream:
+        print("3. Fill in .upstream.json with real source URLs, SHAs, and notes")
+        print("4. Run validate_skill.py when ready to check the skill structure")
+    else:
+        print("3. Run validate_skill.py when ready to check the skill structure")
 
     return skill_dir
 
@@ -206,6 +232,11 @@ def main():
         "--examples",
         action="store_true",
         help="Create example files inside the selected resource directories",
+    )
+    parser.add_argument(
+        "--upstream",
+        action="store_true",
+        help="Create .upstream.json from the bundled template",
     )
     args = parser.parse_args()
 
@@ -240,7 +271,10 @@ def main():
         print("   Resources: none (create as needed)")
     print()
 
-    result = init_skill(skill_name, path, resources, args.examples)
+    if args.upstream:
+        print("   Upstream: enabled")
+
+    result = init_skill(skill_name, path, resources, args.examples, args.upstream)
 
     if result:
         sys.exit(0)

@@ -10,6 +10,7 @@ Usage:
 Adapted from 0xKobold's skill-creator (MIT License).
 """
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -114,6 +115,25 @@ def validate_skill(skill_path):
     if "{{" in content and "}}" in content:
         return False, "SKILL.md contains unresolved {{PLACEHOLDER}} values — fill them in before validating"
 
+    # Validate .upstream.json if present
+    upstream_path = skill_path / ".upstream.json"
+    if upstream_path.exists():
+        upstream_content = upstream_path.read_text().strip()
+        if "{{" in upstream_content and "}}" in upstream_content:
+            return False, ".upstream.json contains unresolved {{PLACEHOLDER}} values — fill them in or remove the file"
+        try:
+            upstream = json.loads(upstream_content)
+        except json.JSONDecodeError as e:
+            return False, f"Invalid JSON in .upstream.json: {e}"
+        if not isinstance(upstream, dict):
+            return False, ".upstream.json must contain a JSON object"
+        if "primary" in upstream and not isinstance(upstream["primary"], dict):
+            return False, "'.upstream.json.primary' must be an object"
+        if "sources" in upstream and not isinstance(upstream["sources"], list):
+            return False, "'.upstream.json.sources' must be an array"
+        if "cliTools" in upstream and not isinstance(upstream["cliTools"], list):
+            return False, "'.upstream.json.cliTools' must be an array"
+
     # Check required sections
     required_sections = [
         "## How to use this skill",
@@ -130,7 +150,7 @@ def validate_skill(skill_path):
     if "## Workflow" not in content and "## Dispatch" not in content:
         return (
             False,
-            "SKILL.md missing required section: ## Workflow (or ## Dispatch for meta-skills)",
+            "SKILL.md missing required section: ## Workflow (or ## Dispatch for skills with multiple modes)",
         )
 
     # Check line count

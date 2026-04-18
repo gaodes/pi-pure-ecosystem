@@ -43,7 +43,7 @@ When multiple skills share the same domain, decide: **bundle in one extension** 
 | Shared resources | Scripts, references, or templates | No shared context |
 | User perception | "Part of the same thing" | "A different thing entirely" |
 | Lifecycle | Released together, versioned together | Independent lifecycle |
-| Example | `pure-skills` → create-skill, import-skill, evaluate-skill | `pure-skills` and `pure-git` are separate |
+| Example | `authoring-extension` → create-skill, review-skill, retire-skill | `pure-skills` and `pure-git` are separate |
 
 ## When NOT to make a skill
 

@@ -69,17 +69,9 @@ Read `../../references/SEARCH.md` and follow its workflow: extract up to 3 keywo
 
 If a duplicate exists locally, include a recommendation to improve the existing skill instead.
 
-If any remote skills are marked as **Inspiration** or **Overlap**, record them in `.upstream.json`:
+If any remote skills are marked as **Inspiration** or **Overlap**, preserve them in `.upstream.json` created from `../../assets/templates/.upstream.template.json`.
 
-```json
-{
-  "inspired_by": [
-    { "name": "skill-name", "source": "owner/repo", "installs": 1200, "note": "adopted the retry pattern" }
-  ]
-}
-```
-
-Create `.upstream.json` in the new skill directory during scaffolding (step 6). If no remote skills matched, skip the file.
+Use `primary` when one upstream clearly dominates. Record all other inspirations under `sources` with what they contributed. If no remote skills matched, skip the file.
 
 ### 3. Shape selection
 
@@ -124,14 +116,14 @@ Create the directory with only the subdirectories the skill actually needs:
 For quick scaffolding:
 
 ```bash
-../../scripts/init_skill.py <skill-name> --path <target-dir> [--resources scripts,references,assets] [--examples]
+../../scripts/init_skill.py <skill-name> --path <target-dir> [--resources scripts,references,assets] [--examples] [--upstream]
 ```
 
 ### 7. Write SKILL.md
 
 Read `../../references/AUTHORING.md` before writing.
 
-Follow the required structure from AUTHORING.md: frontmatter (`name`, `description`), `## How to use this skill`, `## Inputs`, `## Outputs`, `## Workflow` (or `## Dispatch`), `## Limits`, `## References`.
+Follow the required structure from AUTHORING.md: frontmatter (`name`, `description`), `## How to use this skill`, `## Inputs`, `## Outputs`, `## Workflow` (or `## Dispatch`), `## Limits`, optional `## Tools`, and `## References`.
 
 Keep SKILL.md under 300 lines. Move detail into `references/`.
 
@@ -144,6 +136,8 @@ Build what the skill needs:
 - **Assets** — templates, schemas, sample data used in output.
 
 Only create directories the skill actually uses. Delete placeholder files if `--examples` was used.
+
+If `.upstream.json` was scaffolded, replace the template placeholders with real URLs, SHAs when known, notes about adopted patterns, and any checked CLI tool versions.
 
 ### 9. Validate
 
@@ -192,3 +186,4 @@ git commit -m "<skill-name>: create initial version"
 | `../../references/PATTERN-SELECTOR.md` | Deciding skill shape, skill vs. extension, where to place |
 | `../../references/SEARCH.md` | Searching remote and local skill registries |
 | `../../references/LIFECYCLE.md` | Promotion and lifecycle signals |
+| `../../assets/templates/.upstream.template.json` | Creating `.upstream.json` when search found inspiration sources |

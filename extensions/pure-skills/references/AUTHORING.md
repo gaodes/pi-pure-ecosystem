@@ -257,7 +257,7 @@ Beyond `name` and `description`, two optional fields are useful:
 compatibility: "CLI: git>=2.40, python3>=3.10, biome>=1.5"
 ```
 
-Format: `CLI: tool1>=version, tool2>=version, ...` — keep it under 500 chars total. The validation script extracts these during validation and tracks versions in `.upstream.json` for change detection.
+Format: `CLI: tool1>=version, tool2>=version, ...` — keep it under 500 chars total. If the skill has `.upstream.json`, record checked tool versions there under `cliTools` for later review.
 
 Only add these when they prevent real failures. Empty or generic compatibility strings are noise.
 
@@ -318,7 +318,7 @@ A skill directory contains only what the agent needs:
 - `scripts/` — optional. Executable logic the agent would otherwise rewrite each run.
 - `references/` — optional. Domain-specific docs loaded on demand.
 - `assets/` — optional. Templates, schemas, sample data used in output.
-- `.upstream.json` — optional. Tracks inspiration sources or import origin. Create when the skill was inspired by remote skills (field: `inspired_by`) or imported from an external source (field: `source`).
+- `.upstream.json` — optional. Tracks inspiration sources or import origin. Create from `assets/templates/.upstream.template.json` when the skill was inspired by remote skills or imported from an external source. Use `primary` for the canonical upstream when one exists, `sources` for secondary inspirations, and `cliTools` for checked CLI tool versions.
 
 ## What not to include
 

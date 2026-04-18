@@ -12,7 +12,7 @@ Skills live in three scopes — per `PATTERN-SELECTOR.md`:
 | Project | `.pi/skills/`, `.agents/skills/` (cwd + ancestors up to git root) |
 | Extension-bundled | `extensions/<name>/skills/` — discovered via `resources_discover` hook |
 
-Scope is assessed during planning, before scaffolding. Skills are created directly in their target location — use the `create-skill` or `import-skill` skills.
+Scope is assessed during planning, before scaffolding. Skills are created directly in their target location — use the `create-skill` skill or the relevant creation workflow.
 
 Lifecycle rules apply regardless of scope.
 

@@ -149,18 +149,26 @@ Present a summary:
 - **Total remote skills found**: raw count before filtering
 - **Relevant skills**: count after dropping "Ignore"
 - **Most relevant**: 1-3 top skills with notes on what to adopt or avoid
-- **Inspiration sources**: record in `.upstream.json` with name, source, installs, and what to adopt
+- **Inspiration sources**: record in `.upstream.json` created from `../assets/templates/.upstream.template.json`
 - **Gap confirmation**: if no relevant skills found, state that the skill fills a gap
 
-Skills marked **Inspiration** or **Overlap** become entries in `.upstream.json`:
+Skills marked **Inspiration** or **Overlap** populate `.upstream.json`:
 
 ```json
 {
-  "inspired_by": [
-    { "name": "skill-name", "source": "owner/repo", "installs": 1200, "note": "adopted the retry pattern" }
-  ]
+  "primary": {
+    "url": "https://github.com/owner/repo",
+    "sha": "",
+    "lastReviewed": "2026-04-18"
+  },
+  "sources": [
+    { "url": "https://github.com/other/repo", "note": "adopted the retry pattern" }
+  ],
+  "cliTools": []
 }
 ```
+
+Use `primary` only when one upstream clearly dominates. Otherwise omit `primary` and record the inspirations under `sources`.
 
 ## Inspecting a remote skill deeply
 
