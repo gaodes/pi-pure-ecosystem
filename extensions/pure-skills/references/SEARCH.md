@@ -114,36 +114,21 @@ Search all Pi skill locations for a skill with the **same name** and **overlappi
 - `.pi/skills/<name>/`
 - `.agents/skills/<name>/`
 - `skills/<name>/`
+- `extensions/*/skills/<name>/` — extension-bundled skills
 
 If found in any location, stop all keywords and report the duplicate.
 
 ### 5. Analyze all unique skills
 
-For **every unique skill** on the deduplicated list, read its SKILL.md frontmatter to get the full description:
+For **every unique skill** on the deduplicated list, read its SKILL.md frontmatter to get the full description.
 
-```
-action: "read_file"
-owner: <owner>
-repo: <repo>
-path: <skill-name>/SKILL.md
-```
-
-Common paths to try, in order:
+Use `github_browse` with action `read_file` to read the file from the remote repo. Common paths to try, in order:
 
 1. `SKILL.md` (single-skill repo at root)
 2. `<skill-name>/SKILL.md`
 3. `skills/<skill-name>/SKILL.md`
 
-If none match, discover the structure first:
-
-```
-action: "list_directory"
-owner: <owner>
-repo: <repo>
-path: .
-```
-
-Then read `SKILL.md` from the skill directory.
+If none match, use `github_browse` with action `list_directory` on the repo root to discover the structure, then read the correct path.
 
 **For each skill, decide:**
 
@@ -164,16 +149,24 @@ Present a summary:
 - **Total remote skills found**: raw count before filtering
 - **Relevant skills**: count after dropping "Ignore"
 - **Most relevant**: 1-3 top skills with notes on what to adopt or avoid
-- **Inspiration sources**: list of skills to credit in `## Sources` or `## References`
+- **Inspiration sources**: record in `.upstream.json` with name, source, installs, and what to adopt
 - **Gap confirmation**: if no relevant skills found, state that the skill fills a gap
 
-If importing: note which features from matching skills should be added to the plan.
+Skills marked **Inspiration** or **Overlap** become entries in `.upstream.json`:
+
+```json
+{
+  "inspired_by": [
+    { "name": "skill-name", "source": "owner/repo", "installs": 1200, "note": "adopted the retry pattern" }
+  ]
+}
+```
 
 ## Inspecting a remote skill deeply
 
 If a skill looks highly relevant and you need its full instructions beyond the frontmatter:
 
-**Try `github_browse` first** (see Step 5 above). No installation, no cleanup.
+**Try `github_browse` with action `read_file` first** — no installation, no cleanup. See step 5 for common paths.
 
 **Fallback: temporary install** for private repos or when the path cannot be determined:
 
