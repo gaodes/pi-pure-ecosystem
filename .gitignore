@@ -11,4 +11,7 @@ node_modules/
 # Archive (local reference, not tracked)
 AGENTS-old.md
 
+# Eval outputs (generated during testing)
+evals/outputs/
+
 # All extensions are tracked in this repo.

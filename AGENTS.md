@@ -1,6 +1,6 @@
 # Pi Pure Ecosystem
 
-Personal Pi extensions, themes, and configuration. Extensions, skills, and themes use the `pure-` prefix. Developed for local use — published only if broadly useful.
+Personal Pi extensions, themes, and configuration. Extensions and themes use the `pure-` prefix. Skills use kebab-case names without a required prefix. Developed for local use — published only if broadly useful.
 
 > **Simplicity, functionality, aesthetics** — start with a single file, split when justified. No build step. Use Pi APIs first. Respect the terminal canvas.
 >
@@ -13,11 +13,14 @@ This is the **development repo**. Remote: `github.com/gaodes/pi-pure-ecosystem`,
 ```
 pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 ├── .pi/
-│   └── settings.json       # Local package overrides and settings
+│   ├── settings.json       # Local package overrides and settings
+│   └── skills/             # Project-specific loaded skills
 ├── .worktrees/              # Feature worktrees (prefer pure-git or pure-extensions-dev workflow; fall back to bash)
 │   └── <feature>/          # Each worktree has the full mono repo
 ├── extensions/              # All extensions here
 │   └── pure-<name>/        # one directory per extension
+├── skills/                  # Skills development workspace
+│   └── <skill-name>/      # One directory per skill
 ├── themes/                  # Theme JSON files
 ├── package.json             # Pi package manifest (extensions + themes)
 ├── biome.json
@@ -32,7 +35,7 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 - **Self-contained extensions** — one directory each, no cross-extension dependencies by default. Prefer self-containment; leverage shared resources (e.g., utility extensions) when duplication justifies it.
 - **Flat layout, prefer simple** — all extensions live as top-level directories in `extensions/`. Subdirectories within an extension are fine when complexity requires it.
 - **Lint** — [Biome](https://biomejs.dev/) (`biome check --write --unsafe extensions/`), zero errors.
-- **Commits** — conventional style (`feat:`, `fix:`, `refactor:`, `todo:`).
+- **Commits** — conventional style with scope: `type(name): description`. Types: `feat:`, `fix:`, `refactor:`, `todo:`. Scope (`name`) is the skill, extension, or theme being changed. Example: `feat(skill-manager): add description optimization reference`.
 - **Manifest** — root `package.json` lists available extensions in `pi.extensions` and themes in `pi.themes`. Global settings can define its own extension list, which overrides the manifest's at runtime — the manifest file is not modified.
 - **Changelogs** — no root `CHANGELOG.md`. Every change to an extension must be recorded in its per-extension `CHANGELOG.md`.
 
