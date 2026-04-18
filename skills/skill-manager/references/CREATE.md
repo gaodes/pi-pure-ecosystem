@@ -33,9 +33,11 @@ The agent **automatically** searches remote registries for skills that overlap w
 
 Extract **up to 3 keywords** from the intake: proposed name (always), primary action/domain, and a secondary term if needed.
 
-**Local check (fast):**
+**Local check (fast) — check all Pi skill locations:**
 ```bash
-ls skills/<proposed-name>/ 2>/dev/null && echo "EXISTS" || echo "OK"
+for dir in ~/.pi/agent/skills ~/.agents/skills .pi/skills .agents/skills skills; do
+  test -d "$dir/<proposed-name>" && echo "EXISTS in $dir" || true
+done
 ```
 
 **Remote search:**

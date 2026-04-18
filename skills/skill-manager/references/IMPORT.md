@@ -17,8 +17,6 @@ The user provides at least one link or reference: GitHub repo, `.skill` file, di
 
 For each source, identify: **Format** (Pi, Codex, Claude, generic) · **Structure** (SKILL.md, references, scripts?) · **Quality** (production-grade or draft?) · **License** — if unlicensed or proprietary, **stop and inform the user** · **Lineage** (forked from another project?)
 
-Clean up after planning: `rm -rf /tmp/<source-name>`
-
 ### 2. Analyze and decide
 
 **Primary source**: pick the highest-quality source as the base. Note improvements from others for later.
@@ -48,11 +46,15 @@ for dir in ~/.pi/agent/skills ~/.agents/skills .pi/skills .agents/skills skills;
 done
 ```
 
-### 3. Present analysis for approval
+### 3. Present analysis
 
 Present: primary source + lineage · format + conversion · approach + rationale · proposed name · features to keep/strip/rewrite · license status
 
+Search findings from step 4 feed into the plan (step 5). Step 5 is the single approval gate.
+
 ### 4. Search for existing skills (automatic)
+
+Summary of `references/SEARCH.md` — consult it for full procedure.
 
 **Extract 3 keywords**: skill name (always) + primary action/domain + secondary term if broad.
 
@@ -75,7 +77,9 @@ If either tool fails, try the other. If both fail, skip this keyword.
 | Same name, different owner | Keep both, flag for manual review |
 | Within-tool duplicate | Remove |
 
-**After each keyword, check for blocking duplicate:** Search all Pi skill locations (`~/.pi/agent/skills/`, `~/.agents/skills/`, `.pi/skills/`, `.agents/skills/`, `skills/`) for a skill with the same name + overlapping purpose → stop and report.
+**Blocking duplicate check:** Search all Pi skill locations for a skill with the same name + overlapping purpose → stop and report.
+
+Locations: `~/.pi/agent/skills/` · `~/.agents/skills/` · `.pi/skills/` · `.agents/skills/` · `skills/`
 
 **Analyze every unique skill:** Use github_browse to read SKILL.md frontmatter. Classify:
 
@@ -92,17 +96,17 @@ If either tool fails, try the other. If both fail, skip this keyword.
 
 ### 5. Create a plan
 
-Include: **Source** (URL + commit SHA + license) · **Approach** · **Conversion steps** · **Keep / Strip / Rewrite** · **Name** · **Resources needed**
+Include: **Source** (URL + commit SHA + license) · **Approach** · **Conversion steps** · **Keep / Strip / Rewrite** · **Name** · **Resources needed** · **Target path** (`<target-path>` — where the skill will be created)
 
 **Do not proceed until user approves the plan.**
 
 ### 6. Scaffold
 
 ```bash
-scripts/init_skill.py <skill-name> --path skills [--resources scripts,references,assets]
+scripts/init_skill.py <skill-name> --path <target-path> [--resources scripts,references,assets]
 ```
 
-Or create manually. Only add directories the skill actually needs.
+Or create manually. Only add directories the skill actually needs. `<target-path>` is set in the approved plan (step 5).
 
 ## Phase 3: Implement & Validate
 
@@ -133,33 +137,41 @@ Or create manually. Only add directories the skill actually needs.
 ### 8. Validate
 
 ```bash
-scripts/validate_skill.py skills/<skill-name>
+scripts/validate_skill.py <target-path>/<skill-name>
 ```
 
 Fix violations. Common issues: name/directory mismatch, vague description, missing `## References` table, interactive scripts, extraneous files (README.md, .github/, CI configs).
 
-### 9. Test triggering
+### 9. Evaluate and test triggering
 
-Write 5-10 prompts that should trigger + 5 that should not. Verify the `description` triggers correctly.
+**Quick evaluation** — write 5-10 prompts that should trigger + 5 that should not. Verify the `description` triggers correctly.
+
+For skills heading to publishing, run structured eval per `references/EVALUATION.md`.
 
 If triggering is off: see `references/DESCRIPTION-OPTIMIZATION.md`.
 
-### 10. Commit
+### 10. Commit and register
 
 ```bash
-git add skills/<skill-name>/
+git add <target-path>/<skill-name>/
 git commit -m "<skill-name>: import from <source>"
 rm -rf /tmp/<source-name>
 ```
 
+Update `AGENTS.md` or relevant project docs if the imported skill changes how the project works.
+
 ---
 
-## Import Rules
+## Pre-Commit Checklist
 
-| Rule | What it means |
-|------|---------------|
-| **License first** | Check source license before importing. Stop if unlicensed or proprietary. |
-| **Fresh description** | Source descriptions use different matching logic — always rewrite for Pi triggers. |
-| **Script adaptation** | Other agents use interactive prompts or human output formats. Adapt: CLI flags, structured output, no interaction. |
-| **Upstream tracking** | Always create `.upstream.json` — enables the Sync Upstream workflow later. |
-| **Format conversion** | Don't assume everything is a Pi skill. Detect format first, apply the right strategy. |
+Run through before committing — each check maps to a step above.
+
+| Check | Source step |
+|-------|------------|
+| License checked and attribution preserved | Step 1 |
+| Fresh `description` written for Pi triggers | Step 7 |
+| Scripts adapted (no interactive prompts, structured output) | Step 7 |
+| `.upstream.json` created with URL, SHA, `lastReviewed` | Step 7 |
+| Source format detected and correct conversion applied | Step 2 |
+| No conflict in any Pi skill location | Step 2, Step 4 |
+| Validation passes | Step 8 |

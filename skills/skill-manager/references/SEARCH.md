@@ -107,7 +107,15 @@ The deduplicated list contains all **unique** skills found across both tools for
 
 **After deduplication, check for blocking duplicates:**
 
-- Does a skill with the **same name** and **overlapping purpose** already exist locally? If yes, stop all keywords and report the duplicate.
+Search all Pi skill locations for a skill with the **same name** and **overlapping purpose**:
+
+- `~/.pi/agent/skills/<name>/`
+- `~/.agents/skills/<name>/`
+- `.pi/skills/<name>/`
+- `.agents/skills/<name>/`
+- `skills/<name>/`
+
+If found in any location, stop all keywords and report the duplicate.
 
 ### 5. Analyze all unique skills
 
