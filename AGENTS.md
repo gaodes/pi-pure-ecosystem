@@ -15,7 +15,7 @@ pi-pure-ecosystem/          # Main worktree (main branch, production-ready)
 ├── .pi/
 │   ├── settings.json       # Local package overrides and settings
 │   └── skills/             # Project-specific loaded skills
-├── .worktrees/              # Feature worktrees (prefer pure-git or pure-extensions-dev workflow; fall back to bash)
+├── .worktrees/              # Feature worktrees (prefer pure-git workflow; fall back to bash)
 │   └── <feature>/          # Each worktree has the full mono repo
 ├── extensions/              # All extensions here
 │   └── pure-<name>/        # one directory per extension
@@ -53,8 +53,7 @@ To work on an extension, add its path to `.pi/settings.json` under `packages` an
 ## Development workflow
 
 - **Tooling preference** — prefer relevant internal Pi tools, extensions, and skills first; fall back to bash only when nothing suitable exists.
-- **Building, enhancing, importing, or publishing extensions** → use the `pure-extensions-dev` skill (it maps tasks to specialized workflows).
-- **Looking up Pi APIs, hooks, tool patterns** → use the skill's `references/` directory.
+- **Creating, importing, improving, or evaluating skills** → use the `skill-manager` skill. It handles the full skill lifecycle from creation through publishing.
+- **Looking up Pi APIs, hooks, tool patterns** → use the skill-manager's `references/` directory and Pi's built-in documentation (`/opt/homebrew/lib/node_modules/@mariozechner/pi-coding-agent/docs/`).
 - **Git worktrees for feature branches** → use the `pure-git` extension (`switch_worktree` tool).
-
-Before implementing new extensions or major changes, read the `pure-extensions-dev` skill first.
+- **Extension development** — write extensions directly in `extensions/pure-<name>/`. See Pi's extension docs for the API (`docs/extensions.md`).
