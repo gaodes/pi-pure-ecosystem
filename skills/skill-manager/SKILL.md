@@ -16,7 +16,7 @@ A meta-skill for creating and managing other Pi agent skills.
 
 1. Read this section first, then use the dispatch table below to match the user's request to a task.
 2. Read the matched task reference and follow it. Load support references only when that task needs them.
-3. Use `scripts/validate_skill.py` for structure checks and `scripts/package_skill.py` for distributable archives.
+3. Use `scripts/validate_skill.py` for structure checks.
 4. If the user's request spans multiple tasks (e.g. import then evaluate), handle them sequentially.
 5. Git history is the change log. Commit with descriptive messages: `<skill-name>: <action> — <summary>`.
 6. If the request doesn't clearly match one dispatch row, ask before proceeding.
@@ -33,7 +33,7 @@ A meta-skill for creating and managing other Pi agent skills.
 - Validation reports (pass/fail with violations).
 - Evaluation results (quick checks or structured evals).
 - Optimized descriptions.
-- Packaged `.skill` archives.
+- Validated skill directories.
 - Git commits with descriptive messages.
 
 ## Dispatch
@@ -45,7 +45,7 @@ A meta-skill for creating and managing other Pi agent skills.
 | Sync upstream | Read `references/SYNC-UPSTREAM.md` | User wants to check an inspiration source for new ideas to adopt |
 | Self-evolve | Read `references/SELF-EVOLVE.md` — ask user which mode if needed | User wants the meta-skill to review and improve itself or managed skills |
 | Improve existing | Read `references/IMPROVE.md` | Skill is too large, unfocused, or failing on recurring patterns |
-| Evaluate | Read `references/EVALUATION.md` | Skill needs validation before publishing |
+| Evaluate | Read `references/EVALUATION.md` | Skill needs validation |
 | Optimize description | Read `references/DESCRIPTION-OPTIMIZATION.md` | Skill doesn't trigger correctly on relevant prompts |
 | Retire | Read `references/RETIRE.md` | Skill is obsolete or replaced |
 
@@ -94,7 +94,7 @@ Supporting references like `PATTERN-SELECTOR.md`, `LIFECYCLE.md`, `AUTHORING.md`
 | `references/SYNC-UPSTREAM.md` | Reviewing inspiration sources for new upstream ideas |
 | `references/SELF-EVOLVE.md` | Running self-audit or self-improve modes |
 | `references/IMPROVE.md` | Refactoring, hardening, splitting, merging, or promoting a skill |
-| `references/EVALUATION.md` | Testing skill quality before publishing |
+| `references/EVALUATION.md` | Testing skill quality |
 | `references/DESCRIPTION-OPTIMIZATION.md` | Description triggers incorrectly (too broad or too narrow) |
 | `references/RETIRE.md` | Retiring an obsolete or replaced skill |
 | `references/PATTERN-SELECTOR.md` | Deciding skill shape, skill vs. extension, or where to place |
@@ -103,6 +103,5 @@ Supporting references like `PATTERN-SELECTOR.md`, `LIFECYCLE.md`, `AUTHORING.md`
 | `references/SELF-AUDIT.md` | Running a portfolio audit across managed skills |
 | `scripts/init_skill.py` | Scaffolding a new skill directory |
 | `scripts/validate_skill.py` | Automated validation of a skill directory |
-| `scripts/package_skill.py` | Creating a distributable .skill archive |
 | `assets/templates/SKILL.template.md` | Template source for init_skill.py — edit to change scaffolded SKILL.md structure |
 | `assets/templates/.upstream.template.json` | Template source for .upstream.json — created during skill import |

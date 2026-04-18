@@ -72,7 +72,7 @@ Before creating files, summarize the plan for the user:
 - trigger examples
 - expected inputs and outputs
 - which directories are needed (`scripts/`, `references/`, `assets/`)
-- whether the skill is local-only or intended for distribution
+- whether the skill is local-only or project-scoped
 - **search findings**: any remote skills found (or "fills a gap — no matches")
 
 If anything important is still unclear, ask before proceeding.
@@ -170,7 +170,7 @@ Fix any violations before proceeding.
 
 Read `references/EVALUATION.md`.
 - For simple skills, quick checks (3 happy + 2 edge + 1 failure) are sufficient.
-- For skills heading to publishing or repeated team use, run structured eval with the `evals/evals.json` format.
+- For skills for repeated team use, run structured eval with the `evals/evals.json` format.
 
 ### 11. Optimize description
 
@@ -178,25 +178,11 @@ Read `references/DESCRIPTION-OPTIMIZATION.md`.
 - For most skills, a quick sanity check with 5-10 prompts is enough.
 - For skills with trigger problems, run the full optimization loop.
 
-### 12. Package if needed
-
-For distributable skills:
-
-```bash
-scripts/package_skill.py <skill-path> [output-directory]
-```
-
-This validates and creates a `.skill` file (zip archive) for sharing.
-
-For Pi package publishing, add the skill to your package's `package.json` under the `pi.skills` array with the relative path to the skill directory.
-
-If the skill is local-only, skip packaging.
-
-### 13. Register intent
+### 12. Register intent
 
 Record the skill's existence in the project's knowledge — update `AGENTS.md` or relevant docs if the skill changes how the project works. There is no separate registry file; Pi discovers skills via directory scanning.
 
-### 14. Commit
+### 13. Commit
 
 Commit the new skill with a descriptive message:
 

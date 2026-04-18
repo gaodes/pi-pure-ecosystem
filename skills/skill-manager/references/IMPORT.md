@@ -104,9 +104,8 @@ Include: **Source** (URL + commit SHA + license) · **Approach** · **Conversion
 |---------------------|---------------------|
 | Specific to this project | `.pi/skills` |
 | Reusable across projects | `~/.pi/agent/skills` |
-| Part of a distributable package | `skills` (with `pi.skills` in `package.json`) |
 
-If unsure, default to `skills` and let the user decide during approval.
+If unsure, default to `~/.pi/agent/skills` and let the user decide during approval.
 
 **Do not proceed until user approves the plan.**
 
@@ -156,7 +155,7 @@ Fix violations. Common issues: name/directory mismatch, vague description, missi
 
 **Quick evaluation** — write 5-10 prompts that should trigger + 5 that should not. Verify the `description` triggers correctly.
 
-For skills heading to publishing, run structured eval per `references/EVALUATION.md`.
+For high-stakes skills, run structured eval per `references/EVALUATION.md`.
 
 If triggering is off: see `references/DESCRIPTION-OPTIMIZATION.md`.
 

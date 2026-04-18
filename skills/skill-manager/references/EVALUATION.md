@@ -1,6 +1,6 @@
 # Evaluation
 
-Verify a skill works before publishing. Three phases:
+Verify a skill works correctly. Three phases:
 
 1. **Trigger validation** — does the description fire on the right prompts?
 2. **Happy-path execution** — does the skill produce correct output on realistic tasks?

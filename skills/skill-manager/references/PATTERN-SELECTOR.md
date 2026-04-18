@@ -65,4 +65,3 @@ If `bash` + instructions can do it → **Skill**. Need hooks, typed tools, or UI
 |-------|----------|
 | Project | `.pi/skills/<skill-name>/SKILL.md` |
 | Global | `~/.pi/agent/skills/<skill-name>/SKILL.md` |
-| Package | `skills/<skill-name>/SKILL.md` (with `pi.skills` in `package.json`) |
