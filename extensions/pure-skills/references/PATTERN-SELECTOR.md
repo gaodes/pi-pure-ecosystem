@@ -6,10 +6,10 @@ Choose the smallest architecture that solves the request.
 
 | # | Shape | Use when |
 |---|-------|----------|
-| 1 | Plain prompt | Reusable text prompt, no workflow or scripts → defer to the prompt manager extension |
+| 1 | Plain prompt | Reusable text prompt, no workflow or scripts — explain to the user, no skill needed |
 | 2 | Bash script or alias | One-off file manipulation, not agent behavior |
 | 3 | Single skill | One stable job with repeated value |
-| 4 | Skill bundle (sub-skills) | Same domain, multiple phases with different instructions |
+| 4 | Bundled skills (extension) | Multiple related skills sharing scripts and references — bundle inside an extension via `resources_discover` |
 | 5 | Separate skill | Unrelated job — different triggers, different purpose |
 | 6 | Extension | Needs hooks, typed tools, UI components, commands, or persistent state |
 
@@ -33,24 +33,21 @@ When the user asks for a new capability, decide early:
 
 If `bash` + instructions can do it → **Skill**. Need hooks, typed tools, or UI → **Extension**.
 
-## Sub-skills vs. separate skills
+## Bundled vs. separate skills
 
-When a skill outgrows 300 lines or mixes concerns, decide: **split into sub-skills** or **create a separate skill**?
+When multiple skills share the same domain, decide: **bundle in one extension** or **keep separate**?
 
-| Signal | Sub-skill (same parent) | Separate skill |
-|--------|------------------------|---------------|
+| Signal | Bundled (same extension) | Separate |
+|--------|--------------------------|----------|
 | Triggers | Same domain, different phases | Completely different trigger conditions |
-| Context | Shares references, scripts, or state | No shared context |
+| Shared resources | Scripts, references, or templates | No shared context |
 | User perception | "Part of the same thing" | "A different thing entirely" |
-| Example | `git-workflow` → commit, rebase, sync sub-skills | `git-workflow` and `docker-manage` are separate skills |
-
-**Sub-skills**: thin dispatcher SKILL.md routes to sibling directories, each with its own `SKILL.md` and frontmatter. Do not put sub-skill instructions in `references/` — references are supporting docs, not independent skills.
-
-**Separate skills**: independent SKILL.md, independent triggers, independent lifecycle. No dispatcher needed.
+| Lifecycle | Released together, versioned together | Independent lifecycle |
+| Example | `pure-skills` → create-skill, import-skill, evaluate-skill | `pure-skills` and `pure-git` are separate |
 
 ## When NOT to make a skill
 
-- The request is a reusable prompt template — defer to the prompt manager extension.
+- The request is a reusable prompt template — a simple prompt doesn't need a skill. Explain this to the user.
 - A bash script or shell alias does the job — skills are for agent behavior, not file manipulation.
 - The capability is better served by an extension — if it needs hooks, typed tools, or UI components, it's extension territory.
 
@@ -62,4 +59,8 @@ Pick concrete, task-focused names: `git-helpers`, `cron-sync`, `statusline-tweak
 
 ## Where to put skills
 
-Per `references/LIFECYCLE.md` → Locations.
+| Scope | Location | Use when |
+|-------|----------|----------|
+| Project | `.pi/skills/` | Tied to a specific repo or project workflow |
+| Global | `~/.pi/agent/skills/` | Works across any project |
+| Extension-bundled | `extensions/<name>/skills/` | Related skills sharing scripts and references |
