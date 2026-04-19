@@ -1,0 +1,10 @@
+{
+  "name": "@gaodes/pi-pure-{{name}}",
+  "version": "0.1.0",
+  "pi": {
+    "extensions": ["./index.ts"]
+  },
+  "dependencies": {
+    "{{package}}": "{{version}}"
+  }
+}

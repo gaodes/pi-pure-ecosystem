@@ -1,0 +1,10 @@
+{
+  "primary": {
+    "url": "{{repo-url}}",
+    "sha": "{{commit-sha}}",
+    "importedAt": "{{YYYY-MM-DD}}"
+  },
+  "sources": [
+    { "url": "{{secondary-repo-url}}", "note": "{{what it contributed}}" }
+  ]
+}
