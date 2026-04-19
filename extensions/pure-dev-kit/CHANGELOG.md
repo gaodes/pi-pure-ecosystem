@@ -1,5 +1,11 @@
 # @gaodes/pure-dev-kit
 
+## 0.7.2
+
+### Patch Changes
+
+- Fix `/extensions:update-upstream` discovery: use session `ctx.cwd` and `import.meta.url`-based sibling detection instead of `process.cwd()`, which doesn't match the session directory inside Pi.
+
 ## 0.7.1
 
 ### Patch Changes
