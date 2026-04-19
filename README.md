@@ -21,7 +21,7 @@ Personal extensions and configuration for the [Pi coding agent](https://github.c
 
 - `pure-utils` is deprecated: see [`extensions/pure-utils/DEPRECATED.md`](extensions/pure-utils/DEPRECATED.md)
 - Shared UI/modules moved to [`pure-foundation`](extensions/pure-foundation/)
-- Utility tools (`pi_version`, `pi_docs`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`) are provided by `pure-dev-kit`
+- Utility tools (`pi_version`, `pi_docs`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`) are provided by `pure-dev-kit` (forked from upstream `@aliou/pi-dev-kit`)
 
 ## Installation
 

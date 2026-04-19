@@ -2,6 +2,9 @@
 
 # Pi Dev Kit
 
+> **Attribution:** This extension is cloned from upstream work by **Aliou** (`@aliou/pi-dev-kit`, formerly `@aliou/pi-extension-dev`).
+> In this repo, we maintain an adapted fork under the `@gaodes` scope.
+
 Tools and commands for building, maintaining, and updating Pi extensions.
 
 ## Demo
@@ -18,16 +21,16 @@ https://github.com/user-attachments/assets/44a96009-0653-4803-8590-d5a8a5131f4c
 ## Installation
 
 ```bash
-pi install npm:@aliou/pi-dev-kit
+pi install npm:@gaodes/pure-dev-kit
 ```
 
 Or from git:
 
 ```bash
-pi install git:github.com/aliou/pi-dev-kit
+pi install git:github.com/gaodes/pi-pure-ecosystem
 ```
 
-Formerly `@aliou/pi-extension-dev`. This package continues from the same release line under a new name.
+Formerly `@aliou/pi-extension-dev` and `@aliou/pi-dev-kit`. This package now continues as a fork under the `@gaodes` scope; original authorship remains upstream.
 
 ## Commands
 

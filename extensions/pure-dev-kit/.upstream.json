@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-19",
+  "primary": {
+    "name": "@aliou/pi-dev-kit",
+    "type": "repo",
+    "url": "https://github.com/aliou/pi-dev-kit",
+    "license": "MIT",
+    "relationship": "fork"
+  },
+  "otherSources": [
+    {
+      "name": "@aliou/pi-extension-dev",
+      "type": "package",
+      "url": "npm:@aliou/pi-extension-dev",
+      "relationship": "historical-ancestor"
+    }
+  ]
+}

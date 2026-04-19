@@ -1,9 +1,23 @@
 {
   "$comment": "Project-level settings for pi-pure-ecosystem development.",
+  "$commentPackages": "NOTE: `packages` in local .pi/settings.json overrides (does not merge with) global package sources for this project context.",
   "pure": {
     "persona": {
       "id": "Pure Dev"
     }
   },
-  "packages": ["../extensions/pure-vibes"]
+  "packages": [
+    {
+      "source": "npm:@gaodes/pure-foundation",
+      "extensions": []
+    },
+    {
+      "source": "npm:@gaodes/pure-dev-kit",
+      "extensions": [],
+      "skills": [],
+      "prompts": []
+    },
+    "../extensions/pure-foundation",
+    "../extensions/pure-dev-kit"
+  ]
 }

@@ -31,5 +31,19 @@
       "./extensions/pure-skills/index.ts"
     ],
     "themes": []
-  }
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaodes/pi-pure-ecosystem.git"
+  },
+  "author": "",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gaodes/pi-pure-ecosystem/issues"
+  },
+  "homepage": "https://github.com/gaodes/pi-pure-ecosystem#readme"
 }

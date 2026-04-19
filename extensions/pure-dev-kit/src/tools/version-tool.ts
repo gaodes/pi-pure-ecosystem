@@ -1,3 +1,4 @@
+import { ToolCallHeader } from "@gaodes/pure-foundation/ui/components";
 import type {
 	AgentToolResult,
 	ExtensionAPI,
@@ -8,7 +9,6 @@ import type {
 import { VERSION } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
-import { ToolCallHeader } from "../../../pure-foundation/ui/components";
 
 const VersionParams = Type.Object({});
 type VersionParamsType = Record<string, never>;

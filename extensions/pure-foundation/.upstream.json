@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "updatedAt": "2026-04-19",
+  "primary": {
+    "name": "@aliou/pi-utils-ui",
+    "type": "package",
+    "url": "npm:@aliou/pi-utils-ui",
+    "relationship": "synced-source"
+  },
+  "otherSources": []
+}

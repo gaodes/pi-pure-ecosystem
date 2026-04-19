@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { ToolBody, ToolCallHeader, ToolFooter } from "@gaodes/pure-foundation/ui/components";
 import type {
 	AgentToolResult,
 	ExtensionAPI,
@@ -10,7 +11,6 @@ import type {
 import { keyHint, VERSION } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { type Static, Type } from "@sinclair/typebox";
-import { ToolBody, ToolCallHeader, ToolFooter } from "../../../pure-foundation/ui/components";
 import { findPiInstallation } from "./utils";
 
 const GITHUB_RAW_CHANGELOG_URL =
