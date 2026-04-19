@@ -98,12 +98,32 @@ function discoverUpstreams(cwd: string): FoundUpstream[] {
 		}
 	}
 
-	// 1. Pi's global node_modules (where npm extensions live)
+	// 1. Global node_modules (where npm extensions live)
+	// Prefer deriving from this extension's own path because package.json subpath
+	// resolution can be blocked by package exports in some Pi versions.
+	try {
+		const selfFile = new URL(import.meta.url).pathname;
+		const selfExtDir = path.resolve(path.dirname(selfFile), "..", ".."); // package root
+		const maybeNodeModules = path.dirname(path.dirname(selfExtDir));
+		if (path.basename(maybeNodeModules) === "node_modules") {
+			scanDir(maybeNodeModules);
+		}
+	} catch {
+		// import.meta.url resolution failed, skip
+	}
+
+	// Fallback: try module resolution-based discovery.
 	try {
 		const require = createRequire(import.meta.url);
-		const piAgentPkg = require.resolve("@mariozechner/pi-coding-agent/package.json");
-		const nodeModules = path.dirname(path.dirname(piAgentPkg));
-		scanDir(nodeModules);
+		const piAgentEntry = require.resolve("@mariozechner/pi-coding-agent");
+		let dir = path.dirname(piAgentEntry);
+		while (dir !== path.dirname(dir)) {
+			if (path.basename(dir) === "node_modules") {
+				scanDir(dir);
+				break;
+			}
+			dir = path.dirname(dir);
+		}
 	} catch {
 		// Pi package not resolvable, skip
 	}

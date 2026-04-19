@@ -1,5 +1,11 @@
 # @gaodes/pure-dev-kit
 
+## 0.7.3
+
+### Patch Changes
+
+- Make `/extensions:update-upstream` global discovery robust when package subpath resolution is restricted by exports. It now derives global `node_modules` from the extension's own install path (`import.meta.url`) and falls back to module-entry walking.
+
 ## 0.7.2
 
 ### Patch Changes
