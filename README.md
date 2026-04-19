@@ -17,6 +17,12 @@ Personal extensions and configuration for the [Pi coding agent](https://github.c
 | [pure-foundation](extensions/pure-foundation/) | — | — | Shared foundation modules (tool UI, widgets, primitives, utilities) |
 | [pure-vibes](extensions/pure-vibes/) | — | `/vibe` | AI-generated themed working messages |
 
+## Migration notes
+
+- `pure-utils` is deprecated: see [`extensions/pure-utils/DEPRECATED.md`](extensions/pure-utils/DEPRECATED.md)
+- Shared UI/modules moved to [`pure-foundation`](extensions/pure-foundation/)
+- Utility tools (`pi_version`, `pi_docs`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`) are provided by `pure-dev-kit`
+
 ## Installation
 
 This repo is installed as a git package in Pi's global settings:
