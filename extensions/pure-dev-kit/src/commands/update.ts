@@ -1,18 +1,17 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { VERSION } from "@mariozechner/pi-coding-agent";
 
-const NPM_REGISTRY_URL =
-  "https://registry.npmjs.org/@mariozechner/pi-coding-agent/latest";
+const NPM_REGISTRY_URL = "https://registry.npmjs.org/@mariozechner/pi-coding-agent/latest";
 
 async function fetchLatestVersion(): Promise<string | null> {
-  try {
-    const res = await fetch(NPM_REGISTRY_URL);
-    if (!res.ok) return null;
-    const data = (await res.json()) as { version?: string };
-    return data.version ?? null;
-  } catch {
-    return null;
-  }
+	try {
+		const res = await fetch(NPM_REGISTRY_URL);
+		if (!res.ok) return null;
+		const data = (await res.json()) as { version?: string };
+		return data.version ?? null;
+	} catch {
+		return null;
+	}
 }
 
 const UPDATE_PROMPT = `# Update Pi Extensions
@@ -99,46 +98,41 @@ If the extension tools (\`pi_changelog\`, \`pi_docs\`, \`detect_package_manager\
 - If unsure about a migration, ask for clarification`;
 
 export function registerUpdateCommand(pi: ExtensionAPI) {
-  pi.registerCommand("extensions:update", {
-    description: "Update Pi extensions to a target version (current or latest)",
-    handler: async (args, ctx) => {
-      if (!ctx.hasUI) return;
+	pi.registerCommand("extensions:update", {
+		description: "Update Pi extensions to a target version (current or latest)",
+		handler: async (args, ctx) => {
+			if (!ctx.hasUI) return;
 
-      let targetVersion: string;
+			let targetVersion: string;
 
-      if (args?.trim()) {
-        // Version passed as argument.
-        targetVersion = args.trim().replace(/^v/, "");
-      } else {
-        // Fetch latest and let user choose.
-        ctx.ui.setStatus("extensions:update", "Checking latest version...");
-        const latest = await fetchLatestVersion();
-        ctx.ui.setStatus("extensions:update", undefined);
+			if (args?.trim()) {
+				// Version passed as argument.
+				targetVersion = args.trim().replace(/^v/, "");
+			} else {
+				// Fetch latest and let user choose.
+				ctx.ui.setStatus("extensions:update", "Checking latest version...");
+				const latest = await fetchLatestVersion();
+				ctx.ui.setStatus("extensions:update", undefined);
 
-        if (!latest || latest === VERSION) {
-          // Either fetch failed or already on latest -- use installed version.
-          targetVersion = VERSION;
-          if (!latest) {
-            ctx.ui.notify(
-              "Could not fetch latest version from npm, using installed version.",
-              "warning",
-            );
-          }
-        } else {
-          const choice = await ctx.ui.select(
-            `Installed: ${VERSION}, Latest: ${latest}`,
-            [`${latest} (latest)`, `${VERSION} (installed)`],
-          );
+				if (!latest || latest === VERSION) {
+					// Either fetch failed or already on latest -- use installed version.
+					targetVersion = VERSION;
+					if (!latest) {
+						ctx.ui.notify("Could not fetch latest version from npm, using installed version.", "warning");
+					}
+				} else {
+					const choice = await ctx.ui.select(`Installed: ${VERSION}, Latest: ${latest}`, [
+						`${latest} (latest)`,
+						`${VERSION} (installed)`,
+					]);
 
-          if (choice === undefined) return; // cancelled
+					if (choice === undefined) return; // cancelled
 
-          targetVersion = choice.startsWith(latest) ? latest : VERSION;
-        }
-      }
+					targetVersion = choice.startsWith(latest) ? latest : VERSION;
+				}
+			}
 
-      pi.sendUserMessage(
-        `Target Pi version: ${targetVersion}\n\n${UPDATE_PROMPT}`,
-      );
-    },
-  });
+			pi.sendUserMessage(`Target Pi version: ${targetVersion}\n\n${UPDATE_PROMPT}`);
+		},
+	});
 }

@@ -40,6 +40,33 @@ pi-pure-ecosystem/
 - **Commits** — conventional style with scope: `type(name): description`. Primary types: `feat:`, `fix:`, `refactor:`, `todo:`. Other conventional commit types are acceptable when appropriate. Scope is the skill, extension, or theme being changed.
 - **Manifest** — root `package.json` lists available extensions in `pi.extensions` and themes in `pi.themes`. Global settings can define its own extension list, which overrides the manifest at runtime — the manifest file is not modified.
 - **Changelogs** — no root `CHANGELOG.md`. Every change to an extension must be recorded in its per-extension `CHANGELOG.md`.
+- **First-class citizen** — all extensions are built to first-class Pi Ecosystem standards (see below). Personal use extensions still meet this bar — it ensures quality and prepares for publishing.
+
+## First-Class Citizen Standard
+
+All `pure-*` extensions meet Pi Ecosystem first-class standards:
+
+| Standard | Implementation |
+|----------|----------------|
+| **API compliance** | Use Pi APIs first (`@mariozechner/pi-coding-agent`, `@mariozechner/pi-tui`, `@mariozechner/pi-ai`). Only add npm deps when Pi doesn't provide the capability. |
+| **Terminal-aware** | Respect terminal canvas: 256-color fallback, screen reader accessibility, no blocking operations in TUI. |
+| **Hot-reload ready** | Extensions work with `/reload`; themes reload automatically on edit. |
+| **Branching-safe** | Persist state via tool result `details` for session tree support. |
+| **Error-resilient** | Handle load errors gracefully. Pi silently swallows some failures — log and recover. |
+| **Minimal footprint** | No unnecessary deps. Pi bundles core packages — use peer deps for shared Pi packages. |
+| **Type-safe** | Biome lint with zero errors. |
+
+## Publishing Workflow
+
+When an extension is broadly useful and meets first-class citizen standards:
+
+1. **Prepare** — per-extension `CHANGELOG.md` complete; Biome lint passes
+2. **Test** — local test via project `.pi/settings.json` override before committing
+3. **Manifest** — add to root `package.json` `pi.extensions` (if not already)
+4. **Publish** — publish to npm with `keywords: ["pi-package"]`
+5. **Document** — update extension table in README
+
+Production extensions may be published to npm independently from this mono repo. See [docs/packages.md](https://github.com/badlogic/pi-mono/blob/main/docs/packages.md) for Pi package structure.
 
 ## Activation tiers
 
@@ -59,3 +86,4 @@ To work on an extension, add its path to `.pi/settings.json` under `packages` an
 - **Looking up Pi APIs, hooks, tool patterns** → use the skill-manager's `references/` directory and Pi's built-in documentation (resolve the path from the Pi installation directory).
 - **Git worktrees for feature branches** → use the `pure-git` extension (`switch_worktree` tool). Prefer pure-git workflow; fall back to bash.
 - **Extension development** — write extensions directly in `extensions/pure-<name>/`. See Pi's extension docs for the API.
+- **Testing** — test extensions locally via project `.pi/settings.json` before committing. Use `--mode json` or isolated subprocess for smoke tests.

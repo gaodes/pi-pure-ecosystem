@@ -3,6 +3,6 @@ import { registerCommands } from "./commands";
 import { setupTools } from "./tools";
 
 export default function (pi: ExtensionAPI) {
-  setupTools(pi);
-  registerCommands(pi);
+	setupTools(pi);
+	registerCommands(pi);
 }
