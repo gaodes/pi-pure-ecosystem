@@ -203,8 +203,9 @@ function formatRelationship(rel: string): string {
 const UPSTREAM_SYNC_PROMPT = `# Upstream Sync Analysis
 
 You have been given a discovery report of extensions with \`.upstream.json\` lineage data.
-For each extension with a **fork** or **synced-source** relationship, perform the following analysis.
-Skip extensions with **historical-ancestor** or **reference** relationships — those are informational only.
+Analyze **all selected extensions**, but vary depth by relationship type:
+- **fork** / **synced-source**: full deep analysis
+- **historical-ancestor** / **reference**: lighter analysis (still check for meaningful updates)
 
 ## Steps (per extension)
 
@@ -222,6 +223,10 @@ For the primary upstream source:
 - If it is a **repo** (GitHub URL): browse the upstream repo's \`README.md\`, \`CHANGELOG.md\` (or release notes), and recent commits since our \`updatedAt\` date
 - If it is an **npm package**: fetch the package metadata, read its README and changelog from the registry or linked repo
 - Focus on changes **after** the \`updatedAt\` date in our \`.upstream.json\`
+
+Depth rule:
+- **fork / synced-source**: full changelog + relevant commits + API/behavior impact review
+- **historical-ancestor / reference**: lighter pass (release notes/changelog scan + any clearly meaningful changes), then classify whether follow-up is needed
 
 ### 3. Identify upstream changes
 
@@ -379,15 +384,10 @@ export function registerUpdateUpstreamCommand(pi: ExtensionAPI) {
 				return;
 			}
 
-			// Check if selected upstreams have syncable relationships
-			const hasSyncable = selection.selected.some(
-				(u) => u.data.primary.relationship === "fork" || u.data.primary.relationship === "synced-source",
-			);
-
-			if (hasSyncable) {
+			// Run analysis prompt for any selected set. Depth is relationship-based in the prompt.
+			if (selection.selected.length > 0) {
 				pi.sendUserMessage(`${summary}\n${buildSyncPromptForSelection(selection.selected)}`);
 			} else {
-				// No syncable upstreams in selected set — just show the report
 				pi.sendUserMessage(summary);
 			}
 		},
