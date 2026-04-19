@@ -35,7 +35,6 @@
     "README.md"
   ],
   "dependencies": {
-    "@aliou/pi-utils-ui": "^0.1.0",
     "@sinclair/typebox": "^0.34.41"
   },
   "peerDependencies": {

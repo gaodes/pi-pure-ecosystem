@@ -17,8 +17,8 @@ Pi injects these packages via jiti at runtime. Extensions do not need to install
 - `@sinclair/typebox` — schema definitions for tool parameters and related types
 
 ```typescript
-// Tool UI components (from @aliou/pi-utils-ui)
-import { ToolCallHeader, ToolBody, ToolFooter } from "@aliou/pi-utils-ui";
+// Tool UI components (from the local shared foundation module)
+import { ToolCallHeader, ToolBody, ToolFooter } from "../pure-foundation/ui/components"; // adjust relative path per extension
 
 // Core types
 import type {
@@ -103,7 +103,7 @@ When implementing, look at these existing extensions for patterns:
 7. **Tool rendering uses `ToolCallHeader`**: First line `[Tool Name]: [Action] [Main arg] [Option args]`, long args on follow-up lines. Use display names, not raw tool IDs.
 8. **Deterministic call rendering**: Build `renderCall` with a stable extraction order (action → main arg → option args → long args), process-style. Same input should produce same header layout.
 9. **Long args placement**: Put long prompt/task/question/context strings on following lines. Keep first line scannable.
-10. **Result layout**: In `renderResult(result, options, theme)`, handle `isPartial` first with a stable tool-scoped message. Detect errors by checking for missing expected fields in `details` (framework sets `details: {}` on throw). Use `ToolBody` from `@aliou/pi-utils-ui` with `showCollapsed` fields. Use `ToolFooter` conditionally (omit when empty). Use `Container`/`Markdown` for rich content.
+10. **Result layout**: In `renderResult(result, options, theme)`, handle `isPartial` first with a stable tool-scoped message. Detect errors by checking for missing expected fields in `details` (framework sets `details: {}` on throw). Use `ToolBody` from your shared foundation module (e.g. `pure-foundation/ui/components`) with `showCollapsed` fields. Use `ToolFooter` conditionally (omit when empty). Use `Container`/`Markdown` for rich content.
 11. **Typed param alias**: Define `type MyToolParams = Static<typeof parameters>` at the top of each tool file. Use it everywhere instead of repeating `Static<typeof parameters>`.
 12. **Tool metadata**: Every tool must have `label` (required). Add `promptSnippet` for system prompt tool listing. Add `promptGuidelines` for usage instructions, but write them as standalone global bullets that name the exact tool. These replace system-prompt hooks for simple tools.
 13. **Output truncation**: For tools returning large text, use `truncateHead()` from `@mariozechner/pi-coding-agent`. Write full content to temp file. Append footer with line/byte counts and temp file path.

@@ -12,9 +12,6 @@ importers:
 
   .:
     dependencies:
-      '@aliou/pi-utils-ui':
-        specifier: ^0.1.0
-        version: 0.1.0(@mariozechner/pi-coding-agent@0.65.2(ws@8.19.0)(zod@3.25.76))(@mariozechner/pi-tui@0.65.2)
       '@sinclair/typebox':
         specifier: ^0.34.41
         version: 0.34.48
@@ -42,12 +39,6 @@ importers:
         version: 5.9.3
 
 packages:
-
-  '@aliou/pi-utils-ui@0.1.0':
-    resolution: {integrity: sha512-GAgA29J7fnswE+eFp+ktkQomRUB7YsZVdJ1vqWcllWYVfMDbSZ9orDTgf0Rr6wnrZ7s/SBeipGlxEBLDEch+qA==}
-    peerDependencies:
-      '@mariozechner/pi-coding-agent': '>=0.51.0'
-      '@mariozechner/pi-tui': 0.65.2
 
   '@anthropic-ai/sdk@0.73.0':
     resolution: {integrity: sha512-URURVzhxXGJDGUGFunIOtBlSl7KWvZiAAKY/ttTkZAkXT9bTPqdk2eK0b8qqSxXpikh3QKPnPYpiyX98zf5ebw==}
@@ -769,7 +760,7 @@ packages:
   basic-ftp@5.1.0:
     resolution: {integrity: sha512-RkaJzeJKDbaDWTIPiJwubyljaEPwpVWkm9Rt5h9Nd6h7tEXTJ3VB4qxdZBioV7JO5yLUaOKwz7vDOzlncUsegw==}
     engines: {node: '>=10.0.0'}
-    deprecated: Security vulnerability fixed in 5.2.0, please upgrade
+    deprecated: Security vulnerability fixed in 5.2.1, please upgrade
 
   better-path-resolve@1.0.0:
     resolution: {integrity: sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==}
@@ -1574,11 +1565,6 @@ packages:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
 snapshots:
-
-  '@aliou/pi-utils-ui@0.1.0(@mariozechner/pi-coding-agent@0.65.2(ws@8.19.0)(zod@3.25.76))(@mariozechner/pi-tui@0.65.2)':
-    dependencies:
-      '@mariozechner/pi-coding-agent': 0.65.2(ws@8.19.0)(zod@3.25.76)
-      '@mariozechner/pi-tui': 0.65.2
 
   '@anthropic-ai/sdk@0.73.0(zod@3.25.76)':
     dependencies:

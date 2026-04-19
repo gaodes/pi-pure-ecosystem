@@ -1,6 +1,5 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { ToolCallHeader } from "@aliou/pi-utils-ui";
 import type {
 	AgentToolResult,
 	ExtensionAPI,
@@ -10,6 +9,7 @@ import type {
 } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
+import { ToolCallHeader } from "../../../pure-foundation/ui/components";
 
 const Params = Type.Object({});
 type PackageManagerParams = Record<string, never>;

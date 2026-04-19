@@ -1,5 +1,11 @@
 # @aliou/pi-dev-kit
 
+## 0.6.4
+
+### Patch Changes
+
+- local: Migrate tool UI imports from `@aliou/pi-utils-ui` to local `pure-foundation` compatibility exports and remove the external `@aliou/pi-utils-ui` dependency.
+
 ## 0.6.3
 
 ### Patch Changes

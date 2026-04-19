@@ -7,7 +7,7 @@ Tools are functions the LLM can call. They are the primary way extensions add ca
 Use these imports at the top of your tool file:
 
 ```typescript
-import { ToolCallHeader, ToolBody, ToolFooter } from "@aliou/pi-utils-ui";
+import { ToolCallHeader, ToolBody, ToolFooter } from "../pure-foundation/ui/components"; // adjust relative path per extension
 import type {
   AgentToolResult,
   AgentToolUpdateCallback,
@@ -365,7 +365,7 @@ renderCall(args: MyToolParams, theme: Theme): Component
 
 A 3rd `context` param is available from the framework but rarely needed in `renderCall`.
 
-Use `ToolCallHeader` from `@aliou/pi-utils-ui`:
+Use `ToolCallHeader` from your shared foundation module (e.g. `pure-foundation/ui/components`):
 
 ```typescript
 renderCall(args: MyToolParams, theme: Theme) {
@@ -828,7 +828,7 @@ const myTool = {
 Here's a realistic tool demonstrating all the patterns:
 
 ```typescript
-import { ToolCallHeader, ToolBody, ToolFooter } from "@aliou/pi-utils-ui";
+import { ToolCallHeader, ToolBody, ToolFooter } from "../pure-foundation/ui/components"; // adjust relative path per extension
 import type {
   AgentToolResult,
   ExtensionAPI,
