@@ -1,5 +1,18 @@
 # @gaodes/pure-dev-kit
 
+## Unreleased
+
+### Minor Changes
+
+- Add `/extensions:update-upstream` command that discovers and reports upstream lineage from `.upstream.json` across installed npm, git, and local extensions. Produces a formatted summary; does not error when no `.upstream.json` is found.
+- Ship `.upstream.json` in the npm package (removed from `.npmignore`, added to `files`).
+
+### Patch Changes
+
+- Improve `detect_package_manager` to scan upward from the current directory before deciding, instead of throwing immediately when `cwd/package.json` is missing.
+- Add `Detected from` metadata/output so callers can see which path provided the package-manager signal (packageManager field, lockfile, or default fallback).
+- Update Pi peer/dev dependencies from 0.65.2 to 0.67.68.
+
 ## 0.6.5
 
 ### Patch Changes

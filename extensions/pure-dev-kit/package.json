@@ -1,6 +1,6 @@
 {
   "name": "@gaodes/pure-dev-kit",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "license": "MIT",
   "type": "module",
   "private": false,
@@ -33,7 +33,8 @@
   },
   "files": [
     "src",
-    "README.md"
+    "README.md",
+    ".upstream.json"
   ],
   "dependencies": {
     "@gaodes/pure-foundation": "^0.1.0",
