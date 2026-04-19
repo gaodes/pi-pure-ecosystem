@@ -1,27 +1,41 @@
 import type { Component } from "@mariozechner/pi-tui";
-import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
+import { Container, truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 
 export interface FrameOptions {
-	children: Component[];
+	/**
+	 * Backward-compatible optional children initializer.
+	 * New code can also manage children via Container APIs.
+	 */
+	children?: Component[];
 	borderColor?: (text: string) => string;
 }
 
-export class Frame implements Component {
-	constructor(private options: FrameOptions) {}
+export class Frame extends Container {
+	private _borderColor: (text: string) => string;
+
+	constructor(options: FrameOptions = {}) {
+		super();
+		this._borderColor = options.borderColor ?? ((text: string) => text);
+		if (options.children) {
+			this.children = options.children;
+		}
+	}
 
 	update(options: Partial<FrameOptions>): void {
-		this.options = {
-			...this.options,
-			...options,
-		};
+		if (options.borderColor !== undefined) {
+			this._borderColor = options.borderColor ?? ((text: string) => text);
+		}
+		if (options.children !== undefined) {
+			this.children = options.children;
+		}
 	}
 
 	setBorderColor(borderColor?: (text: string) => string): void {
-		this.options.borderColor = borderColor;
+		this._borderColor = borderColor ?? ((text: string) => text);
 	}
 
 	handleInput(data: string): boolean {
-		for (const child of this.options.children) {
+		for (const child of this.children) {
 			const handled = (child.handleInput as ((data: string) => unknown) | undefined)?.(data);
 			if (handled === true) {
 				return true;
@@ -31,23 +45,17 @@ export class Frame implements Component {
 		return false;
 	}
 
-	invalidate(): void {
-		for (const child of this.options.children) {
-			child.invalidate();
-		}
-	}
-
-	render(width: number): string[] {
+	override render(width: number): string[] {
 		const contentWidth = Math.max(1, width - 4);
 		const innerWidth = Math.max(1, width - 2);
-		const lines = this.options.children.flatMap((child) => child.render(contentWidth));
+		const lines = this.children.flatMap((child) => child.render(contentWidth));
 		const content = (lines.length > 0 ? lines : [""]).map((line) => {
 			const truncated = truncateToWidth(line, contentWidth);
 			const fill = Math.max(0, contentWidth - visibleWidth(truncated));
 			return ` ${truncated}${" ".repeat(fill)} `;
 		});
 
-		const borderColor = this.options.borderColor ?? ((text: string) => text);
+		const borderColor = this._borderColor;
 		const top = borderColor(`╭${"─".repeat(innerWidth)}╮`);
 		const bottom = borderColor(`╰${"─".repeat(innerWidth)}╯`);
 		const left = borderColor("│");

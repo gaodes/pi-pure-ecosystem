@@ -16,7 +16,7 @@ This package centralizes reusable building blocks across the Pure ecosystem:
 ## Current modules
 
 - `tools/` — tool rendering components (`ToolCallHeader`, `ToolBody`, `ToolFooter`, fields, states)
-- `widgets/` — higher-level reusable TUI widgets
+- `widgets/` — higher-level reusable TUI widgets (`Frame`, `InfoBox`, `ScrollablePanel`, `TabbedScrollablePanel`, `Tree`)
 - `primitives/` — low-level terminal helpers
 - `ui/components.ts` — compatibility exports for `ToolCallHeader`, `ToolBody`, `ToolFooter`, etc.
 - `utils/` — shared non-UI helpers (currently `findPiInstallation()`)

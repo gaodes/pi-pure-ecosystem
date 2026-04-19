@@ -1,6 +1,6 @@
 {
   "name": "@gaodes/pure-foundation",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Shared foundation layer for pure-* extensions (UI primitives, tool UI, widgets, and common helpers)",
   "keywords": [
     "pi-package",
