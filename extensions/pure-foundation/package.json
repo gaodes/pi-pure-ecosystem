@@ -1,0 +1,42 @@
+{
+  "name": "@gaodes/pure-foundation",
+  "version": "0.1.0",
+  "description": "Shared foundation layer for pure-* extensions (UI primitives, tool UI, widgets, and common helpers)",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "pure-foundation",
+    "shared",
+    "ui"
+  ],
+  "license": "MIT",
+  "author": "gaodes",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gaodes/pi-pure-ecosystem.git",
+    "directory": "extensions/pure-foundation"
+  },
+  "exports": {
+    ".": "./index.ts",
+    "./ui/components": "./ui/components.ts",
+    "./utils": "./utils/index.ts"
+  },
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "peerDependencies": {
+    "@mariozechner/pi-coding-agent": "*",
+    "@mariozechner/pi-tui": "*"
+  },
+  "peerDependenciesMeta": {
+    "@mariozechner/pi-coding-agent": {
+      "optional": true
+    },
+    "@mariozechner/pi-tui": {
+      "optional": true
+    }
+  }
+}

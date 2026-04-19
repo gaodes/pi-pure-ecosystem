@@ -14,7 +14,7 @@ Personal extensions and configuration for the [Pi coding agent](https://github.c
 | [pure-statusline](extensions/pure-statusline/) | — | `/statusline` | Configurable multi-line status footer with segments, tool counters |
 | [pure-theme](extensions/pure-theme/) | — | `/theme` | Sync theme with system dark/light mode |
 | [pure-updater](extensions/pure-updater/) | — | `/update` | Check for Pi updates, prompt on new versions, install and restart |
-| [pure-utils](extensions/pure-utils/) | — | — | Shared utilities for other extensions |
+| [pure-foundation](extensions/pure-foundation/) | — | — | Shared foundation modules (tool UI, widgets, primitives, utilities) |
 | [pure-vibes](extensions/pure-vibes/) | — | `/vibe` | AI-generated themed working messages |
 
 ## Installation
