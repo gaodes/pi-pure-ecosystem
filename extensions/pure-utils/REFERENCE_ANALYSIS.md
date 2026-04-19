@@ -1,5 +1,7 @@
 # Analysis: What pure-utils Tools Can Discover in Reference Files
 
+> ⚠️ Archived historical analysis. Tool ownership has moved to `pure-dev-kit` and shared UI moved to `pure-foundation`.
+>
 > Generated 2026-04-17 using pure-utils tools (`pi_version`, `pi_docs`, `pi_changelog`)
 
 ---

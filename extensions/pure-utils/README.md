@@ -1,5 +1,12 @@
 # pure-utils
 
+> ⚠️ **Deprecated**: `pure-utils` has been superseded.
+>
+> - Shared UI primitives now live in [`../pure-foundation/`](../pure-foundation/)
+> - Utility tools (`pi_version`, `pi_docs`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager`) now live in `pure-dev-kit`
+>
+> Keep this extension only for historical reference/backward context. Do not add new features here.
+
 Shared utilities and reference tools for Pi extension development. Replaces the deprecated `pi-devkit` extension.
 
 ## Sources / Inspiration
