@@ -9,7 +9,7 @@ Tools are functions the LLM can call. They are the primary way extensions add ca
 Use these imports at the top of your tool file:
 
 ```typescript
-import { ToolCallHeader, ToolBody, ToolFooter } from "../../pure-utils/ui/components";
+import { ToolCallHeader, ToolBody, ToolFooter } from "../../pure-foundation/ui/components";
 import type {
   AgentToolResult,
   AgentToolUpdateCallback,
@@ -282,7 +282,7 @@ renderCall(args: MyToolParams, theme: Theme): Component
 
 A 3rd `context` param is available from the framework but rarely needed in `renderCall`.
 
-Use `ToolCallHeader` from `pure-utils/ui/components` (or copy inline if you don't depend on `pure-utils`):
+Use `ToolCallHeader` from `pure-foundation/ui/components` (or copy inline if you don't depend on `pure-foundation`):
 
 ```typescript
 renderCall(args: MyToolParams, theme: Theme) {
@@ -745,7 +745,7 @@ const myTool = {
 Here's a realistic tool demonstrating all the patterns:
 
 ```typescript
-import { ToolCallHeader, ToolBody, ToolFooter } from "../../pure-utils/ui/components";
+import { ToolCallHeader, ToolBody, ToolFooter } from "../../pure-foundation/ui/components";
 import type {
   AgentToolResult,
   ExtensionAPI,

@@ -607,7 +607,7 @@ All built-in examples live in the Pi package at `examples/extensions/`.
 
 ## Version Discovery
 
-For the latest Pi version and changelog, use the `pure-utils` tools:
+For the latest Pi version and changelog, use the utility tools currently exposed by `pure-dev-kit`:
 - `pi_version` — get the installed Pi version
 - `pi_changelog` — get changelog entry for a specific version
 - `pi_changelog_versions` — list all available versions

@@ -10,7 +10,8 @@
 
 | Extension | Tool | Command | Activation | Lines | .ts Files | Runtime Deps |
 |-----------|------|---------|------------|-------|-----------|-------------|
-| `pure-utils` | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | — | Global (git pkg) | ~700 | 7 | `@sinclair/typebox` |
+| `pure-foundation` | — | — | Global (git pkg) | ~1500 | 28 | — |
+| `pure-dev-kit` | `pi_docs`, `pi_version`, `pi_changelog`, `pi_changelog_versions`, `detect_package_manager` | — | Global (git pkg) | ~900 | 10 | `@sinclair/typebox` |
 | `pure-cron` | `pure_cron` | `/cron` | Global (git pkg) | 1300 | 1 | `croner`, `nanoid` |
 | `pure-git` | `switch_worktree` | `/worktrees` | Global (git pkg) | 53 (main) | 6 | — |
 | `pure-github` | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | `/gh-status` (planned) | Global (git pkg) | 970 | 13 | — |
@@ -27,11 +28,11 @@ Tools registered across extensions (avoid name collisions):
 
 | Tool Name | Extension | Purpose |
 |-----------|-----------|---------|
-| `pi_docs` | `pure-utils` | Read Pi documentation |
-| `pi_version` | `pure-utils` | Get Pi version info |
-| `pi_changelog` | `pure-utils` | Read Pi changelog |
-| `pi_changelog_versions` | `pure-utils` | List changelog versions |
-| `detect_package_manager` | `pure-utils` | Detect project package manager |
+| `pi_docs` | `pure-dev-kit` | Read Pi documentation |
+| `pi_version` | `pure-dev-kit` | Get Pi version info |
+| `pi_changelog` | `pure-dev-kit` | Read Pi changelog |
+| `pi_changelog_versions` | `pure-dev-kit` | List changelog versions |
+| `detect_package_manager` | `pure-dev-kit` | Detect project package manager |
 | `pure_cron` | `pure-cron` | Schedule recurring/one-shot prompts |
 | `switch_worktree` | `pure-git` | Git worktree management |
 | `github_repo` | `pure-github` | GitHub repo operations |
@@ -131,7 +132,8 @@ Split when justified by size or logical separation:
 
 | Extension | Structure | Reason |
 |-----------|-----------|--------|
-| `pure-utils` | 7 files (tools, utils, ui) | Multiple independent tools + shared utilities |
+| `pure-foundation` | 28 files (tools, widgets, primitives, ui, utils) | Shared ecosystem foundation modules |
+| `pure-dev-kit` | 10 files (tools, commands, skills) | Utility tools and extension authoring guidance |
 | `pure-git` | 6 files (commands, services) | Separation of git ops from UI |
 | `pure-github` | 13 files (browse-tools, commands, config, error-handler) | Large surface area (5 tools + browse) |
 | `pure-vibes` | 4 files (config, messages separate) | Clean config/message separation |

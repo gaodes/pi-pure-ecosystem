@@ -47,7 +47,7 @@ If the request doesn't clearly match one, ask before proceeding.
 
 ### Naming & Structure
 
-- **Name**: `pure-<name>` (`pi-devkit` is deprecated — future shared tools will live in `pure-utils`)
+- **Name**: `pure-<name>` (`pi-devkit` is deprecated — shared UI primitives live in `pure-foundation`; operational utility tools are in `pure-dev-kit`)
 - **Entry point**: `index.ts` at extension root
 - **Structure**: single `index.ts`. Split when justified.
 - **package.json**: only if npm deps needed. Pi packages are **peer dependencies**, never `dependencies`.
