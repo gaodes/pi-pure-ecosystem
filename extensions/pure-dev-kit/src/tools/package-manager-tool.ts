@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { ToolCallHeader } from "@gaodes/pure-foundation/ui/components";
 import type {
 	AgentToolResult,
 	ExtensionAPI,
@@ -9,7 +10,6 @@ import type {
 } from "@mariozechner/pi-coding-agent";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
-import { ToolCallHeader } from "../../../pure-foundation/ui/components";
 
 const Params = Type.Object({});
 type PackageManagerParams = Record<string, never>;
@@ -21,6 +21,8 @@ interface PackageManagerDetails {
 	installCommand?: string;
 	runCommand?: string;
 	cwd?: string;
+	detectedFrom?: string;
+	source?: "packageManager" | "lockfile" | "default";
 }
 
 const LOCKFILES: Record<string, string> = {
@@ -60,17 +62,14 @@ export function setupPackageManagerTool(pi: ExtensionAPI) {
 		): Promise<AgentToolResult<PackageManagerDetails>> {
 			const cwd = ctx.cwd;
 
-			const packageJsonPath = path.join(cwd, "package.json");
-			if (!fs.existsSync(packageJsonPath)) {
-				throw new Error(`No package.json found in ${cwd}`);
-			}
-
 			// Walk up from cwd to repo root, collecting packageManager and lockfile.
 			// Stop at .git boundary to avoid escaping the repository.
 			let declaredPm: string | undefined;
 			let declaredVersion: string | undefined;
+			let declaredPmFrom: string | undefined;
 			let lockfile: string | undefined;
 			let lockfilePm: string | undefined;
+			let lockfileFrom: string | undefined;
 
 			let searchDir = cwd;
 			while (true) {
@@ -85,6 +84,7 @@ export function setupPackageManagerTool(pi: ExtensionAPI) {
 								if (match) {
 									declaredPm = match[1];
 									declaredVersion = match[2] || undefined;
+									declaredPmFrom = pkgPath;
 								}
 							}
 						}
@@ -96,9 +96,11 @@ export function setupPackageManagerTool(pi: ExtensionAPI) {
 				// Check lockfiles
 				if (!lockfilePm) {
 					for (const [filename, pm] of Object.entries(LOCKFILES)) {
-						if (fs.existsSync(path.join(searchDir, filename))) {
+						const candidate = path.join(searchDir, filename);
+						if (fs.existsSync(candidate)) {
 							lockfilePm = pm;
 							lockfile = filename;
+							lockfileFrom = candidate;
 							break;
 						}
 					}
@@ -114,6 +116,12 @@ export function setupPackageManagerTool(pi: ExtensionAPI) {
 			}
 
 			const pm = declaredPm || lockfilePm || "npm";
+			const source: PackageManagerDetails["source"] = declaredPm
+				? "packageManager"
+				: lockfilePm
+					? "lockfile"
+					: "default";
+			const detectedFrom = declaredPmFrom || lockfileFrom || cwd;
 			const fallback = { install: `${pm} install`, run: pm };
 			const commands = COMMANDS[pm] ?? fallback;
 
@@ -125,9 +133,10 @@ export function setupPackageManagerTool(pi: ExtensionAPI) {
 			if (lockfile) {
 				parts.push(`Lockfile: ${lockfile}`);
 			}
-			if (!lockfile && !declaredPm) {
+			if (source === "default") {
 				parts.push("No lockfile or packageManager field found, defaulting to npm");
 			}
+			parts.push(`Detected from: ${detectedFrom}`);
 			parts.push(`Install: ${commands.install}`);
 			parts.push(`Run: ${commands.run}`);
 
@@ -142,6 +151,8 @@ export function setupPackageManagerTool(pi: ExtensionAPI) {
 					installCommand: commands.install,
 					runCommand: commands.run,
 					cwd,
+					detectedFrom,
+					source,
 				},
 			};
 		},
@@ -172,6 +183,9 @@ export function setupPackageManagerTool(pi: ExtensionAPI) {
 			}
 			if (details.lockfile) {
 				lines.push(theme.fg("dim", `Lockfile: ${details.lockfile}`));
+			}
+			if (details.detectedFrom) {
+				lines.push(theme.fg("muted", `Detected from: ${details.detectedFrom}`));
 			}
 
 			return new Text(lines.join("\n"), 0, 0);

@@ -1,10 +1,18 @@
-# @aliou/pi-dev-kit
+# @gaodes/pure-dev-kit
+
+## 0.6.5
+
+### Patch Changes
+
+- Improve `detect_package_manager` to scan upward from the current directory before deciding, instead of throwing immediately when `cwd/package.json` is missing.
+- Add `Detected from` metadata/output so callers can see which path provided the package-manager signal (packageManager field, lockfile, or default fallback).
 
 ## 0.6.4
 
 ### Patch Changes
 
-- local: Migrate tool UI imports from `@aliou/pi-utils-ui` to local `pure-foundation` compatibility exports and remove the external `@aliou/pi-utils-ui` dependency.
+- Migrate tool UI imports from `@aliou/pi-utils-ui` to `@gaodes/pure-foundation/ui/components` and remove the external `@aliou/pi-utils-ui` dependency.
+- Rename package scope from `@aliou/pi-dev-kit` to `@gaodes/pure-dev-kit`.
 
 ## 0.6.3
 
