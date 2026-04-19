@@ -162,6 +162,75 @@ function formatRelationship(rel: string): string {
 	}
 }
 
+const UPSTREAM_SYNC_PROMPT = `# Upstream Sync Analysis
+
+You have been given a discovery report of extensions with \`.upstream.json\` lineage data.
+For each extension with a **fork** or **synced-source** relationship, perform the following analysis.
+Skip extensions with **historical-ancestor** or **reference** relationships — those are informational only.
+
+## Steps (per extension)
+
+### 1. Read our extension
+
+Read the local extension's:
+- \`README.md\` — understand what we ship, our scope, and any local modifications documented there
+- \`CHANGELOG.md\` — understand our version history and what we have already changed
+- \`package.json\` — note our current version
+- \`.upstream.json\` — note the \`updatedAt\` date (last time we checked upstream)
+
+### 2. Read the upstream
+
+For the primary upstream source:
+- If it is a **repo** (GitHub URL): browse the upstream repo's \`README.md\`, \`CHANGELOG.md\` (or release notes), and recent commits since our \`updatedAt\` date
+- If it is an **npm package**: fetch the package metadata, read its README and changelog from the registry or linked repo
+- Focus on changes **after** the \`updatedAt\` date in our \`.upstream.json\`
+
+### 3. Identify upstream changes
+
+List every meaningful upstream change since our last sync. For each change, note:
+- What changed (feature, fix, refactor, dependency update, API change)
+- Which files or areas are affected
+- Whether it is a breaking change
+
+### 4. Classify each change
+
+For each upstream change, classify it into one of these categories:
+
+- ✅ **Pull** — the change is beneficial and compatible with our extension. We should adopt it.
+- ⚠️ **Review** — the change may be useful but needs adaptation, conflicts with our modifications, or touches areas we have customized. Explain what needs manual review.
+- ❌ **Skip** — the change is irrelevant to our fork/scope, conflicts with our architecture, or we have intentionally diverged from that upstream behavior. Explain why.
+- 🔄 **Already have** — we independently made the same or equivalent change. Note the overlap.
+
+### 5. Present the sync report
+
+For each extension, present a structured report:
+
+#### Extension: \`<name>\`
+| Our version | Upstream version | Last synced |
+|---|---|---|
+| \`x.y.z\` | \`a.b.c\` | \`YYYY-MM-DD\` |
+
+**Changes since last sync:**
+
+| # | Change | Category | Notes |
+|---|---|---|---|
+| 1 | description | ✅ Pull / ⚠️ Review / ❌ Skip / 🔄 Already have | explanation |
+
+**Recommendation:** brief overall assessment — is a sync needed, and how large is the effort?
+
+### 6. Wait for confirmation
+
+Present the full report and wait for the user to decide which changes to pull.
+Do not apply any changes until explicitly confirmed.
+
+## Important
+
+- Do not modify any files during the analysis phase.
+- If the upstream repo or package is inaccessible, report that and move on to the next extension.
+- Focus on substance — skip trivial formatting-only or whitespace changes unless they fix a real issue.
+- When our extension has intentionally diverged (renamed, restructured, added features), note that context when classifying changes.
+`;
+
 function formatSummary(upstreams: FoundUpstream[]): string {
 	const lines: string[] = [];
 	lines.push(`# Extension Upstream Report`);
@@ -208,7 +277,18 @@ export function registerUpdateUpstreamCommand(pi: ExtensionAPI) {
 			}
 
 			const summary = formatSummary(upstreams);
-			pi.sendUserMessage(summary);
+
+			// Check if any upstream has a syncable relationship
+			const hasSyncable = upstreams.some(
+				(u) => u.data.primary.relationship === "fork" || u.data.primary.relationship === "synced-source",
+			);
+
+			if (hasSyncable) {
+				pi.sendUserMessage(`${summary}\n${UPSTREAM_SYNC_PROMPT}`);
+			} else {
+				// No syncable upstreams — just show the report
+				pi.sendUserMessage(summary);
+			}
 		},
 	});
 }
