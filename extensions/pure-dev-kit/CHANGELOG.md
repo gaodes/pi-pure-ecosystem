@@ -1,5 +1,11 @@
 # @gaodes/pure-dev-kit
 
+## Unreleased
+
+### Patch Changes
+
+- Improve `/extensions:update-upstream` UX by asking which extension(s) to analyze first via an interactive multi-select loop (with `None` and `Cancel` options). The sync workflow now runs only for the selected extensions.
+
 ## 0.7.3
 
 ### Patch Changes

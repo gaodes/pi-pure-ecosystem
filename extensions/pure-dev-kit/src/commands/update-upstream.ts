@@ -297,6 +297,58 @@ function formatSummary(upstreams: FoundUpstream[]): string {
 	return lines.join("\n");
 }
 
+function buildSyncPromptForSelection(selected: FoundUpstream[]): string {
+	const targets = selected.map((u) => `- ${u.pkgName}`).join("\n");
+	return `${UPSTREAM_SYNC_PROMPT}\n\n## Target extensions for this run\n${targets}`;
+}
+
+async function selectExtensionsForAnalysis(
+	upstreams: FoundUpstream[],
+	ctx: {
+		ui: {
+			select: (title: string, options: string[]) => Promise<string | undefined>;
+			notify: (message: string, type?: "info" | "warning" | "error") => void;
+		};
+	},
+): Promise<{ selected: FoundUpstream[]; skipAnalysis: boolean } | undefined> {
+	const selected = new Set<number>(upstreams.map((_, i) => i));
+
+	while (true) {
+		const toggleLabels = upstreams.map((u, i) => `${selected.has(i) ? "☑" : "☐"} ${u.pkgName}`);
+		const continueLabel = `✅ Analyze selected (${selected.size})`;
+		const noneLabel = "🚫 None (summary only)";
+		const cancelLabel = "❌ Cancel";
+
+		const choice = await ctx.ui.select("Select extensions to analyze upstream changes", [
+			...toggleLabels,
+			continueLabel,
+			noneLabel,
+			cancelLabel,
+		]);
+
+		if (!choice || choice === cancelLabel) return undefined;
+		if (choice === noneLabel) {
+			return { selected: [], skipAnalysis: true };
+		}
+		if (choice === continueLabel) {
+			if (selected.size === 0) {
+				ctx.ui.notify("No extension selected. Choose at least one or use None.", "warning");
+				continue;
+			}
+			return {
+				selected: upstreams.filter((_, i) => selected.has(i)),
+				skipAnalysis: false,
+			};
+		}
+
+		const toggleIndex = toggleLabels.indexOf(choice);
+		if (toggleIndex >= 0) {
+			if (selected.has(toggleIndex)) selected.delete(toggleIndex);
+			else selected.add(toggleIndex);
+		}
+	}
+}
+
 export function registerUpdateUpstreamCommand(pi: ExtensionAPI) {
 	pi.registerCommand("extensions:update-upstream", {
 		description: "Report upstream lineage for installed extensions (.upstream.json)",
@@ -314,17 +366,28 @@ export function registerUpdateUpstreamCommand(pi: ExtensionAPI) {
 				return;
 			}
 
-			const summary = formatSummary(upstreams);
+			const selection = await selectExtensionsForAnalysis(upstreams, ctx);
+			if (!selection) {
+				ctx.ui.notify("Upstream analysis cancelled.", "info");
+				return;
+			}
 
-			// Check if any upstream has a syncable relationship
-			const hasSyncable = upstreams.some(
+			const summary = formatSummary(selection.selected.length > 0 ? selection.selected : upstreams);
+
+			if (selection.skipAnalysis) {
+				pi.sendUserMessage(summary);
+				return;
+			}
+
+			// Check if selected upstreams have syncable relationships
+			const hasSyncable = selection.selected.some(
 				(u) => u.data.primary.relationship === "fork" || u.data.primary.relationship === "synced-source",
 			);
 
 			if (hasSyncable) {
-				pi.sendUserMessage(`${summary}\n${UPSTREAM_SYNC_PROMPT}`);
+				pi.sendUserMessage(`${summary}\n${buildSyncPromptForSelection(selection.selected)}`);
 			} else {
-				// No syncable upstreams — just show the report
+				// No syncable upstreams in selected set — just show the report
 				pi.sendUserMessage(summary);
 			}
 		},
