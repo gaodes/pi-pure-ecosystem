@@ -26,7 +26,7 @@ interface FoundUpstream {
 	data: UpstreamJson;
 }
 
-function discoverUpstreams(): FoundUpstream[] {
+function discoverUpstreams(cwd: string): FoundUpstream[] {
 	const results: FoundUpstream[] = [];
 	const seen = new Set<string>();
 
@@ -71,6 +71,33 @@ function discoverUpstreams(): FoundUpstream[] {
 		}
 	}
 
+	function scanExtensionsDir(dir: string) {
+		if (!fs.existsSync(dir)) return;
+		let entries: string[];
+		try {
+			entries = fs.readdirSync(dir);
+		} catch {
+			return;
+		}
+		for (const entry of entries) {
+			const extDir = path.join(dir, entry);
+			try {
+				if (!fs.statSync(extDir).isDirectory()) continue;
+			} catch {
+				continue;
+			}
+			const pkgJsonPath = path.join(extDir, "package.json");
+			let pkgName = entry;
+			try {
+				const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
+				if (pkg.name) pkgName = pkg.name;
+			} catch {
+				// Use directory name
+			}
+			tryRead(pkgName, extDir);
+		}
+	}
+
 	// 1. Pi's global node_modules (where npm extensions live)
 	try {
 		const require = createRequire(import.meta.url);
@@ -82,36 +109,27 @@ function discoverUpstreams(): FoundUpstream[] {
 	}
 
 	// 2. Project-local .pi/npm/node_modules (shadowed npm packages)
-	const projectNpmDir = path.join(process.cwd(), ".pi", "npm", "node_modules");
+	const projectNpmDir = path.join(cwd, ".pi", "npm", "node_modules");
 	scanDir(projectNpmDir);
 
-	// 3. Local extensions/ directory (if in dev repo)
-	const localExtDir = path.join(process.cwd(), "extensions");
-	if (fs.existsSync(localExtDir)) {
-		let entries: string[];
-		try {
-			entries = fs.readdirSync(localExtDir);
-		} catch {
-			entries = [];
+	// 3. Local extensions/ directory relative to session cwd
+	scanExtensionsDir(path.join(cwd, "extensions"));
+
+	// 4. Derive from this extension's own source location.
+	//    import.meta.url points into extensions/pure-dev-kit/src/commands/,
+	//    so walk up to the parent extensions/ directory to find siblings.
+	try {
+		const selfFile = new URL(import.meta.url).pathname;
+		const selfExtDir = path.resolve(path.dirname(selfFile), "..", ".."); // -> extensions/pure-dev-kit
+		const parentExtDir = path.dirname(selfExtDir); // -> extensions/
+		if (path.basename(parentExtDir) === "extensions") {
+			scanExtensionsDir(parentExtDir);
 		}
-		for (const entry of entries) {
-			const extDir = path.join(localExtDir, entry);
-			if (fs.statSync(extDir).isDirectory()) {
-				// Derive likely npm name from directory name
-				const pkgJsonPath = path.join(extDir, "package.json");
-				let pkgName = entry;
-				try {
-					const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
-					if (pkg.name) pkgName = pkg.name;
-				} catch {
-					// Use directory name
-				}
-				tryRead(pkgName, extDir);
-			}
-		}
+	} catch {
+		// import.meta.url resolution failed, skip
 	}
 
-	// 4. Pi git cache (~/.pi/git/)
+	// 5. Pi git cache (~/.pi/git/)
 	const gitDir = path.join(os.homedir(), ".pi", "git");
 	if (fs.existsSync(gitDir)) {
 		function walkGit(dir: string, depth: number) {
@@ -267,7 +285,7 @@ export function registerUpdateUpstreamCommand(pi: ExtensionAPI) {
 
 			ctx.ui.setStatus("extensions:update-upstream", "Scanning extensions...");
 
-			const upstreams = discoverUpstreams();
+			const upstreams = discoverUpstreams(ctx.cwd);
 
 			ctx.ui.setStatus("extensions:update-upstream", undefined);
 
