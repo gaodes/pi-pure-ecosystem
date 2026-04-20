@@ -17,7 +17,15 @@
       "skills": [],
       "prompts": []
     },
+    {
+      "source": "npm:pi-ask-user",
+      "extensions": [],
+      "skills": [],
+      "prompts": [],
+      "themes": []
+    },
     "../extensions/pure-foundation",
-    "../extensions/pure-dev-kit"
+    "../extensions/pure-dev-kit",
+    "../extensions/pure-ask"
   ]
 }

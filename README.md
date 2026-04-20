@@ -10,6 +10,7 @@ Personal extensions and configuration for the [Pi coding agent](https://github.c
 | [pure-git](extensions/pure-git/) | `switch_worktree` | `/worktrees` | Git worktree management: create, list, clean, switch |
 | [pure-github](extensions/pure-github/) | `github_repo`, `github_issue`, `github_pr`, `github_workflow` | *(planned)* | GitHub PR/repo/workflow tools |
 | [pure-model-switch](extensions/pure-model-switch/) | `switch_model` | — | List, search, and switch models with aliases |
+| [pure-ask](extensions/pure-ask/) | `ask_user` | `/ask`, `/ask-demo` | Native Ask User questionnaire tool for structured user input |
 | [pure-sessions](extensions/pure-sessions/) | — | `/sesh` | Auto-name sessions, browse/resume/rename |
 | [pure-statusline](extensions/pure-statusline/) | — | `/statusline` | Configurable multi-line status footer with segments, tool counters |
 | [pure-theme](extensions/pure-theme/) | — | `/theme` | Sync theme with system dark/light mode |
@@ -37,6 +38,7 @@ This repo is installed as a git package in Pi's global settings:
         "extensions/pure-github/index.ts",
         "extensions/pure-git/index.ts",
         "extensions/pure-model-switch/index.ts",
+        "extensions/pure-ask/index.ts",
         "extensions/pure-sessions/index.ts",
         "extensions/pure-statusline/index.ts",
         "extensions/pure-theme/index.ts",

@@ -22,6 +22,7 @@
       "./extensions/pure-cron/index.ts",
       "./extensions/pure-github/index.ts",
       "./extensions/pure-model-switch/index.ts",
+      "./extensions/pure-ask/index.ts",
       "./extensions/pure-sessions/index.ts",
       "./extensions/pure-statusline/index.ts",
       "./extensions/pure-theme/index.ts",
