@@ -75,11 +75,13 @@ Extensions are **self-contained by default**, but stable reusable cross-extensio
 ### What belongs in the shared layer
 
 Promote code into the shared layer when it is:
+
 - reused by multiple extensions
 - clearly an ecosystem primitive
 - stable enough to preserve API compatibility
 
 Typical examples:
+
 - reusable tool call/result render helpers
 - shared TUI primitives or widgets
 - common Pi/environment discovery helpers
@@ -89,6 +91,7 @@ Typical examples:
 ### What stays local to an extension
 
 Keep code local when it is:
+
 - extension-specific business logic
 - unstable or exploratory
 - tightly coupled to one extension's feature behavior
@@ -106,21 +109,21 @@ Do **not** copy the same reusable helper into multiple extensions.
 
 All Pure ecosystem resources should meet this bar.
 
-| Standard | Implementation expectation |
-|---|---|
-| **API correctness** | Use Pi APIs first (`@mariozechner/pi-coding-agent`, `@mariozechner/pi-tui`, `@mariozechner/pi-ai`). Use current lifecycle/event names and supported extension points. |
-| **Terminal-aware** | Respect width, wrapping, fallback colors, and stable rendering in the TUI. Avoid noisy or fragile layouts. |
-| **Hot-reload ready** | Extensions should behave correctly on `/reload`; themes should reload cleanly when edited. |
-| **Session / branch safe** | Persist reconstructable state in tool `details` or durable session entries when appropriate. Avoid important state existing only in memory. |
-| **Error-resilient** | Fail clearly, recover where reasonable, and remember Pi may swallow some load errors. Validate loading behavior instead of assuming success. |
-| **Tool correctness** | Use `StringEnum` where needed, `prepareArguments` for compatibility when needed, throw from `execute()` for real tool errors, and use `promptSnippet` / `promptGuidelines` intentionally. |
-| **File mutation safety** | Any file-mutating custom tool should use `withFileMutationQueue()` so it cooperates with Pi's parallel tool execution model. |
-| **Output discipline** | Truncate oversized outputs appropriately and preserve a path to the full output when needed. |
-| **Shared-layer discipline** | Reusable stable helpers go into the shared layer; extension-specific logic stays local. |
-| **Testing discipline** | Smoke-test before promotion. Validate repo-root behavior, isolated behavior, and publish-like behavior where relevant. |
-| **Packaging correctness** | Use correct manifest paths, peerDependencies vs dependencies, and do not bundle Pi core packages incorrectly. |
-| **Type and lint safety** | Biome clean for changed files; keep TypeScript and package metadata consistent. |
-| **Docs and changelog hygiene** | Update docs, READMEs, and per-package changelogs when behavior changes. |
+| Standard                       | Implementation expectation                                                                                                                                                                |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **API correctness**            | Use Pi APIs first (`@mariozechner/pi-coding-agent`, `@mariozechner/pi-tui`, `@mariozechner/pi-ai`). Use current lifecycle/event names and supported extension points.                     |
+| **Terminal-aware**             | Respect width, wrapping, fallback colors, and stable rendering in the TUI. Avoid noisy or fragile layouts.                                                                                |
+| **Hot-reload ready**           | Extensions should behave correctly on `/reload`; themes should reload cleanly when edited.                                                                                                |
+| **Session / branch safe**      | Persist reconstructable state in tool `details` or durable session entries when appropriate. Avoid important state existing only in memory.                                               |
+| **Error-resilient**            | Fail clearly, recover where reasonable, and remember Pi may swallow some load errors. Validate loading behavior instead of assuming success.                                              |
+| **Tool correctness**           | Use `StringEnum` where needed, `prepareArguments` for compatibility when needed, throw from `execute()` for real tool errors, and use `promptSnippet` / `promptGuidelines` intentionally. |
+| **File mutation safety**       | Any file-mutating custom tool should use `withFileMutationQueue()` so it cooperates with Pi's parallel tool execution model.                                                              |
+| **Output discipline**          | Truncate oversized outputs appropriately and preserve a path to the full output when needed.                                                                                              |
+| **Shared-layer discipline**    | Reusable stable helpers go into the shared layer; extension-specific logic stays local.                                                                                                   |
+| **Testing discipline**         | Smoke-test before promotion. Validate repo-root behavior, isolated behavior, and publish-like behavior where relevant.                                                                    |
+| **Packaging correctness**      | Use correct manifest paths, peerDependencies vs dependencies, and do not bundle Pi core packages incorrectly.                                                                             |
+| **Type and lint safety**       | Biome clean for changed files; keep TypeScript and package metadata consistent.                                                                                                           |
+| **Docs and changelog hygiene** | Update docs, READMEs, and per-package changelogs when behavior changes.                                                                                                                   |
 
 ## Extensions
 
@@ -138,17 +141,21 @@ Extensions are the main product surface of this repo.
 Skills are first-class resources in this repo, not an afterthought.
 
 Use a **skill** when you need:
+
 - a reusable workflow
 - a development or release playbook
 - structured instructions that do not require runtime hooks or tool registration
 
 Use an **extension** when you need:
+
 - tools, commands, events, UI, runtime state, or integration logic
 
 Use a **prompt template** when you need:
+
 - a lightweight reusable prompt without a full workflow package
 
 Skill conventions:
+
 - kebab-case names
 - specific `description` that makes triggering obvious
 - Agent Skills-compatible frontmatter
@@ -214,6 +221,7 @@ Think about loading in three layers:
    - object-form package entries can disable or narrow extensions/skills/prompts/themes per scope
 
 Use isolated loads when needed:
+
 - `pi -e <path-or-package>`
 - `pi --no-extensions -e <path-or-package>`
 
@@ -224,6 +232,7 @@ Inside this development repo, **owned** packages should load from local source f
 ### Policy
 
 If an extension is ours (`gaodes`) and is also installed globally:
+
 - keep the global install intact for normal usage outside this repo
 - do **not** uninstall it merely to work on it here
 - inside this repo, use **project-level shadowing** so local source wins
@@ -288,6 +297,7 @@ At the start of a new session in this repo:
 ### Publish-ready validation
 
 For publish candidates:
+
 - run Biome checks on changed files
 - run `npm pack --dry-run`
 - test the packed tarball in a temp dir
@@ -363,6 +373,7 @@ Use explicit semantic-versioning discipline for published packages in this repo:
 - **Major** — breaking changes, contract changes, loader/activation changes, public API changes, migration-requiring package reorganizations, or **large refactorings** that materially change how the package is used or maintained.
 
 When deciding between patch and minor, prefer:
+
 - **patch** for small or low-risk improvements
 - **minor** for clearly user-visible additive capability
 
@@ -398,6 +409,7 @@ Required shape:
 ```
 
 Use this to document:
+
 - canonical lineage
 - sync intent
 - historical ancestry
@@ -408,6 +420,7 @@ Use this to document:
 ## Commit and maintenance expectations
 
 Use scoped conventional commits. Common types here include:
+
 - `feat:`
 - `fix:`
 - `refactor:`
@@ -419,6 +432,7 @@ Use scoped conventional commits. Common types here include:
 - `todo:` when intentionally tracking incomplete work
 
 Additional rules:
+
 - scope narrowly to the package/resource being changed
 - in a dirty monorepo, stage intentionally
 - update docs when behavior, workflow, packaging, or migration expectations change
@@ -432,10 +446,12 @@ Additional rules:
 At the end of each session, the agent should run a brief process retro and improve this `AGENTS.md` when durable learnings emerge.
 
 Required behavior:
+
 - read the **entire** `AGENTS.md` before editing it, so updates are placed in the correct section and do not break document structure
 - add only durable, reusable guidance (not transient task noise)
 - integrate findings into existing sections when possible; create a new subsection only when the topic does not fit cleanly
 - keep wording concise, mechanism-focused, and aligned with repository conventions
+  \*\*
 
 ### Compact execution checklists
 
@@ -459,6 +475,7 @@ Required behavior:
 
 - **Duplicate registration conflicts** usually mean the same package is active globally and locally; fix this with project-level shadowing, not by uninstalling the global package.
 - **Project overrides can hide global reality**; test both repo-local and temp-dir/global-like contexts when debugging.
+- **Project settings arrays replace, they do not append**; in `.pi/settings.json`, fields like `packages`, `extensions`, `skills`, `prompts`, and `themes` override the global arrays entirely, while nested objects still merge.
 - **`pi list` is mandatory** before deep debugging of load origin questions.
 - **Developer utility tools should degrade gracefully** where practical; prefer useful fallback behavior plus provenance over brittle failure in general repo workflows.
 - **This repo may be dirty for unrelated reasons**; release commits must stay intentionally scoped.
